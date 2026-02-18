@@ -1,0 +1,347 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ========================
+// AUTH / USER
+// ========================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+
+  role          UserRole  @default(VOLUNTEER)
+  onboarded     Boolean   @default(false)
+
+  // Volunteer profile
+  bio           String?   @db.Text
+  location      String?
+  skills        UserSkill[]
+  interests     UserCategory[]
+  availability  String?   // JSON string: ["monday", "weekend", ...]
+  maxDistance   Int?      @default(25) // km
+
+  // Organisation link
+  organisation  Organisation? @relation("OrgAdmin")
+  organisationId String?
+
+  // Relations
+  swipesGiven   Swipe[]          @relation("SwipeFrom")
+  matchesAsVol  Match[]          @relation("MatchVolunteer")
+  conversations ConversationParticipant[]
+  sentMessages  Message[]        @relation("MessageSender")
+
+  // NextAuth
+  accounts      Account[]
+  sessions      Session[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("users")
+}
+
+enum UserRole {
+  VOLUNTEER
+  ORGANISATION
+  ADMIN
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ========================
+// ORGANISATION
+// ========================
+
+model Organisation {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  logo        String?
+  website     String?
+  email       String?
+  phone       String?
+  address     String?
+  city        String?
+  verified    Boolean  @default(false)
+
+  adminId     String   @unique
+  admin       User     @relation("OrgAdmin", fields: [adminId], references: [id])
+
+  vacancies   Vacancy[]
+  categories  OrgCategory[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("organisations")
+}
+
+// ========================
+// VACANCY
+// ========================
+
+model Vacancy {
+  id             String        @id @default(cuid())
+  title          String
+  description    String        @db.Text
+  imageUrl       String?
+  location       String?
+  city           String?
+  remote         Boolean       @default(false)
+  hours          Int?          // hours per week
+  duration       String?       // "3 months", "ongoing", etc.
+  status         VacancyStatus @default(ACTIVE)
+
+  organisationId String
+  organisation   Organisation  @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  skills         VacancySkill[]
+  categories     VacancyCategory[]
+  swipes         Swipe[]
+  matches        Match[]
+
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@map("vacancies")
+}
+
+enum VacancyStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  CLOSED
+}
+
+// ========================
+// CATEGORIES & SKILLS
+// ========================
+
+model Category {
+  id            String         @id @default(cuid())
+  name          String         @unique
+  icon          String?
+  color         String?
+
+  userInterests UserCategory[]
+  orgCategories OrgCategory[]
+  vacancyCategories VacancyCategory[]
+
+  @@map("categories")
+}
+
+model Skill {
+  id           String        @id @default(cuid())
+  name         String        @unique
+
+  userSkills   UserSkill[]
+  vacancySkills VacancySkill[]
+
+  @@map("skills")
+}
+
+model UserSkill {
+  userId  String
+  skillId String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([userId, skillId])
+  @@map("user_skills")
+}
+
+model UserCategory {
+  userId     String
+  categoryId String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([userId, categoryId])
+  @@map("user_categories")
+}
+
+model OrgCategory {
+  organisationId String
+  categoryId     String
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+  category       Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([organisationId, categoryId])
+  @@map("org_categories")
+}
+
+model VacancySkill {
+  vacancyId String
+  skillId   String
+  vacancy   Vacancy @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  skill     Skill   @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([vacancyId, skillId])
+  @@map("vacancy_skills")
+}
+
+model VacancyCategory {
+  vacancyId  String
+  categoryId String
+  vacancy    Vacancy  @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([vacancyId, categoryId])
+  @@map("vacancy_categories")
+}
+
+// ========================
+// SWIPE & MATCH
+// ========================
+
+model Swipe {
+  id        String    @id @default(cuid())
+  direction SwipeDir
+
+  fromId    String
+  from      User      @relation("SwipeFrom", fields: [fromId], references: [id], onDelete: Cascade)
+
+  vacancyId String
+  vacancy   Vacancy   @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+
+  @@unique([fromId, vacancyId])
+  @@map("swipes")
+}
+
+enum SwipeDir {
+  LIKE
+  DISLIKE
+  SUPER_LIKE
+}
+
+model Match {
+  id             String      @id @default(cuid())
+  status         MatchStatus @default(PENDING)
+
+  volunteerId    String
+  volunteer      User        @relation("MatchVolunteer", fields: [volunteerId], references: [id], onDelete: Cascade)
+
+  vacancyId      String
+  vacancy        Vacancy     @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+
+  conversation   Conversation?
+
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@unique([volunteerId, vacancyId])
+  @@map("matches")
+}
+
+enum MatchStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  COMPLETED
+}
+
+// ========================
+// CHAT / MESSAGING
+// ========================
+
+model Conversation {
+  id           String                    @id @default(cuid())
+  matchId      String?                   @unique
+  match        Match?                    @relation(fields: [matchId], references: [id])
+
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  conversationId String
+  userId         String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastReadAt     DateTime?
+
+  @@id([conversationId, userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  content        String       @db.Text
+  type           MessageType  @default(TEXT)
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  senderId       String
+  sender         User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@map("messages")
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  SYSTEM
+}
