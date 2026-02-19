@@ -13,10 +13,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/login",
   },
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
+    ...(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
+      ? [
+          GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          }),
+        ]
+      : []),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -48,6 +52,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.role = (user as any).role
         token.onboarded = (user as any).onboarded
+      }
+      // Herlaad onboarded-status uit DB zolang de gebruiker nog niet onboarded is.
+      // Zo werkt de redirect naar dashboard na onboarding meteen correct.
+      if (!token.onboarded && token.sub) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { onboarded: true },
+        })
+        if (dbUser?.onboarded) token.onboarded = true
       }
       return token
     },

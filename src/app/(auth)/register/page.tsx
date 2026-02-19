@@ -3,6 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Heart, User, Mail, Lock, Building2, ArrowRight, Loader2 } from "lucide-react"
@@ -45,6 +46,18 @@ export default function RegisterPage() {
 
       if (!response.ok) {
         setError(result.error ?? "Registratie mislukt")
+        return
+      }
+
+      // Log automatisch in na registratie zodat de sessie (incl. role) beschikbaar is
+      const signInResult = await signIn("credentials", {
+        email: data.email,
+        password: data.password,
+        redirect: false,
+      })
+
+      if (signInResult?.error) {
+        router.push("/login")
         return
       }
 

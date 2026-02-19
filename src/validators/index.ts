@@ -22,6 +22,12 @@ export const registerSchema = z
     path: ["confirmPassword"],
   })
 
+const postcodeSchema = z
+  .string()
+  .regex(/^[1-9][0-9]{3}\s?[A-Z]{2}$/i, "Ongeldige postcode")
+  .optional()
+  .or(z.literal(""))
+
 export const vacancySchema = z.object({
   title: z.string().min(5, "Titel moet minimaal 5 tekens zijn").max(100),
   description: z
@@ -30,6 +36,7 @@ export const vacancySchema = z.object({
     .max(5000),
   location: z.string().optional(),
   city: z.string().optional(),
+  postcode: postcodeSchema,
   remote: z.boolean().default(false),
   hours: z.number().min(1).max(80).optional(),
   duration: z.string().optional(),
@@ -41,6 +48,7 @@ export const profileSchema = z.object({
   name: z.string().min(2, "Naam moet minimaal 2 tekens zijn"),
   bio: z.string().max(500, "Bio mag maximaal 500 tekens zijn").optional(),
   location: z.string().optional(),
+  postcode: postcodeSchema,
   skills: z.array(z.string()).default([]),
   interests: z.array(z.string()).default([]),
   availability: z.array(z.string()).default([]),
@@ -59,6 +67,7 @@ export const organisationSchema = z.object({
   phone: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
+  postcode: postcodeSchema,
 })
 
 export type LoginFormData = z.infer<typeof loginSchema>
@@ -67,3 +76,19 @@ export type VacancyFormData = z.infer<typeof vacancySchema>
 export type ProfileFormData = z.infer<typeof profileSchema>
 export type MessageFormData = z.infer<typeof messageSchema>
 export type OrganisationFormData = z.infer<typeof organisationSchema>
+
+export const VFI_KEYS = ["waarden", "begrip", "sociaal", "loopbaan", "bescherming", "verbetering"] as const
+
+export const vfiSchema = z.object({
+  waarden: z.number().int().min(1).max(5),
+  begrip: z.number().int().min(1).max(5),
+  sociaal: z.number().int().min(1).max(5),
+  loopbaan: z.number().int().min(1).max(5),
+  bescherming: z.number().int().min(1).max(5),
+  verbetering: z.number().int().min(1).max(5),
+})
+
+export type VFIData = z.infer<typeof vfiSchema>
+
+export const MATCH_REASONS = ["Goede zaak", "Past bij mijn skills", "Flexibele tijden", "Dichtbij mij"] as const
+export type MatchReason = typeof MATCH_REASONS[number]

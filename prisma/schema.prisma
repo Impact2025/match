@@ -15,23 +15,37 @@ datasource db {
 // ========================
 
 model User {
-  id            String    @id @default(cuid())
+  id            String     @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String?    @unique
   emailVerified DateTime?
   image         String?
   password      String?
 
-  role          UserRole  @default(VOLUNTEER)
-  onboarded     Boolean   @default(false)
+  role          UserRole   @default(VOLUNTEER)
+  status        UserStatus @default(ACTIVE)
+  onboarded     Boolean    @default(false)
 
   // Volunteer profile
   bio           String?   @db.Text
   location      String?
+  postcode      String?
+  lat           Float?
+  lon           Float?
   skills        UserSkill[]
   interests     UserCategory[]
   availability  String?   // JSON string: ["monday", "weekend", ...]
   maxDistance   Int?      @default(25) // km
+
+  age                 Int?
+
+  motivationProfile   String?   @db.Text   // JSON: {waarden,begrip,sociaal,loopbaan,bescherming,verbetering}
+  streakDays          Int       @default(0)
+  lastActiveDate      DateTime?
+
+  // Password reset
+  resetToken        String?   @unique
+  resetTokenExpiry  DateTime?
 
   // Organisation link
   organisation  Organisation? @relation("OrgAdmin")
@@ -42,6 +56,7 @@ model User {
   matchesAsVol  Match[]          @relation("MatchVolunteer")
   conversations ConversationParticipant[]
   sentMessages  Message[]        @relation("MessageSender")
+  adminLogs     AdminLog[]       @relation("AdminActions")
 
   // NextAuth
   accounts      Account[]
@@ -57,6 +72,12 @@ enum UserRole {
   VOLUNTEER
   ORGANISATION
   ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  BANNED
 }
 
 model Account {
@@ -103,17 +124,24 @@ model VerificationToken {
 // ========================
 
 model Organisation {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  description String?  @db.Text
-  logo        String?
-  website     String?
-  email       String?
-  phone       String?
-  address     String?
-  city        String?
-  verified    Boolean  @default(false)
+  id              String    @id @default(cuid())
+  name            String
+  slug            String    @unique
+  description     String?   @db.Text
+  logo            String?
+  website         String?
+  email           String?
+  phone           String?
+  address         String?
+  city            String?
+
+  status          OrgStatus @default(PENDING_APPROVAL)
+  verifiedAt      DateTime?
+  rejectionReason String?   @db.Text
+
+  postcode    String?
+  lat         Float?
+  lon         Float?
 
   adminId     String   @unique
   admin       User     @relation("OrgAdmin", fields: [adminId], references: [id])
@@ -121,10 +149,20 @@ model Organisation {
   vacancies   Vacancy[]
   categories  OrgCategory[]
 
+  avgResponseHours   Float?
+  slaScore           Int     @default(100)
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@map("organisations")
+}
+
+enum OrgStatus {
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  SUSPENDED
 }
 
 // ========================
@@ -138,6 +176,9 @@ model Vacancy {
   imageUrl       String?
   location       String?
   city           String?
+  postcode       String?
+  lat            Float?
+  lon            Float?
   remote         Boolean       @default(false)
   hours          Int?          // hours per week
   duration       String?       // "3 months", "ongoing", etc.
@@ -255,6 +296,8 @@ model Swipe {
   vacancyId String
   vacancy   Vacancy   @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
 
+  matchReason String?   // "Goede zaak"|"Past bij mijn skills"|"Flexibele tijden"|"Dichtbij mij"
+
   createdAt DateTime  @default(now())
 
   @@unique([fromId, vacancyId])
@@ -278,6 +321,11 @@ model Match {
   vacancy        Vacancy     @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
 
   conversation   Conversation?
+
+  startedAt        DateTime?   // set on ACCEPTED
+  checkIn1SentAt   DateTime?   // week 1 (7d)
+  checkIn4SentAt   DateTime?   // week 4 (28d)
+  checkIn12SentAt  DateTime?   // week 12 (84d)
 
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -344,4 +392,32 @@ enum MessageType {
   IMAGE
   FILE
   SYSTEM
+}
+
+// ========================
+// ADMIN
+// ========================
+
+model AdminLog {
+  id         String      @id @default(cuid())
+  adminId    String
+  admin      User        @relation("AdminActions", fields: [adminId], references: [id])
+  action     AdminAction
+  entityType String      // "Organisation" | "User" | "Vacancy"
+  entityId   String
+  reason     String?     @db.Text
+  metadata   Json?
+  createdAt  DateTime    @default(now())
+
+  @@map("admin_logs")
+}
+
+enum AdminAction {
+  APPROVE_ORG
+  REJECT_ORG
+  SUSPEND_ORG
+  UNSUSPEND_ORG
+  SUSPEND_USER
+  BAN_USER
+  REINSTATE_USER
 }

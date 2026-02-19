@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { registerSchema } from "@/validators"
+import { sendWelcomeEmail } from "@/lib/email"
 
 export async function POST(req: Request) {
   try {
@@ -35,6 +36,11 @@ export async function POST(req: Request) {
         role,
       },
     })
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(user.email!, user.name ?? "").catch((err) =>
+      console.error("[WELCOME_EMAIL_ERROR]", err)
+    )
 
     return NextResponse.json(
       { success: true, userId: user.id },
