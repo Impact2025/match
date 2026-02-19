@@ -1,22 +1,17 @@
 import OpenAI from "openai"
 
-const globalForOpenAI = globalThis as unknown as {
-  openai: OpenAI | undefined
+// Lazy init — avoids build-time error when env var is not yet set
+let _openai: OpenAI | null = null
+function getOpenAI(): OpenAI {
+  if (!_openai) _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  return _openai
 }
-
-export const openai =
-  globalForOpenAI.openai ??
-  new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  })
-
-if (process.env.NODE_ENV !== "production") globalForOpenAI.openai = openai
 
 export async function generateMatchScore(
   volunteerBio: string,
   vacancyDescription: string
 ): Promise<number> {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
       {
@@ -41,7 +36,7 @@ export async function generateOrgDescription(
   categories: string[]
 ): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -72,7 +67,7 @@ export async function generateIcebreaker(
   vacancyTitle: string,
   orgName: string
 ): Promise<string> {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAI().chat.completions.create({
     model: "gpt-4o-mini",
     messages: [
       {
