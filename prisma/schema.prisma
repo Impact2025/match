@@ -40,10 +40,11 @@ model User {
   age                 Int?
 
   motivationProfile   String?   @db.Text   // JSON: {waarden,begrip,sociaal,loopbaan,bescherming,verbetering}
+  schwartzProfile     String?   @db.Text   // JSON: {zorg,universalisme,zelfrichting,stimulatie,hedonisme,prestatie,macht,veiligheid,conformiteit,traditie}
   streakDays          Int       @default(0)
   lastActiveDate      DateTime?
 
-  openToInvitations Boolean   @default(false)
+  openToInvitations Boolean   @default(true)
 
   // Password reset
   resetToken        String?   @unique
