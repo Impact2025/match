@@ -44,7 +44,18 @@
       "Bash(cmd.exe /c \"ping -n 4 127.0.0.1 > nul\")",
       "Bash(cmd.exe /c \"taskkill /F /IM node.exe /T 2>&1 & echo DONE\")",
       "Bash(powershell.exe -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force; Write-Host ''Step 1 complete: node processes killed \\(or none running\\)''\")",
-      "Bash(powershell.exe -Command \"Start-Sleep -Seconds 4; Write-Host ''Step 2 complete: waited 4 seconds''\")"
+      "Bash(powershell.exe -Command \"Start-Sleep -Seconds 4; Write-Host ''Step 2 complete: waited 4 seconds''\")",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(vercel --version:*)",
+      "Bash(vercel whoami:*)",
+      "Bash(vercel ls:*)",
+      "Bash(vercel:*)",
+      "Bash(python3:*)",
+      "WebSearch",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_m3SXhDcCuQN6@ep-wispy-hill-agp7zff7-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require\")",
+      "Bash(psql:*)",
+      "Bash(./node_modules/.bin/tsx:*)"
     ]
   }
 }
