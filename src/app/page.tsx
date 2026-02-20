@@ -1,12 +1,13 @@
 import Link from "next/link"
+import { AiAssistant } from "@/components/ai/ai-assistant"
 
 export default function HomePage() {
   return (
-    <div className="bg-white text-gray-900 antialiased">
+    <div className="bg-white text-gray-900 antialiased overflow-x-hidden">
       {/* ─── HEADER ─── */}
       <header className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
-        <nav className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5">
+        <nav className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5 min-w-0">
             <div className="w-7 h-7 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -15,7 +16,7 @@ export default function HomePage() {
                 />
               </svg>
             </div>
-            <span className="text-base font-semibold tracking-tight text-gray-900">Vrijwilligersmatch</span>
+            <span className="text-sm sm:text-base font-semibold tracking-tight text-gray-900 truncate">Vrijwilligersmatch</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-8 text-sm text-gray-500">
@@ -24,16 +25,16 @@ export default function HomePage() {
             <a href="#impact" className="hover:text-gray-900 transition-colors">Impact</a>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3">
             <Link
               href="/login"
-              className="hidden sm:inline-flex px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              className="px-3 sm:px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
             >
               Inloggen
             </Link>
             <Link
               href="/register"
-              className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors"
+              className="px-3 sm:px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors whitespace-nowrap"
             >
               Aanmelden
             </Link>
@@ -55,11 +56,11 @@ export default function HomePage() {
           {/* Solid dark overlay — no gradient */}
           <div className="absolute inset-0 bg-black/55" />
 
-          <div className="relative z-10 max-w-6xl mx-auto px-6 w-full py-20 lg:py-0">
+          <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 w-full py-16 lg:py-0">
             <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
-              {/* Left — Phone mockup */}
-              <div className="flex justify-center lg:justify-start">
+              {/* Left — Phone mockup — only on large screens */}
+              <div className="hidden lg:flex justify-center lg:justify-start">
                 {/* Phone frame */}
                 <div className="relative w-[260px] md:w-[290px]">
                   <div className="rounded-[2.5rem] border-[6px] border-white/15 overflow-hidden shadow-2xl">
@@ -89,48 +90,48 @@ export default function HomePage() {
               </div>
 
               {/* Right — Text */}
-              <div className="text-white">
-                <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-8 bg-white/10 border border-white/20 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400" />
+              <div className="text-white text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-6 sm:mb-8 bg-white/10 border border-white/20 rounded-full">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400 flex-shrink-0" />
                   <span className="text-xs font-medium text-white/90">Matching platform voor Nederland</span>
                 </div>
 
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.0] mb-6">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.05] mb-5 sm:mb-6">
                   Vrijwilligers&shy;werk dat
                   <br />
                   <span className="text-orange-400">bij je past.</span>
                 </h1>
 
-                <p className="text-lg text-white/70 leading-relaxed mb-10 max-w-md">
+                <p className="text-base sm:text-lg text-white/70 leading-relaxed mb-8 sm:mb-10 max-w-md mx-auto lg:mx-0">
                   Swipe door vacatures van geverifieerde organisaties en word
                   gekoppeld op basis van jouw vaardigheden, interesses en locatie.
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-3 mb-14">
+                <div className="flex flex-col sm:flex-row gap-3 mb-10 sm:mb-14">
                   <Link
                     href="/register"
-                    className="inline-flex justify-center items-center px-6 py-3.5 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition-colors"
+                    className="w-full sm:w-auto inline-flex justify-center items-center px-6 py-4 sm:py-3.5 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition-colors"
                   >
                     Ik ben vrijwilliger
                   </Link>
                   <Link
                     href="/register?role=organisation"
-                    className="inline-flex justify-center items-center px-6 py-3.5 bg-white/10 border border-white/25 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors"
+                    className="w-full sm:w-auto inline-flex justify-center items-center px-6 py-4 sm:py-3.5 bg-white/10 border border-white/25 text-white font-semibold rounded-xl hover:bg-white/20 transition-colors"
                   >
                     Ik ben een organisatie
                   </Link>
                 </div>
 
                 {/* Inline stats */}
-                <div className="flex items-center divide-x divide-white/20">
+                <div className="flex items-center justify-center lg:justify-start divide-x divide-white/20">
                   {[
                     { value: "15k+", label: "Matches" },
                     { value: "850+", label: "Organisaties" },
-                    { value: "4.9", label: "Gebruikersscore" },
+                    { value: "4.9", label: "Score" },
                   ].map((s, i) => (
-                    <div key={i} className={`${i === 0 ? "pr-6" : "px-6"}`}>
-                      <span className="block text-2xl font-bold text-white tracking-tight">{s.value}</span>
-                      <span className="text-xs text-white/50 uppercase tracking-wide">{s.label}</span>
+                    <div key={i} className={`${i === 0 ? "pr-4 sm:pr-6" : "px-4 sm:px-6"}`}>
+                      <span className="block text-xl sm:text-2xl font-bold text-white tracking-tight">{s.value}</span>
+                      <span className="text-[10px] sm:text-xs text-white/50 uppercase tracking-wide">{s.label}</span>
                     </div>
                   ))}
                 </div>
@@ -141,11 +142,11 @@ export default function HomePage() {
         </section>
 
         {/* ─── HOW IT WORKS ─── */}
-        <section className="py-24 border-t border-gray-100" id="hoe-het-werkt">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="mb-16">
+        <section className="py-16 sm:py-24 border-t border-gray-100" id="hoe-het-werkt">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="mb-10 sm:mb-16">
               <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-4">Hoe het werkt</p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-gray-900 max-w-lg">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-gray-900 max-w-lg">
                 Drie stappen naar zinvol vrijwilligerswerk
               </h2>
             </div>
@@ -168,7 +169,7 @@ export default function HomePage() {
                   desc: "Bij een match nemen we contact met de organisatie. Je ontvangt een automatisch gespreksstarter via de app.",
                 },
               ].map((item) => (
-                <div key={item.step} className="bg-white p-8 lg:p-10">
+                <div key={item.step} className="bg-white p-6 sm:p-8 lg:p-10">
                   <span className="text-xs font-bold text-orange-500 tracking-widest uppercase">{item.step}</span>
                   <h3 className="mt-4 mb-3 text-lg font-bold text-gray-900">{item.title}</h3>
                   <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
@@ -179,15 +180,15 @@ export default function HomePage() {
         </section>
 
         {/* ─── FOR ORGANISATIONS ─── */}
-        <section className="py-24 bg-gray-50 border-y border-gray-100" id="organisaties">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <section className="py-16 sm:py-24 bg-gray-50 border-y border-gray-100" id="organisaties">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="grid lg:grid-cols-2 gap-12 sm:gap-16 items-center">
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-4">Voor organisaties</p>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-gray-900 mb-6">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-gray-900 mb-6">
                   Vind de vrijwilliger die echt bij jou past
                 </h2>
-                <p className="text-gray-500 leading-relaxed mb-10">
+                <p className="text-gray-500 leading-relaxed mb-8 sm:mb-10">
                   Maak gratis een profiel aan, voeg vacatures toe en ontvang gematchte kandidaten
                   direct in je dashboard. Geen tijdverlies, geen ruis.
                 </p>
@@ -209,7 +210,7 @@ export default function HomePage() {
                   { title: "AI-gegenereerde icebreakers", desc: "Bij elke match: een persoonlijke gespreksopener." },
                   { title: "Realtime berichten", desc: "Communiceer direct met gematchte vrijwilligers in de app." },
                 ].map((item) => (
-                  <li key={item.title} className="flex gap-4 p-5 bg-white border border-gray-100 rounded-xl">
+                  <li key={item.title} className="flex gap-4 p-4 sm:p-5 bg-white border border-gray-100 rounded-xl">
                     <div className="w-5 h-5 mt-0.5 flex-shrink-0">
                       <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
@@ -227,20 +228,20 @@ export default function HomePage() {
         </section>
 
         {/* ─── IMPACT STATS ─── */}
-        <section className="py-20 border-b border-gray-100" id="impact">
-          <div className="max-w-6xl mx-auto px-6">
+        <section className="py-16 sm:py-20 border-b border-gray-100" id="impact">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
               {[
-                { value: "15.000+", label: "Succesvolle matches" },
-                { value: "850+", label: "Geverifieerde organisaties" },
-                { value: "22", label: "Steden in Nederland" },
-                { value: "4.9/5", label: "Gemiddelde beoordeling" },
+                { value: "15.000+", label: "Matches" },
+                { value: "850+", label: "Organisaties" },
+                { value: "22", label: "Steden" },
+                { value: "4.9/5", label: "Beoordeling" },
               ].map((stat, i) => (
-                <div key={i} className="text-center py-8 px-4">
-                  <span className="block text-3xl md:text-4xl font-bold tracking-tighter text-gray-900 mb-1">
+                <div key={i} className="text-center py-6 sm:py-8 px-2 sm:px-4">
+                  <span className="block text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-gray-900 mb-1">
                     {stat.value}
                   </span>
-                  <span className="text-xs uppercase tracking-widest text-gray-400">{stat.label}</span>
+                  <span className="text-[10px] sm:text-xs uppercase tracking-widest text-gray-400">{stat.label}</span>
                 </div>
               ))}
             </div>
@@ -248,24 +249,24 @@ export default function HomePage() {
         </section>
 
         {/* ─── CTA ─── */}
-        <section className="py-20 bg-orange-500">
-          <div className="max-w-6xl mx-auto px-6 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tighter text-white mb-4">
+        <section className="py-16 sm:py-20 bg-orange-500">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-white mb-4">
               Klaar om impact te maken?
             </h2>
-            <p className="text-orange-100 mb-10 max-w-md mx-auto">
+            <p className="text-orange-100 mb-8 sm:mb-10 max-w-md mx-auto text-sm sm:text-base">
               Maak vandaag een gratis account aan en vind jouw perfecte vrijwilligersmatch.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href="/register"
-                className="px-8 py-3.5 bg-white text-orange-600 font-semibold rounded-xl hover:bg-orange-50 transition-colors"
+                className="px-8 py-4 sm:py-3.5 bg-white text-orange-600 font-semibold rounded-xl hover:bg-orange-50 transition-colors"
               >
                 Word vrijwilliger
               </Link>
               <Link
                 href="/register?role=organisation"
-                className="px-8 py-3.5 bg-transparent border-2 border-white/40 text-white font-semibold rounded-xl hover:bg-white/10 hover:border-white/70 transition-colors"
+                className="px-8 py-4 sm:py-3.5 bg-transparent border-2 border-white/40 text-white font-semibold rounded-xl hover:bg-white/10 hover:border-white/70 transition-colors"
               >
                 Aanmelden als organisatie
               </Link>
@@ -275,10 +276,10 @@ export default function HomePage() {
       </main>
 
       {/* ─── FOOTER ─── */}
-      <footer className="bg-gray-950 py-16">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
-            <div className="md:col-span-2">
+      <footer className="bg-gray-950 py-12 sm:py-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 mb-10 sm:mb-12">
+            <div className="col-span-2 md:col-span-2">
               <div className="flex items-center gap-2 mb-5">
                 <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -335,6 +336,7 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+      <AiAssistant mode="presale" />
     </div>
   )
 }
