@@ -125,12 +125,12 @@ export default function HomePage() {
                 {/* Inline stats */}
                 <div className="flex items-center justify-center lg:justify-start divide-x divide-white/20">
                   {[
-                    { value: "15k+", label: "Matches" },
-                    { value: "850+", label: "Organisaties" },
-                    { value: "4.9", label: "Score" },
+                    { value: "Gratis", label: "Voor iedereen" },
+                    { value: "Heel NL", label: "Bereikbaar" },
+                    { value: "100%", label: "Geverifieerd" },
                   ].map((s, i) => (
                     <div key={i} className={`${i === 0 ? "pr-4 sm:pr-6" : "px-4 sm:px-6"}`}>
-                      <span className="block text-xl sm:text-2xl font-bold text-white tracking-tight">{s.value}</span>
+                      <span className="block text-lg sm:text-xl font-bold text-white tracking-tight">{s.value}</span>
                       <span className="text-[10px] sm:text-xs text-white/50 uppercase tracking-wide">{s.label}</span>
                     </div>
                   ))}
@@ -232,10 +232,10 @@ export default function HomePage() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
               {[
-                { value: "15.000+", label: "Matches" },
-                { value: "850+", label: "Organisaties" },
-                { value: "22", label: "Steden" },
-                { value: "4.9/5", label: "Beoordeling" },
+                { value: "Gratis", label: "Altijd gratis voor vrijwilligers" },
+                { value: "Heel NL", label: "Landelijk beschikbaar" },
+                { value: "100%", label: "Geverifieerde organisaties" },
+                { value: "AI", label: "Slimme matching" },
               ].map((stat, i) => (
                 <div key={i} className="text-center py-6 sm:py-8 px-2 sm:px-4">
                   <span className="block text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-gray-900 mb-1">
