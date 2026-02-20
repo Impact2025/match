@@ -22,11 +22,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { generateReactHelpers } from "@uploadthing/react"
-import type { OurFileRouter } from "@/lib/uploadthing"
 import { CATEGORIES } from "@/config"
 
-const { useUploadThing } = generateReactHelpers<OurFileRouter>()
 
 type OrgStep = "organisatie" | "categorieën" | "beschrijving" | "contact"
 const STEPS: OrgStep[] = ["organisatie", "categorieën", "beschrijving", "contact"]
@@ -119,25 +116,23 @@ export function OrgOnboardingFlow() {
     }
   }, [postcode])
 
-  const { startUpload } = useUploadThing("orgLogo", {
-    onClientUploadComplete: (res) => {
-      const url = res?.[0]?.serverData?.url ?? res?.[0]?.url
-      if (url) setLogoUrl(url)
-      setUploading(false)
-      setUploadError(null)
-    },
-    onUploadError: (err) => {
-      setUploading(false)
-      setUploadError(err?.message ?? "Logo uploaden mislukt. Controleer UploadThing instellingen.")
-    },
-  })
-
   async function handleLogoSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     setUploading(true)
     setUploadError(null)
-    await startUpload([file])
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      const res = await fetch("/api/upload?type=orgLogo", { method: "POST", body: formData })
+      if (!res.ok) throw new Error("Upload mislukt")
+      const data = await res.json()
+      setLogoUrl(data.url)
+    } catch (err: unknown) {
+      setUploadError(err instanceof Error ? err.message : "Logo uploaden mislukt.")
+    } finally {
+      setUploading(false)
+    }
   }
 
   function toggleCategory(cat: string) {

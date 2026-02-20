@@ -28,7 +28,7 @@ export default async function AdminSettingsPage() {
     { key: "OPENAI_API_KEY", label: "OpenAI (AI match)", set: !!process.env.OPENAI_API_KEY },
     { key: "PUSHER_APP_ID", label: "Pusher App ID", set: !!process.env.PUSHER_APP_ID },
     { key: "NEXT_PUBLIC_PUSHER_KEY", label: "Pusher Public Key", set: !!process.env.NEXT_PUBLIC_PUSHER_KEY },
-    { key: "UPLOADTHING_SECRET", label: "UploadThing", set: !!process.env.UPLOADTHING_SECRET },
+    { key: "BLOB_READ_WRITE_TOKEN", label: "Vercel Blob", set: !!process.env.BLOB_READ_WRITE_TOKEN },
     { key: "CRON_SECRET", label: "Cron Secret", set: !!process.env.CRON_SECRET },
     { key: "GOOGLE_CLIENT_ID", label: "Google OAuth", set: !!process.env.GOOGLE_CLIENT_ID },
   ]
@@ -143,7 +143,7 @@ export default async function AdminSettingsPage() {
           {[
             { label: "Resend Dashboard", href: "https://resend.com/emails", desc: "E-mail logs en statistieken" },
             { label: "Pusher Dashboard", href: "https://dashboard.pusher.com", desc: "Real-time verbindingen" },
-            { label: "UploadThing", href: "https://uploadthing.com/dashboard", desc: "Geüploade bestanden" },
+            { label: "Vercel Blob", href: "https://vercel.com/dashboard", desc: "Geüploade bestanden" },
             { label: "Vercel Dashboard", href: "https://vercel.com/dashboard", desc: "Deployments en cron logs" },
           ].map((link) => (
             <a

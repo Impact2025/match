@@ -11,8 +11,6 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { UploadButton } from "@uploadthing/react"
-import type { OurFileRouter } from "@/lib/uploadthing"
 import { vacancySchema, type VacancyFormData } from "@/validators"
 import { SKILLS, CATEGORIES } from "@/config"
 
@@ -29,6 +27,8 @@ export function VacancyForm({ defaultValues, mode = "create" }: VacancyFormProps
   )
   const [remote, setRemote] = useState(defaultValues?.remote ?? false)
   const [imageUrl, setImageUrl] = useState<string | null>(defaultValues?.imageUrl ?? null)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const vacancyImgRef = useRef<HTMLInputElement>(null)
   const [saving, setSaving] = useState(false)
   const [geocoding, setGeocoding] = useState(false)
   const [detectedCity, setDetectedCity] = useState<string | null>(null)
@@ -90,6 +90,25 @@ export function VacancyForm({ defaultValues, mode = "create" }: VacancyFormProps
       if (geocodeTimer.current) clearTimeout(geocodeTimer.current)
     }
   }, [postcodeValue, setValue])
+
+  async function handleVacancyImageSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingImage(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      const res = await fetch("/api/upload?type=vacancyImage", { method: "POST", body: formData })
+      if (!res.ok) throw new Error("Upload mislukt")
+      const data = await res.json()
+      setImageUrl(data.url)
+      toast.success("Afbeelding geüpload!")
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Upload mislukt")
+    } finally {
+      setUploadingImage(false)
+    }
+  }
 
   function toggleSkill(skill: string) {
     const next = selectedSkills.includes(skill)
@@ -333,23 +352,21 @@ export function VacancyForm({ defaultValues, mode = "create" }: VacancyFormProps
           <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 flex flex-col items-center gap-3">
             <ImageIcon className="w-8 h-8 text-gray-300" />
             <p className="text-sm text-gray-400">Max. 8MB, JPG/PNG/WebP</p>
-            <UploadButton<OurFileRouter, "vacancyImage">
-              endpoint="vacancyImage"
-              onClientUploadComplete={(res) => {
-                if (res?.[0]?.url) {
-                  setImageUrl(res[0].url)
-                  toast.success("Afbeelding geüpload!")
-                }
-              }}
-              onUploadError={(err) => {
-                toast.error(`Upload mislukt: ${err.message}`)
-              }}
-              appearance={{
-                button:
-                  "bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors",
-                allowedContent: "hidden",
-              }}
-              content={{ button: "Afbeelding uploaden" }}
+            <button
+              type="button"
+              onClick={() => vacancyImgRef.current?.click()}
+              disabled={uploadingImage}
+              className="bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+            >
+              {uploadingImage && <Loader2 className="w-4 h-4 animate-spin" />}
+              {uploadingImage ? "Uploaden..." : "Afbeelding uploaden"}
+            </button>
+            <input
+              ref={vacancyImgRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleVacancyImageSelect}
             />
           </div>
         )}

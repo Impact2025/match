@@ -1,6 +1,7 @@
-import { createRouteHandler } from "uploadthing/next"
-import { ourFileRouter } from "@/lib/uploadthing"
-
-export const { GET, POST } = createRouteHandler({
-  router: ourFileRouter,
-})
+// Replaced by /api/upload (Vercel Blob)
+export async function GET() {
+  return Response.json({ error: "Not found" }, { status: 404 })
+}
+export async function POST() {
+  return Response.json({ error: "Not found" }, { status: 404 })
+}
