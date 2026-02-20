@@ -43,6 +43,8 @@ model User {
   streakDays          Int       @default(0)
   lastActiveDate      DateTime?
 
+  openToInvitations Boolean   @default(false)
+
   // Password reset
   resetToken        String?   @unique
   resetTokenExpiry  DateTime?
@@ -52,11 +54,12 @@ model User {
   organisationId String?
 
   // Relations
-  swipesGiven   Swipe[]          @relation("SwipeFrom")
-  matchesAsVol  Match[]          @relation("MatchVolunteer")
-  conversations ConversationParticipant[]
-  sentMessages  Message[]        @relation("MessageSender")
-  adminLogs     AdminLog[]       @relation("AdminActions")
+  swipesGiven         Swipe[]          @relation("SwipeFrom")
+  matchesAsVol        Match[]          @relation("MatchVolunteer")
+  conversations       ConversationParticipant[]
+  sentMessages        Message[]        @relation("MessageSender")
+  adminLogs           AdminLog[]       @relation("AdminActions")
+  receivedInvitations Invitation[]     @relation("ReceivedInvitations")
 
   // NextAuth
   accounts      Account[]
@@ -146,8 +149,9 @@ model Organisation {
   adminId     String   @unique
   admin       User     @relation("OrgAdmin", fields: [adminId], references: [id])
 
-  vacancies   Vacancy[]
-  categories  OrgCategory[]
+  vacancies        Vacancy[]
+  categories       OrgCategory[]
+  sentInvitations  Invitation[]
 
   avgResponseHours   Float?
   slaScore           Int     @default(100)
@@ -191,6 +195,7 @@ model Vacancy {
   categories     VacancyCategory[]
   swipes         Swipe[]
   matches        Match[]
+  invitations    Invitation[]
 
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
@@ -392,6 +397,39 @@ enum MessageType {
   IMAGE
   FILE
   SYSTEM
+}
+
+// ========================
+// INVITATIONS
+// ========================
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model Invitation {
+  id             String           @id @default(cuid())
+  message        String?          @db.Text
+  status         InvitationStatus @default(PENDING)
+
+  organisationId String
+  organisation   Organisation     @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  vacancyId      String
+  vacancy        Vacancy          @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
+
+  volunteerId    String
+  volunteer      User             @relation("ReceivedInvitations", fields: [volunteerId], references: [id], onDelete: Cascade)
+
+  conversationId String?          // set on ACCEPTED
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@unique([organisationId, vacancyId, volunteerId])
+  @@map("invitations")
 }
 
 // ========================

@@ -53,6 +53,13 @@ export const profileSchema = z.object({
   interests: z.array(z.string()).default([]),
   availability: z.array(z.string()).default([]),
   maxDistance: z.number().min(1).max(200).default(25),
+  openToInvitations: z.boolean().optional(),
+})
+
+export const invitationSchema = z.object({
+  vacancyId: z.string().min(1, "Vacature is verplicht"),
+  volunteerId: z.string().min(1, "Vrijwilliger is verplicht"),
+  message: z.string().max(500, "Bericht mag maximaal 500 tekens zijn").optional(),
 })
 
 export const messageSchema = z.object({
@@ -76,6 +83,7 @@ export type VacancyFormData = z.infer<typeof vacancySchema>
 export type ProfileFormData = z.infer<typeof profileSchema>
 export type MessageFormData = z.infer<typeof messageSchema>
 export type OrganisationFormData = z.infer<typeof organisationSchema>
+export type InvitationFormData = z.infer<typeof invitationSchema>
 
 export const VFI_KEYS = ["waarden", "begrip", "sociaal", "loopbaan", "bescherming", "verbetering"] as const
 

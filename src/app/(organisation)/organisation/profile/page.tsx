@@ -1,10 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
-import { Save, Loader2, LogOut } from "lucide-react"
+import { Save, Loader2, LogOut, Camera } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,6 +20,9 @@ export default function OrgProfilePage() {
   const [saving, setSaving] = useState(false)
   const [org, setOrg] = useState<any>(null)
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [logoUrl, setLogoUrl] = useState<string | null>(null)
+  const [uploadingLogo, setUploadingLogo] = useState(false)
+  const logoInputRef = useRef<HTMLInputElement>(null)
 
   const {
     register,
@@ -38,6 +41,7 @@ export default function OrgProfilePage() {
       .then((r) => r.json())
       .then((data) => {
         setOrg(data)
+        setLogoUrl(data.logo ?? null)
         setSelectedCategories(data.categories?.map((c: any) => c.category.name) ?? [])
         reset({
           name: data.name ?? "",
@@ -52,6 +56,32 @@ export default function OrgProfilePage() {
       .finally(() => setLoading(false))
   }, [reset])
 
+  async function handleLogoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingLogo(true)
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+      const res = await fetch("/api/upload?type=orgLogo", { method: "POST", body: formData })
+      if (!res.ok) throw new Error("Upload mislukt")
+      const data = await res.json()
+      setLogoUrl(data.url)
+      // Direct opslaan in DB
+      await fetch("/api/organisations/me", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ logo: data.url }),
+      })
+      toast.success("Logo bijgewerkt!")
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Logo uploaden mislukt")
+    } finally {
+      setUploadingLogo(false)
+      if (logoInputRef.current) logoInputRef.current.value = ""
+    }
+  }
+
   function toggleCategory(name: string) {
     setSelectedCategories((prev) =>
       prev.includes(name) ? prev.filter((c) => c !== name) : [...prev, name]
@@ -64,7 +94,7 @@ export default function OrgProfilePage() {
       const res = await fetch("/api/organisations/me", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...data, categories: selectedCategories }),
+        body: JSON.stringify({ ...data, categories: selectedCategories, logo: logoUrl }),
       })
 
       if (!res.ok) {
@@ -94,17 +124,48 @@ export default function OrgProfilePage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="flex items-center gap-4 mb-8">
-        <Avatar className="w-20 h-20">
-          <AvatarImage src={org?.logo ?? ""} alt={org?.name} />
-          <AvatarFallback className="bg-orange-100 text-orange-700 text-2xl font-bold">
-            {org?.name?.charAt(0)?.toUpperCase() ?? "O"}
-          </AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => logoInputRef.current?.click()}
+            disabled={uploadingLogo}
+            className="relative w-20 h-20 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 group"
+            title="Logo wijzigen"
+          >
+            <Avatar className="w-20 h-20">
+              <AvatarImage src={logoUrl ?? ""} alt={org?.name} />
+              <AvatarFallback className="bg-orange-100 text-orange-700 text-2xl font-bold">
+                {org?.name?.charAt(0)?.toUpperCase() ?? "O"}
+              </AvatarFallback>
+            </Avatar>
+            <div className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              {uploadingLogo
+                ? <Loader2 className="w-5 h-5 text-white animate-spin" />
+                : <Camera className="w-5 h-5 text-white" />
+              }
+            </div>
+          </button>
+          <input
+            ref={logoInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleLogoSelect}
+          />
+        </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{org?.name ?? "Organisatieprofiel"}</h1>
           <p className="text-gray-500 text-sm">
             {org?.status === "APPROVED" ? "✅ Geverifieerd" : org?.status === "PENDING_APPROVAL" ? "⏳ In behandeling" : "Niet geverifieerd"}
           </p>
+          <button
+            type="button"
+            onClick={() => logoInputRef.current?.click()}
+            disabled={uploadingLogo}
+            className="text-xs text-orange-500 hover:text-orange-600 mt-0.5"
+          >
+            {uploadingLogo ? "Uploaden..." : "Logo wijzigen"}
+          </button>
         </div>
       </div>
 

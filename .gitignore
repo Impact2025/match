@@ -43,6 +43,11 @@ yarn-error.log*
 # vercel
 .vercel
 
+# geüploade bestanden (lokale opslag)
+/public/uploads/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.vercel

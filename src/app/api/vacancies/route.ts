@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { vacancySchema } from "@/validators"
 import { geocodePostcode, haversineDistance } from "@/lib/geocoding"
+import { calculateMatchScore } from "@/lib/matching/scoring-engine"
 
 export async function GET(req: Request) {
   const session = await auth()
@@ -50,18 +51,8 @@ export async function GET(req: Request) {
       orderBy: { createdAt: "desc" },
     })
 
-    const now = Date.now()
     const maxDistance = currentUser?.maxDistance ?? 25
     const userInterests = new Set((currentUser?.interests ?? []).map((i) => i.category.name))
-
-    let motivationProfile: Record<string, number> | null = null
-    if (currentUser?.motivationProfile) {
-      try {
-        motivationProfile = JSON.parse(currentUser.motivationProfile)
-      } catch {
-        // ignore parse error
-      }
-    }
 
     const withDistance = vacancies.map((v) => {
       let distanceKm: number | null = null
@@ -79,45 +70,30 @@ export async function GET(req: Request) {
       return v.distanceKm <= maxDistance
     })
 
+    const volunteerSkillNames = (currentUser?.skills ?? []).map((s) => s.skill.name)
+    const volunteerInterestNames = [...userInterests]
+
     const scored = filtered.map((v) => {
-      // motivationFit: category overlap × 0.6 + VFI dim × 0.4
-      const vacancyCats = new Set(v.categories.map((c) => c.category.name))
-      const overlapCount = [...vacancyCats].filter((c) => userInterests.has(c)).length
-      const catOverlap = vacancyCats.size > 0 ? (overlapCount / vacancyCats.size) * 100 : 50
-      let vfiDim = 50
-      if (motivationProfile) {
-        const values = Object.values(motivationProfile) as number[]
-        const maxVal = Math.max(...values)
-        vfiDim = ((maxVal - 1) / 4) * 100 // normalize 1-5 to 0-100
-      }
-      const motivationFit = catOverlap * 0.6 + vfiDim * 0.4
+      const matchScore = calculateMatchScore({
+        // Volunteer
+        volunteerVFIJson: currentUser?.motivationProfile ?? null,
+        volunteerInterests: volunteerInterestNames,
+        volunteerSkills: volunteerSkillNames,
+        volunteerLat: currentUser?.lat,
+        volunteerLon: currentUser?.lon,
+        volunteerMaxDistance: maxDistance,
+        // Vacancy
+        vacancyCategories: v.categories.map((c) => c.category.name),
+        vacancySkills: v.skills.map((s) => s.skill.name),
+        vacancyLat: v.lat,
+        vacancyLon: v.lon,
+        vacancyRemote: v.remote,
+        vacancyCreatedAt: v.createdAt,
+        // Organisation
+        orgTotalSwipes: v._count.swipes,
+      })
 
-      // distanceScore
-      let distanceScore: number
-      if (v.remote) {
-        distanceScore = 100
-      } else if (v.distanceKm === null) {
-        distanceScore = 50
-      } else {
-        distanceScore = Math.max(0, 100 - (v.distanceKm / maxDistance) * 100)
-      }
-
-      // recencyScore: linear decay 100→0 over 30 days
-      const ageMs = now - new Date(v.createdAt).getTime()
-      const ageDays = ageMs / (1000 * 60 * 60 * 24)
-      const recencyScore = Math.max(0, 100 - (ageDays / 30) * 100)
-
-      // fairnessScore: smaller orgs (fewer swipes) rank higher
-      const totalOrgSwipes = v._count.swipes
-      const fairnessScore = Math.max(0, 100 - totalOrgSwipes)
-
-      const score =
-        motivationFit * 0.4 +
-        distanceScore * 0.3 +
-        recencyScore * 0.2 +
-        fairnessScore * 0.1
-
-      return { ...v, distanceKm: v.distanceKm, _score: score }
+      return { ...v, distanceKm: v.distanceKm, matchScore, _score: matchScore.total }
     })
 
     const result = scored
