@@ -18,81 +18,106 @@ import {
   FileText,
   Check,
   Upload,
+  Users,
+  Heart,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { CATEGORIES } from "@/config"
 
-
-type OrgStep = "organisatie" | "categorieën" | "beschrijving" | "contact"
-const STEPS: OrgStep[] = ["organisatie", "categorieën", "beschrijving", "contact"]
+type OrgStep = "organisatie" | "doelgroepen" | "verhaal" | "contact"
+const STEPS: OrgStep[] = ["organisatie", "doelgroepen", "verhaal", "contact"]
 const TOTAL = STEPS.length
 
 const STEP_TITLES: Record<OrgStep, string> = {
   organisatie: "Vertel ons over jullie organisatie",
-  categorieën: "Welke doelgroepen bedienen jullie?",
-  beschrijving: "Beschrijf jullie organisatie",
-  contact: "Contactgegevens & locatie",
+  doelgroepen: "Wie helpen jullie?",
+  verhaal:     "Jullie verhaal",
+  contact:     "Contact & locatie",
 }
 
 const STEP_SUBTITLES: Record<OrgStep, string> = {
-  organisatie: "Beginnen met de basisgegevens. Upload jullie logo zodat vrijwilligers jullie herkennen.",
-  categorieën: "Selecteer de doelgroepen waarop jullie organisatie zich richt.",
-  beschrijving: "Vertel in een paar zinnen wat jullie organisatie doet en waarvoor jullie vrijwilligers zoeken.",
-  contact: "Vul jullie contactgegevens in zodat vrijwilligers jullie kunnen bereiken. Alles is optioneel.",
+  organisatie: "Begin met de naam, het logo en de omvang van jullie organisatie.",
+  doelgroepen: "Selecteer de doelgroepen en het type inzet dat jullie zoeken.",
+  verhaal:     "Beschrijf jullie organisatie en geef aan wat vrijwilligers bij jullie kunnen verwachten.",
+  contact:     "Vul jullie contactgegevens in. Alles is optioneel.",
 }
 
 const STEP_ICONS: Record<OrgStep, React.ReactNode> = {
   organisatie: <Building2 className="w-3.5 h-3.5" />,
-  categorieën: <Tag className="w-3.5 h-3.5" />,
-  beschrijving: <FileText className="w-3.5 h-3.5" />,
-  contact: <MapPin className="w-3.5 h-3.5" />,
+  doelgroepen: <Tag className="w-3.5 h-3.5" />,
+  verhaal:     <FileText className="w-3.5 h-3.5" />,
+  contact:     <MapPin className="w-3.5 h-3.5" />,
 }
+
+const ORG_SIZES = [
+  { value: "starter",  label: "Starter",       desc: "Minder dan 10 vrijwilligers" },
+  { value: "middel",   label: "Middelgroot",    desc: "10 tot 50 vrijwilligers" },
+  { value: "groot",    label: "Groot",          desc: "Meer dan 50 vrijwilligers" },
+]
+
+const INZET_TYPES = [
+  { value: "wekelijks",    label: "Wekelijkse vaste inzet",  desc: "Vrijwilligers die structureel terugkomen" },
+  { value: "projectmatig", label: "Projectmatig",            desc: "Per project of tijdelijke periode" },
+  { value: "incidenteel",  label: "Incidenteel / eenmalig",  desc: "Losse klussen of evenementen" },
+]
+
+const VOLUNTEER_BENEFITS = [
+  { value: "begeleiding",    label: "Persoonlijke begeleiding",    icon: "🤝" },
+  { value: "reiskosten",     label: "Reiskostenvergoeding",        icon: "🚌" },
+  { value: "onkosten",       label: "Onkostenvergoeding",          icon: "💶" },
+  { value: "opleiding",      label: "Opleiding / training",        icon: "🎓" },
+  { value: "certificaat",    label: "Certificaat / referentie",    icon: "📜" },
+  { value: "teamactiviteit", label: "Teamactiviteiten",            icon: "🎉" },
+  { value: "flexibel",       label: "Flexibele tijden",            icon: "⏰" },
+  { value: "werkervaring",   label: "Relevante werkervaring",      icon: "💼" },
+]
 
 export function OrgOnboardingFlow() {
   const router = useRouter()
   const { data: session } = useSession()
-  const [showWelcome, setShowWelcome] = useState(true)
+  const [showWelcome,     setShowWelcome]     = useState(true)
   const [showCelebration, setShowCelebration] = useState(false)
-  const [currentStep, setCurrentStep] = useState(0)
+  const [currentStep,     setCurrentStep]     = useState(0)
 
-  // Step 1: organisatie
-  const [orgName, setOrgName] = useState("")
-  const [logoUrl, setLogoUrl] = useState<string | null>(null)
-  const [uploading, setUploading] = useState(false)
+  // Step 1
+  const [orgName,     setOrgName]     = useState("")
+  const [orgSize,     setOrgSize]     = useState<string>("")
+  const [logoUrl,     setLogoUrl]     = useState<string | null>(null)
+  const [uploading,   setUploading]   = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Step 2: categorieën
+  // Step 2
   const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [selectedInzetTypes, setSelectedInzetTypes] = useState<string[]>([])
 
-  // Step 3: beschrijving
-  const [description, setDescription] = useState("")
-  const [generatingAI, setGeneratingAI] = useState(false)
+  // Step 3
+  const [description,       setDescription]       = useState("")
+  const [selectedBenefits,  setSelectedBenefits]  = useState<string[]>([])
+  const [generatingAI,      setGeneratingAI]       = useState(false)
 
-  // Step 4: contact
-  const [website, setWebsite] = useState("")
+  // Step 4
+  const [website,  setWebsite]  = useState("")
   const [orgEmail, setOrgEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [address, setAddress] = useState("")
+  const [phone,    setPhone]    = useState("")
+  const [address,  setAddress]  = useState("")
   const [postcode, setPostcode] = useState("")
-  const [city, setCity] = useState("")
+  const [city,     setCity]     = useState("")
   const [geocodedLat, setGeocodedLat] = useState<number | null>(null)
   const [geocodedLon, setGeocodedLon] = useState<number | null>(null)
-  const [geocoding, setGeocoding] = useState(false)
+  const [geocoding,   setGeocoding]   = useState(false)
   const geocodeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const [isLoading, setIsLoading] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
 
-  // Pre-fill org name from session
   useEffect(() => {
     const userName = (session?.user as { name?: string } | null)?.name
     if (userName && !orgName) setOrgName(userName)
   }, [session]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Postcode geocoding with 800ms debounce
   useEffect(() => {
     if (geocodeTimer.current) clearTimeout(geocodeTimer.current)
     const isValid = /^[1-9][0-9]{3}\s?[A-Z]{2}$/i.test(postcode)
@@ -111,9 +136,7 @@ export function OrgOnboardingFlow() {
         setGeocoding(false)
       }
     }, 800)
-    return () => {
-      if (geocodeTimer.current) clearTimeout(geocodeTimer.current)
-    }
+    return () => { if (geocodeTimer.current) clearTimeout(geocodeTimer.current) }
   }, [postcode])
 
   async function handleLogoSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -136,9 +159,15 @@ export function OrgOnboardingFlow() {
   }
 
   function toggleCategory(cat: string) {
-    setSelectedCategories((prev) =>
-      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
-    )
+    setSelectedCategories((p) => p.includes(cat) ? p.filter((c) => c !== cat) : [...p, cat])
+  }
+
+  function toggleInzetType(val: string) {
+    setSelectedInzetTypes((p) => p.includes(val) ? p.filter((v) => v !== val) : [...p, val])
+  }
+
+  function toggleBenefit(val: string) {
+    setSelectedBenefits((p) => p.includes(val) ? p.filter((v) => v !== val) : [...p, val])
   }
 
   async function handleGenerateDescription() {
@@ -160,29 +189,21 @@ export function OrgOnboardingFlow() {
   }
 
   function canProceed(): boolean {
-    const step = STEPS[currentStep]
-    switch (step) {
-      case "organisatie":
-        return orgName.trim().length >= 2
-      case "categorieën":
-        return selectedCategories.length >= 1
-      case "beschrijving":
-        return description.trim().length >= 20
-      case "contact":
-        return true
+    switch (STEPS[currentStep]) {
+      case "organisatie": return orgName.trim().length >= 2
+      case "doelgroepen": return selectedCategories.length >= 1
+      case "verhaal":     return description.trim().length >= 20
+      case "contact":     return true
     }
   }
 
   function nextStep() {
-    if (currentStep < STEPS.length - 1) {
-      setCurrentStep((prev) => prev + 1)
-    } else {
-      complete()
-    }
+    if (currentStep < STEPS.length - 1) setCurrentStep((p) => p + 1)
+    else complete()
   }
 
   function prevStep() {
-    if (currentStep > 0) setCurrentStep((prev) => prev - 1)
+    if (currentStep > 0) setCurrentStep((p) => p - 1)
   }
 
   async function complete() {
@@ -193,18 +214,21 @@ export function OrgOnboardingFlow() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          organisationName: orgName,
-          logo: logoUrl,
-          orgCategories: selectedCategories,
+          organisationName:  orgName,
+          logo:              logoUrl,
+          orgSize:           orgSize || undefined,
+          orgCategories:     selectedCategories,
+          inzetType:         selectedInzetTypes,
           description,
-          website: website || undefined,
-          orgEmail: orgEmail || undefined,
-          phone: phone || undefined,
-          address: address || undefined,
-          postcode: postcode || undefined,
-          city: city || undefined,
-          lat: geocodedLat,
-          lon: geocodedLon,
+          volunteerBenefits: selectedBenefits,
+          website:           website || undefined,
+          orgEmail:          orgEmail || undefined,
+          phone:             phone || undefined,
+          address:           address || undefined,
+          postcode:          postcode || undefined,
+          city:              city || undefined,
+          lat:               geocodedLat,
+          lon:               geocodedLon,
         }),
       })
       if (!res.ok) {
@@ -223,21 +247,12 @@ export function OrgOnboardingFlow() {
     }
   }
 
-  const step = STEPS[currentStep]
+  const step       = STEPS[currentStep]
   const stepNumber = currentStep + 1
   const isLastStep = currentStep === STEPS.length - 1
+  const firstName  = (orgName || (session?.user as { name?: string } | null)?.name || "").split(" ")[0]
 
-  const displayName = orgName || (session?.user as { name?: string } | null)?.name || ""
-  const firstName = displayName.split(" ")[0]
-
-  const initials = displayName
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2)
-
-  // --- Celebration overlay ---
+  // ── Celebration ─────────────────────────────────────────────────────────────
   if (showCelebration) {
     return (
       <motion.div
@@ -249,9 +264,9 @@ export function OrgOnboardingFlow() {
           initial={{ scale: 0, rotate: -15 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 12 }}
-          className="text-8xl mb-6 select-none"
+          className="w-20 h-20 rounded-2xl bg-white/20 flex items-center justify-center mb-6"
         >
-          🎉
+          <Heart className="w-10 h-10 text-white" strokeWidth={1.5} />
         </motion.div>
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -265,7 +280,7 @@ export function OrgOnboardingFlow() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.42 }}
-          className="text-white/80 text-center leading-relaxed mb-10"
+          className="text-white/80 text-center leading-relaxed mb-10 max-w-xs"
         >
           Het organisatieprofiel is aangemaakt. Vrijwilligers kunnen jullie nu vinden!
         </motion.p>
@@ -282,19 +297,20 @@ export function OrgOnboardingFlow() {
     )
   }
 
-  // --- Welcome screen ---
+  // ── Welcome ──────────────────────────────────────────────────────────────────
   if (showWelcome) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 flex flex-col max-w-lg mx-auto">
+      <div className="min-h-screen bg-white flex flex-col max-w-lg mx-auto">
         <div className="flex-1 flex flex-col items-center justify-center px-6 text-center pt-10 pb-4">
           <motion.div
             initial={{ scale: 0.7, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            className="text-7xl mb-5 select-none"
+            className="w-14 h-14 rounded-2xl bg-orange-100 flex items-center justify-center mb-6"
           >
-            🏢
+            <Building2 className="w-7 h-7 text-orange-500" strokeWidth={1.5} />
           </motion.div>
+
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -303,6 +319,7 @@ export function OrgOnboardingFlow() {
           >
             Welkom{firstName ? `, ${firstName}` : ""}!
           </motion.h2>
+
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -310,34 +327,36 @@ export function OrgOnboardingFlow() {
             className="text-gray-500 text-sm leading-relaxed mb-7"
           >
             We helpen jullie in{" "}
-            <span className="font-semibold text-orange-500">4 stappen</span> een professioneel
-            organisatieprofiel aanmaken. Vrijwilligers kunnen jullie dan vinden!
+            <span className="font-semibold text-orange-500">4 stappen</span> een compleet
+            organisatieprofiel aanmaken. Duurt maar 3 minuten.
           </motion.p>
+
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.35 }}
-            className="w-full space-y-2.5"
+            className="w-full space-y-2"
           >
             {[
-              { emoji: "🏢", text: "Organisatienaam en logo" },
-              { emoji: "🏷️", text: "Jullie doelgroepen" },
-              { emoji: "✍️", text: "Beschrijving (met AI-hulp)" },
-              { emoji: "📍", text: "Contactgegevens en locatie" },
+              { icon: <Building2 className="w-4 h-4 text-gray-400" />, text: "Organisatienaam, logo & omvang" },
+              { icon: <Tag       className="w-4 h-4 text-gray-400" />, text: "Doelgroepen en type inzet" },
+              { icon: <FileText  className="w-4 h-4 text-gray-400" />, text: "Jullie verhaal (met AI-hulp)" },
+              { icon: <MapPin    className="w-4 h-4 text-gray-400" />, text: "Contactgegevens en locatie" },
             ].map((item, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -16 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.42 + i * 0.07 }}
-                className="flex items-center gap-3 bg-white rounded-2xl px-4 py-3 shadow-sm text-left"
+                className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 text-left"
               >
-                <span className="text-xl w-7 text-center">{item.emoji}</span>
+                {item.icon}
                 <span className="text-sm text-gray-700 font-medium">{item.text}</span>
               </motion.div>
             ))}
           </motion.div>
         </div>
+
         <div className="px-5 pb-8 pt-2">
           <motion.button
             initial={{ opacity: 0, y: 16 }}
@@ -358,54 +377,31 @@ export function OrgOnboardingFlow() {
     )
   }
 
-  // --- Main step flow ---
+  // ── Main flow ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50 flex flex-col max-w-lg mx-auto">
+    <div className="min-h-screen bg-white flex flex-col max-w-lg mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-5 pb-3">
         <button
           onClick={prevStep}
           disabled={currentStep === 0}
-          className="w-8 h-8 flex items-center justify-center text-orange-500 disabled:opacity-0 transition-opacity"
+          className="w-8 h-8 flex items-center justify-center text-gray-400 disabled:opacity-0 transition-opacity"
         >
           <ChevronLeft className="w-5 h-5" strokeWidth={2.5} />
         </button>
-        <span className="text-sm text-gray-400 font-medium">
-          {stepNumber} / {TOTAL}
-        </span>
+        <span className="text-sm text-gray-400 font-medium">{stepNumber} / {TOTAL}</span>
         <div className="w-8" />
       </div>
 
-      {/* Step dots */}
-      <div className="flex items-center justify-center mb-6 px-5">
-        {STEPS.map((s, i) => {
-          const isDone = i < currentStep
-          const isActive = i === currentStep
-          return (
-            <div key={s} className="flex items-center">
-              <motion.div
-                animate={{ scale: isActive ? 1.15 : 1 }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                style={{
-                  backgroundColor: isDone || isActive ? "#f97316" : "#f3f4f6",
-                  color: isDone || isActive ? "white" : "#9ca3af",
-                }}
-                className={`w-9 h-9 rounded-full flex items-center justify-center ${
-                  isActive ? "ring-4 ring-orange-100" : ""
-                }`}
-              >
-                {isDone ? <Check className="w-4 h-4" /> : STEP_ICONS[s]}
-              </motion.div>
-              {i < STEPS.length - 1 && (
-                <div
-                  className={`w-8 h-0.5 mx-0.5 rounded-full transition-colors duration-500 ${
-                    i < currentStep ? "bg-orange-400" : "bg-gray-200"
-                  }`}
-                />
-              )}
-            </div>
-          )
-        })}
+      {/* Progress bar (matching volunteer flow) */}
+      <div className="px-5 mb-6">
+        <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+          <motion.div
+            className="h-full bg-orange-500 rounded-full"
+            animate={{ width: `${(stepNumber / TOTAL) * 100}%` }}
+            transition={{ duration: 0.3 }}
+          />
+        </div>
       </div>
 
       {/* Content */}
@@ -425,12 +421,13 @@ export function OrgOnboardingFlow() {
               {STEP_SUBTITLES[step]}
             </p>
 
-            {/* Step 1: Organisatie */}
+            {/* ── Step 1: Organisatie ─────────────────────────────────────── */}
             {step === "organisatie" && (
               <div className="space-y-5">
+                {/* Naam */}
                 <div className="space-y-1.5">
                   <Label htmlFor="orgName" className="text-sm font-medium text-gray-700">
-                    Naam van de organisatie
+                    Naam van de organisatie <span className="text-orange-500">*</span>
                   </Label>
                   <div className="relative">
                     <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -444,12 +441,46 @@ export function OrgOnboardingFlow() {
                   </div>
                 </div>
 
-                {/* Logo drop zone */}
+                {/* Organisatiegrootte */}
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Logo</Label>
+                  <Label className="text-sm font-medium text-gray-700">
+                    Hoe groot is jullie organisatie?
+                  </Label>
+                  <div className="flex flex-col gap-2">
+                    {ORG_SIZES.map(({ value, label, desc }) => (
+                      <motion.button
+                        key={value}
+                        whileTap={{ scale: 0.98 }}
+                        type="button"
+                        onClick={() => setOrgSize(value)}
+                        className={`flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all ${
+                          orgSize === value
+                            ? "border-orange-400 bg-orange-50"
+                            : "border-gray-100 bg-gray-50 hover:border-gray-200"
+                        }`}
+                      >
+                        <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 flex items-center justify-center ${
+                          orgSize === value ? "border-orange-500 bg-orange-500" : "border-gray-300"
+                        }`}>
+                          {orgSize === value && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </div>
+                        <div>
+                          <p className={`text-sm font-semibold ${orgSize === value ? "text-orange-700" : "text-gray-800"}`}>{label}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+                        </div>
+                      </motion.button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Logo */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium text-gray-700">
+                    Logo <span className="text-xs font-normal text-gray-400">(optioneel)</span>
+                  </Label>
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className={`relative w-full h-40 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden ${
+                    className={`relative w-full h-36 border-2 border-dashed rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden ${
                       uploading
                         ? "border-orange-300 bg-orange-50"
                         : logoUrl
@@ -459,11 +490,7 @@ export function OrgOnboardingFlow() {
                   >
                     {logoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={logoUrl}
-                        alt="Logo preview"
-                        className="w-full h-full object-contain p-4"
-                      />
+                      <img src={logoUrl} alt="Logo preview" className="w-full h-full object-contain p-4" />
                     ) : uploading ? (
                       <div className="flex flex-col items-center gap-2">
                         <Loader2 className="w-8 h-8 text-orange-400 animate-spin" />
@@ -471,18 +498,11 @@ export function OrgOnboardingFlow() {
                       </div>
                     ) : (
                       <div className="flex flex-col items-center gap-2 text-center px-4">
-                        <div className="w-12 h-12 rounded-2xl bg-orange-100 flex items-center justify-center mb-1">
+                        <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center">
                           <Upload className="w-5 h-5 text-orange-500" />
                         </div>
-                        <p className="text-sm font-semibold text-gray-700">
-                          Klik om logo te uploaden
-                        </p>
-                        <p className="text-xs text-gray-400">JPG, PNG · Max. 4MB</p>
-                        {initials && (
-                          <div className="mt-1 w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center text-white text-sm font-bold">
-                            {initials}
-                          </div>
-                        )}
+                        <p className="text-sm font-semibold text-gray-700">Klik om logo te uploaden</p>
+                        <p className="text-xs text-gray-400">JPG, PNG · Max. 4 MB</p>
                       </div>
                     )}
                   </div>
@@ -495,166 +515,201 @@ export function OrgOnboardingFlow() {
                       Ander logo kiezen
                     </button>
                   )}
-                  {uploadError && (
-                    <p className="text-xs text-red-500">{uploadError}</p>
-                  )}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={handleLogoSelect}
-                  />
+                  {uploadError && <p className="text-xs text-red-500">{uploadError}</p>}
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleLogoSelect} />
                 </div>
               </div>
             )}
 
-            {/* Step 2: Categorieën */}
-            {step === "categorieën" && (
-              <div className="space-y-3">
-                <div className="flex flex-wrap gap-2">
-                  {CATEGORIES.map((cat) => {
-                    const selected = selectedCategories.includes(cat.name)
-                    return (
-                      <motion.button
-                        key={cat.name}
-                        whileTap={{ scale: 0.91 }}
-                        onClick={() => toggleCategory(cat.name)}
-                        className={`inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-medium border transition-all ${
-                          selected
-                            ? "bg-orange-500 text-white border-orange-500 shadow-sm"
-                            : "bg-white text-gray-700 border-gray-200 hover:border-orange-300"
-                        }`}
-                      >
-                        <span>{cat.icon}</span>
-                        {cat.name}
-                        {selected && <Check className="w-3 h-3 ml-0.5" />}
-                      </motion.button>
-                    )
-                  })}
-                </div>
-                <p className="text-xs text-gray-400 pt-1">
-                  {selectedCategories.length === 0
-                    ? "Selecteer minimaal één doelgroep"
-                    : `${selectedCategories.length} geselecteerd`}
-                </p>
-              </div>
-            )}
-
-            {/* Step 3: Beschrijving */}
-            {step === "beschrijving" && (
-              <div className="space-y-3">
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Beschrijf wat jullie organisatie doet, voor wie jullie werken en waarom vrijwilligers bij jullie passen..."
-                  className="min-h-[150px] rounded-xl border-gray-200 bg-white resize-none text-sm"
-                />
-                <div className="flex items-center justify-between">
-                  <p className="text-xs text-gray-400">{description.length} tekens</p>
-                  <motion.button
-                    type="button"
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleGenerateDescription}
-                    disabled={
-                      generatingAI || selectedCategories.length === 0 || !orgName.trim()
-                    }
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-50 border border-orange-200 text-sm font-medium text-orange-600 hover:bg-orange-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {generatingAI ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Genereren...
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        AI genereren
-                      </>
-                    )}
-                  </motion.button>
-                </div>
-                {selectedCategories.length === 0 && (
-                  <p className="text-xs text-amber-600">
-                    Selecteer eerst categorieën (stap 2) om AI te gebruiken.
+            {/* ── Step 2: Doelgroepen & Inzet ────────────────────────────── */}
+            {step === "doelgroepen" && (
+              <div className="space-y-6">
+                {/* Categorieën */}
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    {CATEGORIES.map((cat) => {
+                      const selected = selectedCategories.includes(cat.name)
+                      return (
+                        <motion.button
+                          key={cat.name}
+                          whileTap={{ scale: 0.91 }}
+                          onClick={() => toggleCategory(cat.name)}
+                          className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-medium border transition-all ${
+                            selected
+                              ? "bg-orange-500 text-white border-orange-500 shadow-sm"
+                              : "bg-white text-gray-700 border-gray-200 hover:border-orange-300"
+                          }`}
+                        >
+                          <span>{cat.icon}</span>
+                          {cat.name}
+                          {selected && <Check className="w-3 h-3 ml-0.5" />}
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    {selectedCategories.length === 0
+                      ? "Selecteer minimaal één doelgroep"
+                      : `${selectedCategories.length} geselecteerd`}
                   </p>
-                )}
+                </div>
+
+                {/* Inzet types */}
+                <div className="space-y-2.5">
+                  <p className="text-sm font-semibold text-gray-800">Wat voor inzet zoeken jullie?</p>
+                  <p className="text-xs text-gray-400 -mt-1">Meerdere opties mogelijk</p>
+                  <div className="flex flex-col gap-2">
+                    {INZET_TYPES.map(({ value, label, desc }) => {
+                      const selected = selectedInzetTypes.includes(value)
+                      return (
+                        <motion.button
+                          key={value}
+                          whileTap={{ scale: 0.98 }}
+                          type="button"
+                          onClick={() => toggleInzetType(value)}
+                          className={`flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all ${
+                            selected
+                              ? "border-orange-400 bg-orange-50"
+                              : "border-gray-100 bg-gray-50 hover:border-gray-200"
+                          }`}
+                        >
+                          <div className={`w-5 h-5 rounded border-2 flex-shrink-0 flex items-center justify-center ${
+                            selected ? "border-orange-500 bg-orange-500" : "border-gray-300"
+                          }`}>
+                            {selected && <Check className="w-3 h-3 text-white" />}
+                          </div>
+                          <div>
+                            <p className={`text-sm font-semibold ${selected ? "text-orange-700" : "text-gray-800"}`}>{label}</p>
+                            <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+                          </div>
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                </div>
               </div>
             )}
 
-            {/* Step 4: Contact */}
+            {/* ── Step 3: Jullie verhaal ──────────────────────────────────── */}
+            {step === "verhaal" && (
+              <div className="space-y-5">
+                {/* Beschrijving */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium text-gray-700">
+                      Beschrijving <span className="text-orange-500">*</span>
+                    </Label>
+                    <motion.button
+                      type="button"
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleGenerateDescription}
+                      disabled={generatingAI || selectedCategories.length === 0 || !orgName.trim()}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-orange-50 border border-orange-200 text-xs font-semibold text-orange-600 hover:bg-orange-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {generatingAI ? (
+                        <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Genereren...</>
+                      ) : (
+                        <><Sparkles className="w-3.5 h-3.5" /> AI genereren</>
+                      )}
+                    </motion.button>
+                  </div>
+                  <Textarea
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Beschrijf wat jullie organisatie doet, voor wie jullie werken en waarom vrijwilligers bij jullie passen..."
+                    className="min-h-[130px] rounded-xl border-gray-200 bg-white resize-none text-sm"
+                  />
+                  <p className="text-xs text-gray-400">{description.length} tekens (min. 20)</p>
+                  {selectedCategories.length === 0 && (
+                    <p className="text-xs text-amber-600">Selecteer eerst doelgroepen (stap 2) om AI te gebruiken.</p>
+                  )}
+                </div>
+
+                {/* Wat bieden jullie? */}
+                <div className="space-y-2.5">
+                  <p className="text-sm font-semibold text-gray-800">Wat bieden jullie vrijwilligers?</p>
+                  <p className="text-xs text-gray-400 -mt-1">Selecteer alles wat van toepassing is</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {VOLUNTEER_BENEFITS.map(({ value, label, icon }) => {
+                      const selected = selectedBenefits.includes(value)
+                      return (
+                        <motion.button
+                          key={value}
+                          whileTap={{ scale: 0.95 }}
+                          type="button"
+                          onClick={() => toggleBenefit(value)}
+                          className={`flex items-center gap-2.5 p-3 rounded-xl border-2 text-left transition-all ${
+                            selected
+                              ? "border-orange-400 bg-orange-50"
+                              : "border-gray-100 bg-gray-50 hover:border-gray-200"
+                          }`}
+                        >
+                          <span className="text-lg flex-shrink-0">{icon}</span>
+                          <span className={`text-xs font-medium leading-tight ${selected ? "text-orange-700" : "text-gray-700"}`}>
+                            {label}
+                          </span>
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Step 4: Contact ─────────────────────────────────────────── */}
             {step === "contact" && (
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <Label htmlFor="website" className="text-sm font-medium text-gray-700">
-                    Website
-                  </Label>
-                  <div className="relative">
-                    <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      id="website"
-                      value={website}
-                      onChange={(e) => setWebsite(e.target.value)}
-                      placeholder="https://www.organisatie.nl"
-                      className="pl-10 h-12 rounded-xl border-gray-200 bg-white"
-                    />
+              <div className="space-y-5">
+                {/* Online */}
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Online</p>
+                  <div className="space-y-3">
+                    <div className="relative">
+                      <Globe className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        value={website}
+                        onChange={(e) => setWebsite(e.target.value)}
+                        placeholder="https://www.organisatie.nl"
+                        className="pl-10 h-12 rounded-xl border-gray-200 bg-white"
+                      />
+                    </div>
+                    <div className="relative">
+                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        type="email"
+                        value={orgEmail}
+                        onChange={(e) => setOrgEmail(e.target.value)}
+                        placeholder="info@organisatie.nl"
+                        className="pl-10 h-12 rounded-xl border-gray-200 bg-white"
+                      />
+                    </div>
+                    <div className="relative">
+                      <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="020-1234567 of 06-12345678"
+                        className="pl-10 h-12 rounded-xl border-gray-200 bg-white"
+                      />
+                    </div>
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="orgEmail" className="text-sm font-medium text-gray-700">
-                    E-mailadres organisatie
-                  </Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      id="orgEmail"
-                      type="email"
-                      value={orgEmail}
-                      onChange={(e) => setOrgEmail(e.target.value)}
-                      placeholder="info@organisatie.nl"
-                      className="pl-10 h-12 rounded-xl border-gray-200 bg-white"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="phone" className="text-sm font-medium text-gray-700">
-                    Telefoonnummer
-                  </Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="020-1234567"
-                      className="pl-10 h-12 rounded-xl border-gray-200 bg-white"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="address" className="text-sm font-medium text-gray-700">
-                    Adres
-                  </Label>
+
+                {/* Locatie */}
+                <div className="space-y-3">
+                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Locatie</p>
                   <div className="relative">
                     <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
-                      id="address"
                       value={address}
                       onChange={(e) => setAddress(e.target.value)}
                       placeholder="Straat en huisnummer"
                       className="pl-10 h-12 rounded-xl border-gray-200 bg-white"
                     />
                   </div>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="postcode" className="text-sm font-medium text-gray-700">
-                    Postcode
-                  </Label>
                   <div className="relative">
                     <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
-                      id="postcode"
                       value={postcode}
                       onChange={(e) => setPostcode(e.target.value.toUpperCase())}
                       placeholder="1234 AB"
@@ -665,28 +720,25 @@ export function OrgOnboardingFlow() {
                       <Loader2 className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 animate-spin" />
                     )}
                   </div>
-                  {city && !geocoding ? (
-                    <p className="text-xs text-green-600 flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      Gevonden: {city}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-gray-400">
-                      Stad wordt automatisch ingevuld op basis van de postcode.
-                    </p>
+                  {/* City badge — geen extra input veld */}
+                  {city && !geocoding && (
+                    <div className="flex items-center gap-2 px-3.5 py-2.5 bg-green-50 border border-green-200 rounded-xl">
+                      <MapPin className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
+                      <span className="text-sm font-medium text-green-700">{city}</span>
+                      <span className="text-xs text-green-500 ml-auto">automatisch ingevuld</span>
+                    </div>
+                  )}
+                  {!city && !geocoding && postcode && (
+                    <p className="text-xs text-gray-400 pl-1">Stad wordt automatisch ingevuld op basis van de postcode.</p>
                   )}
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="city" className="text-sm font-medium text-gray-700">
-                    Stad
-                  </Label>
-                  <Input
-                    id="city"
-                    value={city}
-                    readOnly
-                    placeholder="Wordt automatisch ingevuld"
-                    className="h-12 rounded-xl border-gray-200 bg-gray-50 text-gray-500"
-                  />
+
+                {/* Info box */}
+                <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                  <Users className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-blue-700 leading-relaxed">
+                    Jullie profiel wordt na aanmelding handmatig geverifieerd. Na goedkeuring zijn jullie zichtbaar voor vrijwilligers.
+                  </p>
                 </div>
               </div>
             )}
@@ -705,18 +757,12 @@ export function OrgOnboardingFlow() {
           whileTap={{ scale: 0.97 }}
           onClick={nextStep}
           disabled={isLoading || !canProceed()}
-          className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 rounded-2xl transition-colors disabled:opacity-70 text-base"
+          className="w-full flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 rounded-2xl transition-colors disabled:opacity-50 text-base"
         >
           {isLoading ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Opslaan...
-            </>
+            <><Loader2 className="w-5 h-5 animate-spin" /> Opslaan...</>
           ) : (
-            <>
-              {isLastStep ? "Profiel opslaan" : "Volgende"}
-              <ChevronRight className="w-5 h-5" strokeWidth={2.5} />
-            </>
+            <>{isLastStep ? "Profiel opslaan" : "Volgende"}<ChevronRight className="w-5 h-5" strokeWidth={2.5} /></>
           )}
         </motion.button>
         {currentStep === 0 && (

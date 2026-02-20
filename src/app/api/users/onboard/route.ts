@@ -20,6 +20,8 @@ export async function POST(req: Request) {
       location,
       postcode,
       age,
+      maxDistance,
+      commitmentType,
       motivationProfile,
       schwartzProfile,
       // Org-specific fields
@@ -34,6 +36,9 @@ export async function POST(req: Request) {
       city,
       lat: clientLat,
       lon: clientLon,
+      orgSize,
+      inzetType = [],
+      volunteerBenefits = [],
     } = body
 
     // Determine role first
@@ -65,6 +70,9 @@ export async function POST(req: Request) {
         postcode: postcode ?? null,
         lat: clientLat != null ? Number(clientLat) : null,
         lon: clientLon != null ? Number(clientLon) : null,
+        orgSize: orgSize ?? null,
+        inzetType: (inzetType as string[]).length > 0 ? JSON.stringify(inzetType) : null,
+        volunteerBenefits: (volunteerBenefits as string[]).length > 0 ? JSON.stringify(volunteerBenefits) : null,
       }
 
       // 1. Upsert org record (without categories to avoid nested write issues)
@@ -127,6 +135,8 @@ export async function POST(req: Request) {
           lat: geoCoords?.lat ?? null,
           lon: geoCoords?.lon ?? null,
           age: age != null ? Number(age) : null,
+          maxDistance: maxDistance != null ? Number(maxDistance) : undefined,
+          commitmentType: commitmentType ?? null,
           availability: JSON.stringify(availability),
           motivationProfile: motivationProfile ? JSON.stringify(motivationProfile) : undefined,
           schwartzProfile: schwartzProfile ? JSON.stringify(schwartzProfile) : undefined,

@@ -45,6 +45,7 @@ model User {
   lastActiveDate      DateTime?
 
   openToInvitations Boolean   @default(true)
+  commitmentType    String?   // "wekelijks" | "projectmatig" | "incidenteel" | "alles"
 
   // Password reset
   resetToken        String?   @unique
@@ -153,6 +154,10 @@ model Organisation {
   vacancies        Vacancy[]
   categories       OrgCategory[]
   sentInvitations  Invitation[]
+
+  orgSize           String?   // "starter" | "middel" | "groot"
+  inzetType         String?   @db.Text  // JSON: ["wekelijks","projectmatig",...]
+  volunteerBenefits String?   @db.Text  // JSON: ["begeleiding","reiskosten",...]
 
   avgResponseHours   Float?
   slaScore           Int     @default(100)
