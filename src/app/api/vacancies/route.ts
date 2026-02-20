@@ -5,6 +5,7 @@ import { vacancySchema } from "@/validators"
 import { geocodePostcode, haversineDistance } from "@/lib/geocoding"
 import { calculateMatchScore } from "@/lib/matching/scoring-engine"
 import { embedText, toVectorLiteral, volunteerToText, vacancyToText } from "@/lib/embeddings"
+import { getScoringWeights } from "@/lib/matching/weights"
 
 export async function GET(req: Request) {
   const session = await auth()
@@ -126,6 +127,7 @@ export async function GET(req: Request) {
       orderBy: annCandidateIds ? undefined : { createdAt: "desc" },
     })
 
+    const scoringWeights = await getScoringWeights()
     const maxDistance = currentUser?.maxDistance ?? 25
     const userInterests = new Set((currentUser?.interests ?? []).map((i) => i.category.name))
 
@@ -167,7 +169,7 @@ export async function GET(req: Request) {
         vacancyCreatedAt: v.createdAt,
         // Organisation
         orgTotalSwipes: v._count.swipes,
-      })
+      }, scoringWeights)
 
       return { ...v, distanceKm: v.distanceKm, matchScore, _score: matchScore.total }
     })

@@ -461,3 +461,15 @@ enum AdminAction {
   BAN_USER
   REINSTATE_USER
 }
+
+// ========================
+// PLATFORM SETTINGS
+// ========================
+
+model AppSettings {
+  id        String   @id @default("default")
+  data      String   @db.Text  // JSON blob
+  updatedAt DateTime @updatedAt
+
+  @@map("app_settings")
+}

@@ -21,17 +21,47 @@ import {
 
 // ─── Weights ──────────────────────────────────────────────────────────────────
 
-const W_MOTIVATION = 0.40
-const W_DISTANCE = 0.30
-const W_SKILL = 0.20
-const W_FRESHNESS = 0.10
+export const DEFAULT_WEIGHTS: ScoringWeights = {
+  motivation: 0.40,
+  distance:   0.30,
+  skill:      0.20,
+  freshness:  0.10,
+  freshnessWindowDays: 60,
+  smallOrgThreshold:   10,
+  largeOrgThreshold:   150,
+}
+
+// Kept for backward compatibility — internal defaults
+const W_MOTIVATION = DEFAULT_WEIGHTS.motivation
+const W_DISTANCE   = DEFAULT_WEIGHTS.distance
+const W_SKILL      = DEFAULT_WEIGHTS.skill
+const W_FRESHNESS  = DEFAULT_WEIGHTS.freshness
 
 // Freshness decay window in days (score reaches 0 after this many days)
-const FRESHNESS_WINDOW_DAYS = 60
+const FRESHNESS_WINDOW_DAYS = DEFAULT_WEIGHTS.freshnessWindowDays
 
 // Fairness thresholds
-const SMALL_ORG_SWIPE_THRESHOLD = 10   // fewer swipes = small, gets a boost
-const LARGE_ORG_SWIPE_THRESHOLD = 150  // many swipes = large, gets a limiter
+const SMALL_ORG_SWIPE_THRESHOLD = DEFAULT_WEIGHTS.smallOrgThreshold  // fewer swipes = small, gets a boost
+const LARGE_ORG_SWIPE_THRESHOLD = DEFAULT_WEIGHTS.largeOrgThreshold  // many swipes = large, gets a limiter
+
+// ─── Weights type ─────────────────────────────────────────────────────────────
+
+export interface ScoringWeights {
+  /** Weight for motivation component [0–1] */
+  motivation: number
+  /** Weight for distance component [0–1] */
+  distance: number
+  /** Weight for skill component [0–1] */
+  skill: number
+  /** Weight for freshness component [0–1] */
+  freshness: number
+  /** Number of days until freshness score reaches 0 */
+  freshnessWindowDays: number
+  /** Swipe count below which org gets a boost */
+  smallOrgThreshold: number
+  /** Swipe count above which org gets dampened */
+  largeOrgThreshold: number
+}
 
 // ─── Public types ─────────────────────────────────────────────────────────────
 
@@ -76,10 +106,11 @@ export interface MatchScore {
 
 // ─── Main function ────────────────────────────────────────────────────────────
 
-export function calculateMatchScore(input: MatchInput): MatchScore {
+export function calculateMatchScore(input: MatchInput, weights?: Partial<ScoringWeights>): MatchScore {
+  const w: ScoringWeights = { ...DEFAULT_WEIGHTS, ...weights }
   const highlights: string[] = []
 
-  // 1. Motivation score (40%)
+  // 1. Motivation score
   const { score: motivation, highlights: motivHighlights } = scoreMotivation(
     input.volunteerVFIJson,
     input.volunteerSchwartzJson ?? null,
@@ -88,7 +119,7 @@ export function calculateMatchScore(input: MatchInput): MatchScore {
   )
   highlights.push(...motivHighlights)
 
-  // 2. Distance score (30%)
+  // 2. Distance score
   const { score: distance, highlights: distHighlights } = scoreDistance(
     input.volunteerLat ?? null,
     input.volunteerLon ?? null,
@@ -99,25 +130,25 @@ export function calculateMatchScore(input: MatchInput): MatchScore {
   )
   highlights.push(...distHighlights)
 
-  // 3. Skill score (20%)
+  // 3. Skill score
   const { score: skill, highlights: skillHighlights } = scoreSkills(
     input.volunteerSkills,
     input.vacancySkills,
   )
   highlights.push(...skillHighlights)
 
-  // 4. Freshness score (10%)
-  const freshness = scoreFreshness(input.vacancyCreatedAt)
+  // 4. Freshness score
+  const freshness = scoreFreshness(input.vacancyCreatedAt, w.freshnessWindowDays)
 
   // 5. Fairness weight (multiplicative)
-  const fairnessWeight = calcFairnessWeight(input.orgTotalSwipes)
+  const fairnessWeight = calcFairnessWeight(input.orgTotalSwipes, w.smallOrgThreshold, w.largeOrgThreshold)
 
   // 6. Weighted total
   const raw =
-    motivation * W_MOTIVATION +
-    distance * W_DISTANCE +
-    skill * W_SKILL +
-    freshness * W_FRESHNESS
+    motivation * w.motivation +
+    distance   * w.distance +
+    skill      * w.skill +
+    freshness  * w.freshness
 
   const total = Math.min(100, Math.round(raw * fairnessWeight * 10) / 10)
 
@@ -298,14 +329,12 @@ function scoreSkills(
 
 /**
  * Freshness score: linear decay from 100 (published today) to 0
- * (published FRESHNESS_WINDOW_DAYS or more ago).
- *
- * Uses a 60-day window (vs 30 previously) to be fairer to older vacancies.
+ * (published windowDays or more ago).
  */
-function scoreFreshness(createdAt: Date): number {
+function scoreFreshness(createdAt: Date, windowDays = FRESHNESS_WINDOW_DAYS): number {
   const ageMs = Date.now() - createdAt.getTime()
   const ageDays = ageMs / (1000 * 60 * 60 * 24)
-  return Math.max(0, 100 - (ageDays / FRESHNESS_WINDOW_DAYS) * 100)
+  return Math.max(0, 100 - (ageDays / windowDays) * 100)
 }
 
 /**
@@ -313,24 +342,19 @@ function scoreFreshness(createdAt: Date): number {
  * under-exposed) and gently limits very large / overexposed ones.
  *
  * Range: [0.70, 1.40]
- *
- * This is multiplicative so it amplifies quality rather than replacing it —
- * a great match at a popular org still beats a poor match at a small org.
  */
-function calcFairnessWeight(orgTotalSwipes: number): number {
-  if (orgTotalSwipes < SMALL_ORG_SWIPE_THRESHOLD) {
-    // Small / new org: up to 40% boost
-    const underExposure =
-      (SMALL_ORG_SWIPE_THRESHOLD - orgTotalSwipes) / SMALL_ORG_SWIPE_THRESHOLD
+function calcFairnessWeight(
+  orgTotalSwipes: number,
+  smallThreshold = SMALL_ORG_SWIPE_THRESHOLD,
+  largeThreshold = LARGE_ORG_SWIPE_THRESHOLD,
+): number {
+  if (orgTotalSwipes < smallThreshold) {
+    const underExposure = (smallThreshold - orgTotalSwipes) / smallThreshold
     return Math.min(1.4, 1.0 + underExposure * 0.4)
   }
 
-  if (orgTotalSwipes > LARGE_ORG_SWIPE_THRESHOLD) {
-    // Large / dominant org: up to 30% damper
-    const overExposure = Math.min(
-      1,
-      (orgTotalSwipes - LARGE_ORG_SWIPE_THRESHOLD) / LARGE_ORG_SWIPE_THRESHOLD,
-    )
+  if (orgTotalSwipes > largeThreshold) {
+    const overExposure = Math.min(1, (orgTotalSwipes - largeThreshold) / largeThreshold)
     return Math.max(0.7, 1.0 - overExposure * 0.3)
   }
 

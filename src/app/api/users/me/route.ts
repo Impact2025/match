@@ -101,6 +101,7 @@ export async function PATCH(req: Request) {
     })
 
     // Regenerate embedding non-blocking after profile update
+    const userId = session.user!.id
     embedText(volunteerToText({
       name: user.name,
       bio: user.bio,
@@ -111,7 +112,7 @@ export async function PATCH(req: Request) {
       .then((embedding) => {
         const vectorLiteral = toVectorLiteral(embedding)
         return prisma.$executeRawUnsafe(
-          `UPDATE users SET embedding = '${vectorLiteral}'::vector WHERE id = '${session.user.id}'`
+          `UPDATE users SET embedding = '${vectorLiteral}'::vector WHERE id = '${userId}'`
         )
       })
       .catch((err) => console.error("[USER_EMBED_REGEN_ERROR]", err))

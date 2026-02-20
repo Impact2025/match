@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { calculateMatchScore } from "@/lib/matching/scoring-engine"
+import { getScoringWeights } from "@/lib/matching/weights"
 
 export async function GET(req: Request) {
   const session = await auth()
@@ -74,6 +75,7 @@ export async function GET(req: Request) {
 
   // If a specific vacancy is requested, compute match scores and rank
   if (vacancyId) {
+    const scoringWeights = await getScoringWeights()
     const vacancy = await prisma.vacancy.findUnique({
       where: { id: vacancyId },
       include: {
@@ -107,7 +109,7 @@ export async function GET(req: Request) {
         vacancyRemote: vacancy.remote,
         vacancyCreatedAt: vacancy.createdAt,
         orgTotalSwipes: vacancy._count.swipes,
-      })
+      }, scoringWeights)
 
       // Strip internal fields before returning
       const { motivationProfile, schwartzProfile, lat, lon, ...rest } = v
