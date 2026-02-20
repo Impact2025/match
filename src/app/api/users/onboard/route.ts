@@ -12,6 +12,7 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
     const {
+      name,
       skills = [],
       interests = [],
       availability = [],
@@ -20,6 +21,7 @@ export async function POST(req: Request) {
       postcode,
       age,
       motivationProfile,
+      schwartzProfile,
       // Org-specific fields
       organisationName,
       logo,
@@ -118,6 +120,7 @@ export async function POST(req: Request) {
         where: { id: session.user.id },
         data: {
           onboarded: true,
+          name: name ?? undefined,
           bio: bio ?? null,
           location: location ?? null,
           postcode: postcode ?? null,
@@ -126,6 +129,7 @@ export async function POST(req: Request) {
           age: age != null ? Number(age) : null,
           availability: JSON.stringify(availability),
           motivationProfile: motivationProfile ? JSON.stringify(motivationProfile) : undefined,
+          schwartzProfile: schwartzProfile ? JSON.stringify(schwartzProfile) : undefined,
           skills: {
             deleteMany: {},
             create: skillRecords.map((s) => ({ skillId: s.id })),

@@ -16,7 +16,27 @@ export type VacancyWithOrg = Vacancy & {
   categories?: { category: Category }[]
 }
 
-export type VacancyWithOrgAndDistance = VacancyWithOrg & { distanceKm?: number | null }
+export type MatchScore = {
+  /** Weighted total [0–100] */
+  total: number
+  /** VFI cosine + interest overlap [0–100] */
+  motivation: number
+  /** Haversine distance score [0–100] */
+  distance: number
+  /** Skill overlap [0–100] */
+  skill: number
+  /** Vacancy freshness [0–100] */
+  freshness: number
+  /** Fairness multiplier [0.70–1.40] */
+  fairnessWeight: number
+  /** Dutch match highlights, e.g. "Sociaal gemotiveerd", "2 skills matchen" */
+  highlights: string[]
+}
+
+export type VacancyWithOrgAndDistance = VacancyWithOrg & {
+  distanceKm?: number | null
+  matchScore?: MatchScore
+}
 
 export type MatchWithDetails = Match & {
   volunteer: User

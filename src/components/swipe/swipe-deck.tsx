@@ -100,15 +100,17 @@ export function SwipeDeck() {
       vacancyId,
       direction,
       matchReason,
+      scoreSnapshot,
     }: {
       vacancyId: string
       direction: "LIKE" | "DISLIKE" | "SUPER_LIKE"
       matchReason?: MatchReason
+      scoreSnapshot?: Record<string, unknown>
     }) => {
       const res = await fetch("/api/swipes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vacancyId, direction, matchReason }),
+        body: JSON.stringify({ vacancyId, direction, matchReason, scoreSnapshot }),
       })
       if (!res.ok) throw new Error("Failed to swipe")
       return res.json() as Promise<{
@@ -176,7 +178,7 @@ export function SwipeDeck() {
       setExiting({ id: vacancyId, dir: exitDir })
 
       swipeMutation.mutate(
-        { vacancyId, direction, matchReason },
+        { vacancyId, direction, matchReason, scoreSnapshot: swipedVacancy?.matchScore ?? undefined },
         {
           onSettled: () => {
             setExiting(null)

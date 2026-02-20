@@ -45,9 +45,11 @@ export async function GET() {
     let pendingItems = 0
 
     if (dbUser?.role === "VOLUNTEER") {
-      pendingItems = await prisma.match.count({
-        where: { volunteerId: userId, status: "PENDING" },
-      })
+      const [pendingMatches, pendingInvitations] = await Promise.all([
+        prisma.match.count({ where: { volunteerId: userId, status: "PENDING" } }),
+        prisma.invitation.count({ where: { volunteerId: userId, status: "PENDING" } }),
+      ])
+      pendingItems = pendingMatches + pendingInvitations
     } else if (dbUser?.role === "ORGANISATION") {
       const org = await prisma.organisation.findUnique({
         where: { adminId: userId },

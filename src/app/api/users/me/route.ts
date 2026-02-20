@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { profileSchema } from "@/validators"
 import { geocodePostcode } from "@/lib/geocoding"
+import { embedText, toVectorLiteral, volunteerToText } from "@/lib/embeddings"
 
 export async function GET() {
   const session = await auth()
@@ -48,7 +49,7 @@ export async function PATCH(req: Request) {
       )
     }
 
-    const { name, bio, location, postcode, skills, interests, availability, maxDistance } =
+    const { name, bio, location, postcode, skills, interests, availability, maxDistance, openToInvitations } =
       result.data
 
     const geoCoords =
@@ -83,6 +84,7 @@ export async function PATCH(req: Request) {
         }),
         availability: JSON.stringify(availability),
         maxDistance,
+        ...(openToInvitations !== undefined && { openToInvitations }),
         skills: {
           deleteMany: {},
           create: skillRecords.map((s) => ({ skillId: s.id })),
@@ -97,6 +99,22 @@ export async function PATCH(req: Request) {
         interests: { include: { category: true } },
       },
     })
+
+    // Regenerate embedding non-blocking after profile update
+    embedText(volunteerToText({
+      name: user.name,
+      bio: user.bio,
+      skills: user.skills.map((s) => s.skill.name),
+      interests: user.interests.map((i) => i.category.name),
+      location: user.location,
+    }))
+      .then((embedding) => {
+        const vectorLiteral = toVectorLiteral(embedding)
+        return prisma.$executeRawUnsafe(
+          `UPDATE users SET embedding = '${vectorLiteral}'::vector WHERE id = '${session.user.id}'`
+        )
+      })
+      .catch((err) => console.error("[USER_EMBED_REGEN_ERROR]", err))
 
     return NextResponse.json(user)
   } catch (error) {

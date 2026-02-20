@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion"
-import { MapPin, Clock, Wifi, Info } from "lucide-react"
+import { MapPin, Clock, Wifi, Info, Check } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { AiScoreBadge } from "./ai-score-badge"
 import { CATEGORIES } from "@/config"
@@ -21,16 +21,15 @@ const CAT_MAP = Object.fromEntries(
   CATEGORIES.map((c) => [c.name, { icon: c.icon, color: c.color }])
 )
 
-// Per-org deterministic gradient pair so every card looks unique
 const GRADIENT_PAIRS = [
-  ["#f97316", "#f59e0b"], // orange–amber
-  ["#06b6d4", "#3b82f6"], // cyan–blue
-  ["#a855f7", "#ec4899"], // purple–pink
-  ["#22c55e", "#14b8a6"], // green–teal
-  ["#f43f5e", "#f97316"], // rose–orange
-  ["#6366f1", "#06b6d4"], // indigo–cyan
-  ["#84cc16", "#22c55e"], // lime–green
-  ["#f59e0b", "#f43f5e"], // amber–rose
+  ["#f97316", "#f59e0b"],
+  ["#06b6d4", "#3b82f6"],
+  ["#a855f7", "#ec4899"],
+  ["#22c55e", "#14b8a6"],
+  ["#f43f5e", "#f97316"],
+  ["#6366f1", "#06b6d4"],
+  ["#84cc16", "#22c55e"],
+  ["#f59e0b", "#f43f5e"],
 ]
 
 function orgGradient(name: string): [string, string] {
@@ -39,11 +38,16 @@ function orgGradient(name: string): [string, string] {
 }
 
 function orgInitials(name: string) {
-  return name.split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase()
+  return name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
 }
 
 export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: VacancyCardProps) {
-  const { distanceKm } = vacancy
+  const { distanceKm, matchScore } = vacancy
   const x = useMotionValue(0)
   const rotate = useTransform(x, [-300, 300], [-15, 15])
   const likeOpacity = useTransform(x, [20, SWIPE_THRESHOLD], [0, 1])
@@ -60,6 +64,10 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
   const firstCategory = vacancy.categories?.[0]?.category?.name
   const catInfo = firstCategory ? CAT_MAP[firstCategory] : null
   const [gradFrom, gradTo] = orgGradient(vacancy.organisation.name)
+
+  // Max 2 highlights; only used when this is the top card to avoid visual noise on stacked cards
+  const highlights = isTop ? (matchScore?.highlights ?? []).slice(0, 2) : []
+  const hasHighlights = highlights.length > 0
 
   return (
     <motion.div
@@ -113,12 +121,10 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
               draggable={false}
             />
           ) : (
-            /* Rich no-image fallback */
             <div
               className="absolute inset-0 flex items-center justify-center overflow-hidden"
               style={{ background: `linear-gradient(145deg, ${gradFrom}, ${gradTo})` }}
             >
-              {/* Soft blurred circles for depth */}
               <div
                 className="absolute -top-10 -left-10 w-48 h-48 rounded-full opacity-20 blur-3xl"
                 style={{ background: gradTo }}
@@ -127,16 +133,15 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
                 className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full opacity-20 blur-3xl"
                 style={{ background: gradFrom }}
               />
-              {/* Big category emoji */}
               <span className="text-[80px] leading-none drop-shadow-lg select-none z-10">
                 {catInfo?.icon ?? "🧡"}
               </span>
             </div>
           )}
 
-          {/* AI badge – top right */}
+          {/* Match score ring – top right */}
           <div className="absolute top-3 right-3 z-10">
-            <AiScoreBadge vacancyId={vacancy.id} />
+            <AiScoreBadge score={matchScore?.total} />
           </div>
 
           {/* Org avatar – top left */}
@@ -171,9 +176,10 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
         </div>
 
         {/* ── CONTENT AREA (40% of card) ── */}
-        <div className="flex-1 min-h-0 flex flex-col px-4 pt-3 pb-3 gap-2.5 overflow-hidden">
+        <div className="flex-1 min-h-0 flex flex-col px-4 pt-3 pb-3 gap-2 overflow-hidden">
+
           {/* Meta chips */}
-          <div className="flex items-center flex-wrap gap-x-2 gap-y-1">
+          <div className="flex items-center flex-wrap gap-x-2 gap-y-1 flex-shrink-0">
             {(vacancy.city || vacancy.location) && (
               <span className="flex items-center gap-1 text-[12px] text-gray-500">
                 <MapPin className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
@@ -196,12 +202,31 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
             )}
           </div>
 
-          {/* Description */}
-          <p className="text-[13px] text-gray-600 leading-relaxed line-clamp-3 flex-1 min-h-0">
+          {/* Description — 2 lines when highlights follow, 3 otherwise */}
+          <p
+            className={`text-[13px] text-gray-600 leading-relaxed flex-1 min-h-0 ${
+              hasHighlights ? "line-clamp-2" : "line-clamp-3"
+            }`}
+          >
             {vacancy.description}
           </p>
 
-          {/* Skill chips + info button row */}
+          {/* Match highlights — only on the top card */}
+          {hasHighlights && (
+            <div className="flex flex-wrap gap-1.5 flex-shrink-0">
+              {highlights.map((h) => (
+                <span
+                  key={h}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-[11px] font-semibold border border-green-100"
+                >
+                  <Check className="w-2.5 h-2.5 flex-shrink-0" />
+                  {h}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Skill chips + info button */}
           <div className="flex items-end justify-between gap-2 flex-shrink-0">
             <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
               {vacancy.skills && vacancy.skills.length > 0 && (
@@ -225,7 +250,10 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
             {isTop && onExpand && (
               <button
                 onPointerDown={(e) => e.stopPropagation()}
-                onClick={(e) => { e.stopPropagation(); onExpand() }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onExpand()
+                }}
                 className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
                 aria-label="Meer informatie"
               >

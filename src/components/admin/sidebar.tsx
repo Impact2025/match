@@ -13,6 +13,7 @@ import {
   Briefcase,
   Tag,
   Settings,
+  BarChart2,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { href: "/admin/users", icon: Users, label: "Gebruikers" },
   { href: "/admin/vacancies", icon: Briefcase, label: "Vacatures" },
   { href: "/admin/categories", icon: Tag, label: "Categorieën" },
+  { href: "/admin/analytics", icon: BarChart2, label: "AI Analytics" },
   { href: "/admin/logs", icon: ScrollText, label: "Audit Log" },
   { href: "/admin/settings", icon: Settings, label: "Instellingen" },
 ]

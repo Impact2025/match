@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { vacancySchema } from "@/validators"
 import { geocodePostcode } from "@/lib/geocoding"
+import { embedText, toVectorLiteral, vacancyToText } from "@/lib/embeddings"
 
 async function getVacancyWithOwnerCheck(id: string, userId: string) {
   const vacancy = await prisma.vacancy.findUnique({
@@ -118,6 +119,25 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         categories: { include: { category: true } },
       },
     })
+
+    // Regenerate embedding non-blocking after vacancy update
+    embedText(vacancyToText({
+      title: updated.title,
+      description: updated.description,
+      skills: updated.skills.map((s) => s.skill.name),
+      categories: updated.categories.map((c) => c.category.name),
+      city: updated.city,
+      remote: updated.remote,
+      hours: updated.hours,
+      duration: updated.duration,
+    }))
+      .then((embedding) => {
+        const vectorLiteral = toVectorLiteral(embedding)
+        return prisma.$executeRawUnsafe(
+          `UPDATE vacancies SET embedding = '${vectorLiteral}'::vector WHERE id = '${updated.id}'`
+        )
+      })
+      .catch((err) => console.error("[VACANCY_EMBED_REGEN_ERROR]", err))
 
     return NextResponse.json(updated)
   } catch (error) {

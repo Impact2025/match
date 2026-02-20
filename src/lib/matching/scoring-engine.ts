@@ -14,7 +14,10 @@
  */
 
 import { cosineSimilarity, haversineKm } from "./vector-math"
-import { categoryVFIVector, parseMotivationProfile, vfiToVector, VFIProfile } from "./category-vfi"
+import {
+  categoryVFIVector, parseMotivationProfile, vfiToVector, VFIProfile,
+  categorySchwartzVector, parseSchwartzProfile, schwartzToVector,
+} from "./category-vfi"
 
 // ─── Weights ──────────────────────────────────────────────────────────────────
 
@@ -35,6 +38,7 @@ const LARGE_ORG_SWIPE_THRESHOLD = 150  // many swipes = large, gets a limiter
 export interface MatchInput {
   // --- Volunteer ---
   volunteerVFIJson: string | null | undefined
+  volunteerSchwartzJson?: string | null | undefined
   volunteerInterests: string[]   // category names
   volunteerSkills: string[]      // skill names (lowercase comparison)
   volunteerLat: number | null | undefined
@@ -78,6 +82,7 @@ export function calculateMatchScore(input: MatchInput): MatchScore {
   // 1. Motivation score (40%)
   const { score: motivation, highlights: motivHighlights } = scoreMotivation(
     input.volunteerVFIJson,
+    input.volunteerSchwartzJson ?? null,
     input.volunteerInterests,
     input.vacancyCategories,
   )
@@ -133,10 +138,15 @@ export function calculateMatchScore(input: MatchInput): MatchScore {
  * Motivation score: measures how well the volunteer's underlying motivations
  * align with what this type of work typically requires.
  *
- * = VFI cosine similarity (60%) + category interest overlap (40%)
+ * When Schwartz data is available:
+ *   = VFI cosine (50%) + Schwartz cosine (25%) + category interest overlap (25%)
+ *
+ * Without Schwartz (cold-start / not yet collected):
+ *   = VFI cosine (65%) + category interest overlap (35%)
  */
 function scoreMotivation(
   vfiJson: string | null | undefined,
+  schwartzJson: string | null | undefined,
   volunteerInterests: string[],
   vacancyCategories: string[],
 ): { score: number; highlights: string[] } {
@@ -145,9 +155,18 @@ function scoreMotivation(
 
   // VFI cosine similarity
   const volunteerVFI: VFIProfile | null = parseMotivationProfile(vfiJson)
-  const volunteerVec = volunteerVFI ? vfiToVector(volunteerVFI) : neutralVFI
-  const categoryVec = categoryVFIVector(vacancyCategories)
-  const vfiSim = cosineSimilarity(volunteerVec, categoryVec) // 0-100
+  const volunteerVFIVec = volunteerVFI ? vfiToVector(volunteerVFI) : neutralVFI
+  const categoryVFIVec = categoryVFIVector(vacancyCategories)
+  const vfiSim = cosineSimilarity(volunteerVFIVec, categoryVFIVec)
+
+  // Schwartz cosine similarity (optional — gracefully absent pre-step 6)
+  const volunteerSchwartz = parseSchwartzProfile(schwartzJson)
+  let schwartzSim = 50 // neutral fallback
+  if (volunteerSchwartz) {
+    const volunteerSchwartzVec = schwartzToVector(volunteerSchwartz)
+    const categorySchwartzVec = categorySchwartzVector(vacancyCategories)
+    schwartzSim = cosineSimilarity(volunteerSchwartzVec, categorySchwartzVec)
+  }
 
   // Category interest overlap
   const interestSet = new Set(volunteerInterests.map((i) => i.toLowerCase()))
@@ -155,33 +174,51 @@ function scoreMotivation(
   const interestOverlap =
     vacancyCategories.length > 0 ? (catMatches.length / vacancyCategories.length) * 100 : 50
 
-  // Highlights
-  if (vfiSim >= 80 && volunteerVFI) {
-    highlights.push("Sterke motivatiematch")
-  }
+  // Weighted combination — fuller formula when Schwartz is available
+  const score = volunteerSchwartz
+    ? vfiSim * 0.50 + schwartzSim * 0.25 + interestOverlap * 0.25
+    : vfiSim * 0.65 + interestOverlap * 0.35
+
+  // Highlights — top 2 most informative signals
   if (catMatches.length > 0) {
     highlights.push(`Interesse in ${catMatches[0]}`)
   }
 
-  // Determine dominant VFI dimension for a highlight
   if (volunteerVFI) {
     const dims: [keyof VFIProfile, string][] = [
-      ["sociaal", "Sociaal gemotiveerd"],
-      ["waarden", "Gedreven door waarden"],
-      ["begrip", "Leergierig"],
-      ["loopbaan", "Loopbaangericht"],
-      ["bescherming", "Persoonlijke groei"],
-      ["verbetering", "Zelfverbetering"],
+      ["sociaal",    "Sociaal gemotiveerd"],
+      ["waarden",    "Gedreven door waarden"],
+      ["begrip",     "Leergierig"],
+      ["loopbaan",   "Loopbaangericht"],
+      ["verbetering","Zelfverbetering"],
+      ["bescherming","Persoonlijke groei"],
     ]
-    const top = dims.reduce((best, [key, label]) =>
-      volunteerVFI[key] > volunteerVFI[best[0]] ? [key, label] : best,
+    const top = dims.reduce((best, cur) =>
+      volunteerVFI[cur[0]] > volunteerVFI[best[0]] ? cur : best
     )
-    if (volunteerVFI[top[0]] >= 4) {
-      highlights.push(top[1])
+    if (volunteerVFI[top[0]] >= 4) highlights.push(top[1])
+  }
+
+  // Schwartz highlight — dominant value when it strongly aligns
+  if (volunteerSchwartz && schwartzSim >= 70) {
+    const schwartzLabels: [keyof typeof volunteerSchwartz, string][] = [
+      ["zorg",          "Zorgzaam"],
+      ["universalisme", "Maatschappelijk betrokken"],
+      ["zelfrichting",  "Zelfstandig"],
+      ["stimulatie",    "Avontuurlijk"],
+      ["prestatie",     "Resultaatgericht"],
+      ["veiligheid",    "Stabiel"],
+    ]
+    const topSchwartz = schwartzLabels.reduce((best, cur) =>
+      volunteerSchwartz[cur[0]] > volunteerSchwartz[best[0]] ? cur : best
+    )
+    if (volunteerSchwartz[topSchwartz[0]] >= 4 && highlights.length < 3) {
+      highlights.push(topSchwartz[1])
     }
   }
 
-  const score = vfiSim * 0.6 + interestOverlap * 0.4
+  if (score >= 82) highlights.push("Sterke motivatiematch")
+
   return { score, highlights }
 }
 

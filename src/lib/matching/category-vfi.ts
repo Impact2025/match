@@ -177,6 +177,147 @@ export function vfiToVector(profile: VFIProfile): number[] {
   ]
 }
 
+// ─── Schwartz Values ──────────────────────────────────────────────────────────
+
+/**
+ * Schwartz Basic Human Values profile.
+ *
+ * Ten universal values on a 0–5 scale (mapped from the PVQ 0–6 scale for
+ * mobile-friendly 6-button UX; semantically equivalent after normalisation).
+ *
+ *   zorg          — Benevolence: caring for close others
+ *   universalisme — Universalism: welfare of all people and nature
+ *   zelfrichting  — Self-direction: independent thought and action
+ *   stimulatie    — Stimulation: excitement, novelty, challenge
+ *   hedonisme     — Hedonism: pleasure and sensuous gratification
+ *   prestatie     — Achievement: personal success through competence
+ *   macht         — Power: social status and dominance
+ *   veiligheid    — Security: safety, harmony, stability
+ *   conformiteit  — Conformity: restraint of impulses that might harm others
+ *   traditie      — Tradition: respect and commitment to cultural customs
+ */
+export interface SchwartzProfile {
+  zorg: number
+  universalisme: number
+  zelfrichting: number
+  stimulatie: number
+  hedonisme: number
+  prestatie: number
+  macht: number
+  veiligheid: number
+  conformiteit: number
+  traditie: number
+}
+
+/**
+ * Research-informed Schwartz value affinity profiles per volunteer category.
+ *
+ * Values on a 0–5 scale; 0 = not relevant, 5 = strongly characteristic.
+ * Based on volunteer motivation studies and Schwartz value theory.
+ */
+export const CATEGORY_SCHWARTZ: Record<string, SchwartzProfile> = {
+  "Natuur & Milieu": {
+    zorg: 3, universalisme: 5, zelfrichting: 3, stimulatie: 2,
+    hedonisme: 1, prestatie: 1, macht: 0, veiligheid: 2, conformiteit: 1, traditie: 2,
+  },
+  Onderwijs: {
+    zorg: 4, universalisme: 3, zelfrichting: 4, stimulatie: 2,
+    hedonisme: 1, prestatie: 3, macht: 1, veiligheid: 2, conformiteit: 2, traditie: 1,
+  },
+  "Zorg & Welzijn": {
+    zorg: 5, universalisme: 4, zelfrichting: 2, stimulatie: 1,
+    hedonisme: 1, prestatie: 2, macht: 0, veiligheid: 3, conformiteit: 3, traditie: 2,
+  },
+  "Sport & Recreatie": {
+    zorg: 2, universalisme: 2, zelfrichting: 3, stimulatie: 5,
+    hedonisme: 4, prestatie: 4, macht: 2, veiligheid: 2, conformiteit: 2, traditie: 1,
+  },
+  "Cultuur & Kunst": {
+    zorg: 2, universalisme: 3, zelfrichting: 5, stimulatie: 4,
+    hedonisme: 3, prestatie: 2, macht: 1, veiligheid: 1, conformiteit: 1, traditie: 3,
+  },
+  Dieren: {
+    zorg: 4, universalisme: 5, zelfrichting: 2, stimulatie: 2,
+    hedonisme: 2, prestatie: 1, macht: 0, veiligheid: 2, conformiteit: 1, traditie: 1,
+  },
+  "Vluchtelingen & Integratie": {
+    zorg: 4, universalisme: 5, zelfrichting: 3, stimulatie: 2,
+    hedonisme: 1, prestatie: 1, macht: 0, veiligheid: 2, conformiteit: 2, traditie: 1,
+  },
+  Ouderen: {
+    zorg: 5, universalisme: 3, zelfrichting: 1, stimulatie: 1,
+    hedonisme: 1, prestatie: 1, macht: 0, veiligheid: 4, conformiteit: 3, traditie: 4,
+  },
+  Jongeren: {
+    zorg: 4, universalisme: 3, zelfrichting: 3, stimulatie: 3,
+    hedonisme: 2, prestatie: 3, macht: 1, veiligheid: 2, conformiteit: 2, traditie: 1,
+  },
+  Technologie: {
+    zorg: 1, universalisme: 2, zelfrichting: 5, stimulatie: 4,
+    hedonisme: 2, prestatie: 5, macht: 2, veiligheid: 2, conformiteit: 1, traditie: 0,
+  },
+  Gezondheid: {
+    zorg: 5, universalisme: 4, zelfrichting: 2, stimulatie: 1,
+    hedonisme: 1, prestatie: 3, macht: 0, veiligheid: 4, conformiteit: 2, traditie: 2,
+  },
+  Evenementen: {
+    zorg: 2, universalisme: 2, zelfrichting: 3, stimulatie: 5,
+    hedonisme: 4, prestatie: 2, macht: 1, veiligheid: 2, conformiteit: 2, traditie: 2,
+  },
+}
+
+/**
+ * Returns the average Schwartz vector for a list of category names.
+ * Falls back to a neutral [2.5 × 10] vector when no categories are known.
+ */
+export function categorySchwartzVector(categoryNames: string[]): number[] {
+  const known = categoryNames
+    .map((name) => CATEGORY_SCHWARTZ[name])
+    .filter((p): p is SchwartzProfile => p !== undefined)
+
+  if (known.length === 0) return new Array(10).fill(2.5)
+
+  const keys: (keyof SchwartzProfile)[] = [
+    "zorg", "universalisme", "zelfrichting", "stimulatie", "hedonisme",
+    "prestatie", "macht", "veiligheid", "conformiteit", "traditie",
+  ]
+
+  return keys.map((k) => known.reduce((sum, p) => sum + p[k], 0) / known.length)
+}
+
+/**
+ * Converts a SchwartzProfile object to an ordered numeric vector.
+ * Order must stay consistent with categorySchwartzVector().
+ */
+export function schwartzToVector(profile: SchwartzProfile): number[] {
+  return [
+    profile.zorg, profile.universalisme, profile.zelfrichting, profile.stimulatie,
+    profile.hedonisme, profile.prestatie, profile.macht, profile.veiligheid,
+    profile.conformiteit, profile.traditie,
+  ]
+}
+
+/**
+ * Parses the schwartzProfile JSON string from the database.
+ * Returns null when the string is missing or malformed.
+ */
+export function parseSchwartzProfile(json: string | null | undefined): SchwartzProfile | null {
+  if (!json) return null
+  try {
+    const parsed = JSON.parse(json) as Partial<SchwartzProfile>
+    const keys: (keyof SchwartzProfile)[] = [
+      "zorg", "universalisme", "zelfrichting", "stimulatie", "hedonisme",
+      "prestatie", "macht", "veiligheid", "conformiteit", "traditie",
+    ]
+    if (keys.some((k) => typeof parsed[k] !== "number")) return null
+    return parsed as SchwartzProfile
+  } catch {
+    return null
+  }
+}
+
+// ─── VFI helpers ──────────────────────────────────────────────────────────────
+
 /**
  * Parses the motivationProfile JSON string from the database.
  * Returns null when the string is missing or malformed.

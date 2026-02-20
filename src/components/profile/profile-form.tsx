@@ -1,20 +1,21 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
-import { Save, Upload, Loader2, MapPin } from "lucide-react"
+import { Save, Loader2, MapPin, Bell, Camera } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Slider } from "@/components/ui/slider"
 import { profileSchema, type ProfileFormData } from "@/validators"
 import { SKILLS, CATEGORIES, AVAILABILITY_OPTIONS } from "@/config"
 
 interface ProfileFormProps {
-  defaultValues: ProfileFormData & { image?: string | null }
+  defaultValues: ProfileFormData & { image?: string | null; openToInvitations?: boolean }
 }
 
 export function ProfileForm({ defaultValues }: ProfileFormProps) {
@@ -26,10 +27,55 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
     defaultValues.availability ?? []
   )
   const [maxDistance, setMaxDistance] = useState(defaultValues.maxDistance ?? 25)
+  const [openToInvitations, setOpenToInvitations] = useState(defaultValues.openToInvitations ?? false)
+  const [currentImage, setCurrentImage] = useState<string | null>(defaultValues.image ?? null)
+  const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [geocoding, setGeocoding] = useState(false)
   const [detectedCity, setDetectedCity] = useState<string | null>(null)
   const geocodeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handlePhotoChange = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Alleen afbeeldingen zijn toegestaan")
+      return
+    }
+    if (file.size > 4 * 1024 * 1024) {
+      toast.error("Afbeelding mag maximaal 4 MB zijn")
+      return
+    }
+
+    // Show local preview immediately
+    const localUrl = URL.createObjectURL(file)
+    setCurrentImage(localUrl)
+
+    setUploading(true)
+    try {
+      const form = new FormData()
+      form.append("file", file)
+      const res = await fetch("/api/upload?type=profileImage", { method: "POST", body: form })
+      if (!res.ok) {
+        const err = await res.json()
+        toast.error(err.error ?? "Upload mislukt")
+        setCurrentImage(defaultValues.image ?? null)
+        return
+      }
+      const { url } = await res.json()
+      setCurrentImage(url)
+      toast.success("Profielfoto opgeslagen!")
+    } catch {
+      toast.error("Upload mislukt")
+      setCurrentImage(defaultValues.image ?? null)
+    } finally {
+      setUploading(false)
+      // Reset so the same file can be re-selected
+      if (fileInputRef.current) fileInputRef.current.value = ""
+    }
+  }, [defaultValues.image])
 
   const {
     register,
@@ -89,6 +135,7 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
           interests: selectedInterests,
           availability: selectedAvailability,
           maxDistance,
+          openToInvitations,
         }),
       })
 
@@ -115,6 +162,45 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
       {/* Basic info */}
       <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
         <h2 className="text-lg font-semibold text-gray-900">Persoonlijke informatie</h2>
+
+        {/* Profile photo */}
+        <div className="flex flex-col items-center gap-3 pb-2">
+          <div className="relative">
+            <Avatar className="w-24 h-24 border-4 border-white shadow-md">
+              <AvatarImage src={currentImage ?? ""} alt="Profielfoto" />
+              <AvatarFallback className="bg-orange-100 text-orange-600 text-3xl font-bold">
+                {(defaultValues as any).name?.charAt(0)?.toUpperCase() ?? "?"}
+              </AvatarFallback>
+            </Avatar>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-orange-500 hover:bg-orange-600 text-white flex items-center justify-center shadow-md transition-colors disabled:opacity-70"
+            >
+              {uploading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Camera className="w-4 h-4" />
+              )}
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading}
+            className="text-sm text-orange-500 hover:text-orange-600 font-medium disabled:opacity-50"
+          >
+            {uploading ? "Uploaden..." : "Foto wijzigen"}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handlePhotoChange}
+          />
+        </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="name">Naam</Label>
@@ -257,6 +343,31 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
             Vul je postcode in om vacatures op afstand te filteren.
           </p>
         </div>
+      </section>
+
+      {/* Open voor uitnodigingen */}
+      <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <button
+          type="button"
+          onClick={() => setOpenToInvitations(!openToInvitations)}
+          className="w-full flex items-center justify-between gap-4 text-left"
+        >
+          <div className="flex items-start gap-3">
+            <div className={`mt-0.5 w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors ${openToInvitations ? "bg-orange-100" : "bg-gray-100"}`}>
+              <Bell className={`w-5 h-5 ${openToInvitations ? "text-orange-500" : "text-gray-400"}`} />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">Open voor uitnodigingen</h2>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Laat organisaties jouw profiel vinden en jou uitnodigen voor passende vacatures.
+              </p>
+            </div>
+          </div>
+          {/* Toggle switch */}
+          <div className={`relative flex-shrink-0 w-12 h-6 rounded-full transition-colors duration-200 ${openToInvitations ? "bg-orange-500" : "bg-gray-200"}`}>
+            <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${openToInvitations ? "translate-x-6" : "translate-x-0.5"}`} />
+          </div>
+        </button>
       </section>
 
       <button

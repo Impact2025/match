@@ -41,6 +41,7 @@ export default async function ProfileEditPage() {
     availability,
     maxDistance: user.maxDistance ?? 25,
     image: user.image,
+    openToInvitations: user.openToInvitations ?? false,
   }
 
   return (

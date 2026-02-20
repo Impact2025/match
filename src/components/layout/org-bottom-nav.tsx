@@ -2,11 +2,12 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, MessageCircle, Briefcase, User } from "lucide-react"
+import { LayoutDashboard, MessageCircle, Briefcase, User, Users } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 
 const NAV_ITEMS = [
   { href: "/organisation/dashboard", label: "Dashboard", icon: LayoutDashboard, badge: "pendingItems" as const },
+  { href: "/organisation/volunteers", label: "Zoeken", icon: Users, badge: null as "pendingItems" | "unreadMessages" | null },
   { href: "/chat", label: "Berichten", icon: MessageCircle, badge: "unreadMessages" as const },
   { href: "/organisation/vacancies", label: "Vacatures", icon: Briefcase, badge: null as "pendingItems" | "unreadMessages" | null },
   { href: "/organisation/profile", label: "Profiel", icon: User, badge: null },
@@ -39,7 +40,7 @@ export function OrgBottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center gap-1 py-3 px-4 relative"
+              className="flex flex-col items-center gap-1 py-3 px-2 relative"
             >
               {isActive && (
                 <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-orange-500 rounded-full" />

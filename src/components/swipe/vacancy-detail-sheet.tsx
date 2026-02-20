@@ -1,15 +1,14 @@
 "use client"
 
-import { MapPin, Clock, Wifi, Calendar, Building2, X } from "lucide-react"
+import { MapPin, Clock, Wifi, Calendar, Building2, Check } from "lucide-react"
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CATEGORIES } from "@/config"
-import type { VacancyWithOrgAndDistance } from "@/types"
+import type { MatchScore, VacancyWithOrgAndDistance } from "@/types"
 
 const CAT_MAP = Object.fromEntries(
   CATEGORIES.map((c) => [c.name, { icon: c.icon, color: c.color }])
@@ -33,6 +32,82 @@ function orgGradient(name: string): [string, string] {
 
 function orgInitials(name: string) {
   return name.split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase()
+}
+
+// ─── Match score breakdown panel ───────────────────────────────────────────
+
+function scoreColor(score: number): string {
+  if (score >= 75) return "#22c55e"
+  if (score >= 55) return "#f97316"
+  return "#ef4444"
+}
+
+const SCORE_DIMS: { key: keyof MatchScore; label: string }[] = [
+  { key: "motivation", label: "Motivatie" },
+  { key: "distance",   label: "Nabijheid" },
+  { key: "skill",      label: "Skills" },
+  { key: "freshness",  label: "Actualiteit" },
+]
+
+function MatchScorePanel({ matchScore }: { matchScore: MatchScore }) {
+  const total = Math.round(matchScore.total)
+  const totalColor = scoreColor(total)
+
+  return (
+    <div className="rounded-2xl bg-gray-50 border border-gray-100 p-4 space-y-3">
+      {/* Header row */}
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-semibold text-gray-900">Jouw match</span>
+        <span className="text-2xl font-black" style={{ color: totalColor }}>
+          {total}%
+        </span>
+      </div>
+
+      {/* Total bar */}
+      <div className="h-2.5 bg-gray-200 rounded-full overflow-hidden">
+        <div
+          className="h-full rounded-full transition-all duration-700"
+          style={{ width: `${total}%`, backgroundColor: totalColor }}
+        />
+      </div>
+
+      {/* Component breakdown */}
+      <div className="space-y-2 pt-1">
+        {SCORE_DIMS.map(({ key, label }) => {
+          const val = Math.round(matchScore[key] as number)
+          return (
+            <div key={key} className="flex items-center gap-2">
+              <span className="text-[11px] text-gray-500 w-20 flex-shrink-0">{label}</span>
+              <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-orange-400 rounded-full transition-all duration-700"
+                  style={{ width: `${val}%` }}
+                />
+              </div>
+              <span className="text-[11px] font-semibold text-gray-600 w-7 text-right flex-shrink-0">
+                {val}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Highlights */}
+      {matchScore.highlights.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 pt-1">
+          {matchScore.highlights.map((h) => (
+            <span
+              key={h}
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-[11px] font-semibold border border-green-100"
+            >
+              <Check className="w-2.5 h-2.5 flex-shrink-0" />
+              {h}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  )
 }
 
 interface VacancyDetailSheetProps {
@@ -113,6 +188,9 @@ export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailShee
               </span>
             )}
           </div>
+
+          {/* Match score breakdown */}
+          {vacancy.matchScore && <MatchScorePanel matchScore={vacancy.matchScore} />}
 
           {/* Categories */}
           {categories.length > 0 && (

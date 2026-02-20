@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { vacancySchema } from "@/validators"
 import { geocodePostcode, haversineDistance } from "@/lib/geocoding"
 import { calculateMatchScore } from "@/lib/matching/scoring-engine"
+import { embedText, toVectorLiteral, volunteerToText, vacancyToText } from "@/lib/embeddings"
 
 export async function GET(req: Request) {
   const session = await auth()
@@ -30,25 +31,99 @@ export async function GET(req: Request) {
         lon: true,
         maxDistance: true,
         motivationProfile: true,
+        schwartzProfile: true,
+        bio: true,
+        name: true,
+        location: true,
         interests: { select: { category: { select: { name: true } } } },
         skills: { select: { skill: { select: { name: true } } } },
       },
     })
 
+    // ── Stage 1: ANN retrieval (pgvector cosine search) ──────────────────────
+    // If pgvector is available, pre-filter candidates semantically before scoring.
+    // Falls back to recency-ordered full scan when embeddings are unavailable.
+
+    let annCandidateIds: string[] | null = null
+
+    try {
+      const profileText = volunteerToText({
+        name: currentUser?.name ?? null,
+        bio: currentUser?.bio ?? null,
+        skills: (currentUser?.skills ?? []).map((s) => s.skill.name),
+        interests: (currentUser?.interests ?? []).map((i) => i.category.name),
+        location: currentUser?.location ?? null,
+      })
+
+      if (profileText.trim().length > 10) {
+        // Check if user already has a stored embedding via raw SQL
+        const userEmbRow = await prisma.$queryRaw<{ has_embedding: boolean }[]>`
+          SELECT (embedding IS NOT NULL) as has_embedding
+          FROM users WHERE id = ${session.user.id} LIMIT 1
+        `
+
+        let vectorLiteral: string | null = null
+
+        if (userEmbRow[0]?.has_embedding) {
+          // Reuse stored embedding
+          const row = await prisma.$queryRaw<{ emb: string }[]>`
+            SELECT embedding::text as emb FROM users WHERE id = ${session.user.id} LIMIT 1
+          `
+          if (row[0]?.emb) vectorLiteral = row[0].emb
+        } else {
+          // Generate + store embedding for this user
+          const embedding = await embedText(profileText)
+          vectorLiteral = toVectorLiteral(embedding)
+          await prisma.$executeRawUnsafe(
+            `UPDATE users SET embedding = '${vectorLiteral}'::vector WHERE id = '${session.user.id}'`
+          )
+        }
+
+        if (vectorLiteral) {
+          const excludeClause = swipedIds.length > 0
+            ? `AND v.id NOT IN (${swipedIds.map((id) => `'${id}'`).join(",")})`
+            : ""
+
+          const candidates = await prisma.$queryRawUnsafe<{ id: string }[]>(
+            `SELECT v.id FROM vacancies v
+             INNER JOIN organisations o ON v.organisation_id = o.id
+             WHERE v.status = 'ACTIVE' AND o.status = 'APPROVED'
+             AND v.embedding IS NOT NULL
+             ${excludeClause}
+             ORDER BY v.embedding <=> '${vectorLiteral}'::vector
+             LIMIT ${take * 8}`
+          )
+
+          if (candidates.length > 0) {
+            annCandidateIds = candidates.map((r) => r.id)
+          }
+        }
+      }
+    } catch {
+      // pgvector not available or any error — silently fall back to recency sort
+      annCandidateIds = null
+    }
+
+    // ── Fetch full vacancy data ───────────────────────────────────────────────
+
+    const baseWhere = {
+      status: "ACTIVE" as const,
+      organisation: { status: "APPROVED" as const },
+      ...(swipedIds.length > 0 ? { id: { notIn: swipedIds } } : {}),
+    }
+
     const vacancies = await prisma.vacancy.findMany({
-      where: {
-        status: "ACTIVE",
-        organisation: { status: "APPROVED" },
-        ...(swipedIds.length > 0 ? { id: { notIn: swipedIds } } : {}),
-      },
+      where: annCandidateIds
+        ? { ...baseWhere, id: { in: annCandidateIds } }
+        : baseWhere,
       include: {
         organisation: true,
         skills: { include: { skill: true } },
         categories: { include: { category: true } },
         _count: { select: { swipes: true } },
       },
-      take: take * 4, // fetch extra to account for distance filtering
-      orderBy: { createdAt: "desc" },
+      take: annCandidateIds ? undefined : take * 4, // ANN already limited above
+      orderBy: annCandidateIds ? undefined : { createdAt: "desc" },
     })
 
     const maxDistance = currentUser?.maxDistance ?? 25
@@ -77,6 +152,7 @@ export async function GET(req: Request) {
       const matchScore = calculateMatchScore({
         // Volunteer
         volunteerVFIJson: currentUser?.motivationProfile ?? null,
+        volunteerSchwartzJson: currentUser?.schwartzProfile ?? null,
         volunteerInterests: volunteerInterestNames,
         volunteerSkills: volunteerSkillNames,
         volunteerLat: currentUser?.lat,
@@ -192,6 +268,25 @@ export async function POST(req: Request) {
         categories: { include: { category: true } },
       },
     })
+
+    // Generate and store embedding asynchronously (non-blocking)
+    embedText(vacancyToText({
+      title: vacancy.title,
+      description: vacancy.description,
+      skills: vacancy.skills.map((s) => s.skill.name),
+      categories: vacancy.categories.map((c) => c.category.name),
+      city: vacancy.city,
+      remote: vacancy.remote,
+      hours: vacancy.hours,
+      duration: vacancy.duration,
+    }))
+      .then((embedding) => {
+        const vectorLiteral = toVectorLiteral(embedding)
+        return prisma.$executeRawUnsafe(
+          `UPDATE vacancies SET embedding = '${vectorLiteral}'::vector WHERE id = '${vacancy.id}'`
+        )
+      })
+      .catch((err) => console.error("[VACANCY_EMBED_ERROR]", err))
 
     return NextResponse.json(vacancy, { status: 201 })
   } catch (error) {

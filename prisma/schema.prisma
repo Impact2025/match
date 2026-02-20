@@ -302,7 +302,8 @@ model Swipe {
   vacancyId String
   vacancy   Vacancy   @relation(fields: [vacancyId], references: [id], onDelete: Cascade)
 
-  matchReason String?   // "Goede zaak"|"Past bij mijn skills"|"Flexibele tijden"|"Dichtbij mij"
+  matchReason   String?   // "Goede zaak"|"Past bij mijn skills"|"Flexibele tijden"|"Dichtbij mij"
+  scoreSnapshot String?  @db.Text  // JSON: MatchScore at swipe time (for RL analytics)
 
   createdAt DateTime  @default(now())
 

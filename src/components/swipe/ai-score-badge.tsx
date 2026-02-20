@@ -1,38 +1,75 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
-import { Sparkles } from "lucide-react"
+/**
+ * MatchScoreBadge — circular progress ring showing the pre-computed match score.
+ *
+ * Replaces the old AiScoreBadge that made a separate API call per card.
+ * Score is now computed server-side alongside the vacancy data, so this
+ * component renders instantly with no loading state.
+ */
 
-interface AiScoreBadgeProps {
-  vacancyId: string
+const RADIUS = 13
+const CIRCUMFERENCE = 2 * Math.PI * RADIUS
+
+function ringColor(score: number): string {
+  if (score >= 75) return "#22c55e" // green-500
+  if (score >= 55) return "#f97316" // orange-500
+  return "#ef4444"                   // red-500
 }
 
-export function AiScoreBadge({ vacancyId }: AiScoreBadgeProps) {
-  const { data, isLoading } = useQuery({
-    queryKey: ["match-score", vacancyId],
-    queryFn: async () => {
-      const res = await fetch(`/api/ai/match-score?vacancyId=${vacancyId}`)
-      if (!res.ok) return { score: 50 }
-      return res.json() as Promise<{ score: number }>
-    },
-    staleTime: 5 * 60 * 1000,
-  })
+interface AiScoreBadgeProps {
+  /** Pre-computed match score [0–100]. Defaults to 50 (neutral) when absent. */
+  score?: number
+}
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-gray-100 animate-pulse">
-        <Sparkles className="w-3.5 h-3.5 text-gray-400" />
-        <span className="text-xs text-gray-400">Match...</span>
-      </div>
-    )
-  }
-
-  const score = data?.score ?? 50
+export function AiScoreBadge({ score = 50 }: AiScoreBadgeProps) {
+  const pct = Math.round(Math.max(0, Math.min(100, score)))
+  const color = ringColor(pct)
+  const offset = CIRCUMFERENCE - (pct / 100) * CIRCUMFERENCE
 
   return (
-    <div className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-orange-500 text-white shadow-md">
-      <Sparkles className="w-3 h-3 text-white" />
-      <span className="text-xs font-bold">{score}% AI Match</span>
+    <div className="relative flex items-center justify-center w-[44px] h-[44px]">
+      {/* Frosted-glass backdrop */}
+      <div className="absolute inset-0 rounded-full bg-black/35 backdrop-blur-sm" />
+
+      {/* Circular progress ring */}
+      <svg
+        className="absolute inset-0"
+        viewBox="0 0 36 36"
+        width="44"
+        height="44"
+        style={{ transform: "rotate(-90deg)" }}
+        aria-label={`${pct}% match`}
+        role="img"
+      >
+        {/* Track */}
+        <circle
+          cx="18"
+          cy="18"
+          r={RADIUS}
+          fill="none"
+          strokeWidth="2.5"
+          stroke="rgba(255,255,255,0.18)"
+        />
+        {/* Progress arc */}
+        <circle
+          cx="18"
+          cy="18"
+          r={RADIUS}
+          fill="none"
+          strokeWidth="2.5"
+          stroke={color}
+          strokeLinecap="round"
+          strokeDasharray={CIRCUMFERENCE}
+          strokeDashoffset={offset}
+          style={{ transition: "stroke-dashoffset 0.9s cubic-bezier(0.4,0,0.2,1)" }}
+        />
+      </svg>
+
+      {/* Percentage label */}
+      <span className="relative z-10 text-white font-black leading-none" style={{ fontSize: 9 }}>
+        {pct}%
+      </span>
     </div>
   )
 }

@@ -61,7 +61,7 @@ export async function POST(req: Request) {
 
   try {
     const body = await req.json()
-    const { vacancyId, direction, matchReason } = body
+    const { vacancyId, direction, matchReason, scoreSnapshot } = body
 
     if (!vacancyId || !["LIKE", "DISLIKE", "SUPER_LIKE"].includes(direction)) {
       return NextResponse.json({ error: "Ongeldige invoer" }, { status: 400 })
@@ -80,6 +80,14 @@ export async function POST(req: Request) {
       update: { direction, matchReason: matchReason ?? null },
       create: { fromId, vacancyId, direction, matchReason: matchReason ?? null },
     })
+
+    // Persist match score snapshot for RL analytics (raw SQL — client pending regen)
+    if (scoreSnapshot && typeof scoreSnapshot === "object") {
+      await prisma.$executeRaw`
+        UPDATE swipes SET score_snapshot = ${JSON.stringify(scoreSnapshot)}::text
+        WHERE from_id = ${fromId} AND vacancy_id = ${vacancyId}
+      `
+    }
 
     // Create match on LIKE or SUPER_LIKE
     let matched = false
