@@ -1,9 +1,15 @@
 import OpenAI from "openai"
 
+const MODEL = "google/gemini-2.0-flash-001"
+
 // Lazy init — avoids build-time error when env var is not yet set
 let _openai: OpenAI | null = null
 function getOpenAI(): OpenAI {
-  if (!_openai) _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  if (!_openai)
+    _openai = new OpenAI({
+      apiKey: process.env.OPENROUTER_API_KEY,
+      baseURL: "https://openrouter.ai/api/v1",
+    })
   return _openai
 }
 
@@ -12,7 +18,7 @@ export async function generateMatchScore(
   vacancyDescription: string
 ): Promise<number> {
   const response = await getOpenAI().chat.completions.create({
-    model: "gpt-4o-mini",
+    model: MODEL,
     messages: [
       {
         role: "system",
@@ -37,7 +43,7 @@ export async function generateOrgDescription(
 ): Promise<string> {
   try {
     const response = await getOpenAI().chat.completions.create({
-      model: "gpt-4o-mini",
+      model: MODEL,
       messages: [
         {
           role: "system",
@@ -68,7 +74,7 @@ export async function generateIcebreaker(
   orgName: string
 ): Promise<string> {
   const response = await getOpenAI().chat.completions.create({
-    model: "gpt-4o-mini",
+    model: MODEL,
     messages: [
       {
         role: "system",
