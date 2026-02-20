@@ -1,5 +1,6 @@
 "use client"
 
+import { useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowRight, ShieldCheck, X } from "lucide-react"
 import Link from "next/link"
@@ -22,6 +23,19 @@ export function MatchModal({
   userImage,
   onClose,
 }: MatchModalProps) {
+  const confetti = useMemo(
+    () =>
+      Array.from({ length: 24 }, (_, i) => ({
+        id: i,
+        left: (i * 4.2) % 100,
+        duration: 2 + (i % 4) * 0.5,
+        delay: (i % 6) * 0.2,
+        rotate: i * 15,
+        color: ["#f97316", "#fb923c", "#fbbf24", "#ffffff", "#fed7aa"][i % 5],
+      })),
+    []
+  )
+
   return (
     <AnimatePresence>
       {open && (
@@ -32,6 +46,30 @@ export function MatchModal({
           transition={{ duration: 0.2 }}
           className="fixed inset-0 z-50 bg-orange-500 flex flex-col items-center justify-center px-8 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
         >
+          {/* Confetti overlay */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {confetti.map((c) => (
+              <div
+                key={c.id}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: `${c.left}%`,
+                  width: 8,
+                  height: 8,
+                  borderRadius: c.id % 3 === 0 ? "50%" : 2,
+                  background: c.color,
+                  animationName: "confettiFall",
+                  animationDuration: `${c.duration}s`,
+                  animationDelay: `${c.delay}s`,
+                  animationTimingFunction: "linear",
+                  animationFillMode: "both",
+                  transform: `rotate(${c.rotate}deg)`,
+                }}
+              />
+            ))}
+          </div>
+
           {/* Top bar */}
           <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-5 pt-5">
             <div className="flex items-center gap-2">

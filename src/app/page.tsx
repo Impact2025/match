@@ -310,8 +310,8 @@ export default function HomePage() {
               <h4 className="text-xs font-bold uppercase tracking-widest text-gray-600 mb-5">Bedrijf</h4>
               <ul className="space-y-3 text-sm">
                 <li><Link href="/over-ons" className="text-gray-400 hover:text-white transition-colors">Over ons</Link></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacybeleid</a></li>
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Gebruiksvoorwaarden</a></li>
+                <li><Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">Privacybeleid</Link></li>
+                <li><Link href="/voorwaarden" className="text-gray-400 hover:text-white transition-colors">Gebruiksvoorwaarden</Link></li>
               </ul>
             </div>
           </div>

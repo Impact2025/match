@@ -1,0 +1,25 @@
+{
+  "name": "Vrijwilligersmatch",
+  "short_name": "Vrijwilligers",
+  "description": "Swipe je naar impact — vrijwilligers en organisaties verbinden.",
+  "start_url": "/swipe",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f97316",
+  "lang": "nl",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/api/icon/192",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/api/icon/512",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

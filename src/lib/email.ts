@@ -226,6 +226,29 @@ export async function sendOrgRejectedEmail(to: string, orgName: string, reason?:
   })
 }
 
+export async function sendInvitationEmail(
+  to: string,
+  volunteerName: string,
+  orgName: string,
+  vacancyTitle: string,
+  invitationId: string
+) {
+  const body = `
+    ${h1(`${orgName} heeft je uitgenodigd! 🎉`)}
+    ${p(`Hoi ${highlight(volunteerName)}! ${highlight(orgName)} heeft je uitgenodigd voor de vacature ${highlight(`"${vacancyTitle}"`)}.`)}
+    ${p(`Bekijk de uitnodiging en laat weten of je interesse hebt. Je kunt de uitnodiging accepteren of afwijzen vanuit je matchesoverzicht.`)}
+    ${btn(`${BASE_URL}/matches`, "Bekijk uitnodiging →")}
+    ${p(`<span style="font-size:13px;color:#9ca3af;">Geen interesse? Je kunt de uitnodiging gewoon afwijzen — geen verplichtingen.<br/>Het Vrijwilligersmatch-team</span>`)}
+    ${gdprFooter()}
+  `
+  return getResend().emails.send({
+    from: FROM,
+    to,
+    subject: `${orgName} heeft je uitgenodigd voor "${vacancyTitle}"`,
+    html: layout("Uitnodiging ontvangen", body),
+  })
+}
+
 export async function sendPasswordResetEmail(to: string, name: string, token: string) {
   const resetUrl = `${BASE_URL}/reset-password?token=${token}`
   const body = `

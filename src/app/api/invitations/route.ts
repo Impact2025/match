@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { invitationSchema } from "@/validators"
+import { sendInvitationEmail } from "@/lib/email"
 
 export async function GET() {
   const session = await auth()
@@ -66,7 +67,7 @@ export async function POST(req: Request) {
 
   const org = await prisma.organisation.findUnique({
     where: { adminId: session.user.id },
-    select: { id: true },
+    select: { id: true, name: true },
   })
   if (!org) return NextResponse.json({ error: "Organisatie niet gevonden" }, { status: 404 })
 
@@ -81,7 +82,7 @@ export async function POST(req: Request) {
   // Check volunteer is open to invitations
   const volunteer = await prisma.user.findUnique({
     where: { id: volunteerId },
-    select: { openToInvitations: true, role: true },
+    select: { openToInvitations: true, role: true, email: true, name: true },
   })
   if (!volunteer || volunteer.role !== "VOLUNTEER" || !volunteer.openToInvitations) {
     return NextResponse.json({ error: "Vrijwilliger ontvangt geen uitnodigingen" }, { status: 400 })
@@ -99,14 +100,28 @@ export async function POST(req: Request) {
   }
 
   try {
-    const invitation = await prisma.invitation.create({
-      data: {
-        organisationId: org.id,
-        vacancyId,
-        volunteerId,
-        message: message ?? null,
-      },
-    })
+    const [invitation, vacancy] = await Promise.all([
+      prisma.invitation.create({
+        data: {
+          organisationId: org.id,
+          vacancyId,
+          volunteerId,
+          message: message ?? null,
+        },
+      }),
+      prisma.vacancy.findUnique({ where: { id: vacancyId }, select: { title: true } }),
+    ])
+
+    if (volunteer.email && vacancy) {
+      sendInvitationEmail(
+        volunteer.email,
+        volunteer.name ?? "Vrijwilliger",
+        org.name,
+        vacancy.title,
+        invitation.id
+      ).catch(console.error)
+    }
+
     return NextResponse.json(invitation, { status: 201 })
   } catch (e: any) {
     if (e?.code === "P2002") {
