@@ -59,13 +59,9 @@ export default async function AdminCategoriesPage() {
                   key={cat.id}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/[0.025] group transition-colors"
                 >
-                  {cat.icon ? (
-                    <span className="text-base w-6 text-center">{cat.icon}</span>
-                  ) : (
-                    <span className="w-6 h-6 rounded-md bg-white/[0.04] flex items-center justify-center">
-                      <Tag className="w-3 h-3 text-white/20" />
-                    </span>
-                  )}
+                  <span className="w-6 h-6 rounded-md bg-white/[0.04] flex items-center justify-center">
+                    <Tag className="w-3 h-3 text-white/20" />
+                  </span>
                   <span className="flex-1 text-sm text-white/70">{cat.name}</span>
                   <span className="text-xs text-white/25 tabular-nums">
                     {cat._count.vacancyCategories}v · {cat._count.userInterests}u

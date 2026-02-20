@@ -30,7 +30,7 @@ function layout(title: string, body: string): string {
             <table cellpadding="0" cellspacing="0">
               <tr>
                 <td style="background:linear-gradient(135deg,#f97316,#f59e0b);border-radius:16px;padding:12px 16px;">
-                  <span style="color:#fff;font-size:18px;font-weight:700;letter-spacing:-0.5px;">♥ Vrijwilligersmatch</span>
+                  <span style="color:#fff;font-size:18px;font-weight:700;letter-spacing:-0.5px;">Vrijwilligersmatch</span>
                 </td>
               </tr>
             </table>
@@ -84,7 +84,7 @@ function gdprFooter(): string {
 
 export async function sendWelcomeEmail(to: string, name: string) {
   const body = `
-    ${h1(`Welkom, ${name}! 👋`)}
+    ${h1(`Welkom, ${name}!`)}
     ${p(`Fijn dat je bij <strong>Vrijwilligersmatch.nl</strong> bent! We helpen jou de perfecte vrijwilligersplek te vinden die past bij jouw vaardigheden, interesses en beschikbaarheid.`)}
     ${p(`Begin vandaag nog met swipen en ontdek organisaties die jouw hulp goed kunnen gebruiken.`)}
     ${btn(`${BASE_URL}/swipe`, "Begin met swipen →")}
@@ -107,7 +107,7 @@ export async function sendMatchNotificationOrgEmail(
   matchId: string
 ) {
   const body = `
-    ${h1("Nieuwe interesse in je vacature! 🎉")}
+    ${h1("Nieuwe interesse in je vacature!")}
     ${p(`${highlight(volunteerName)} is geïnteresseerd in de vacature ${highlight(`"${vacancyTitle}"`)}.`)}
     ${p(`Bekijk het profiel van ${volunteerName} en beslis of je de match wilt accepteren of afwijzen.`)}
     ${btn(`${BASE_URL}/organisation/matches`, "Bekijk match →")}
@@ -130,7 +130,7 @@ export async function sendMatchAcceptedEmail(
   conversationId: string
 ) {
   const body = `
-    ${h1("Je match is geaccepteerd! 🚀")}
+    ${h1("Je match is geaccepteerd!")}
     ${p(`Goed nieuws, ${highlight(volunteerName)}! ${highlight(orgName)} heeft je match voor ${highlight(`"${vacancyTitle}"`)}<strong> geaccepteerd</strong>.`)}
     ${p(`Je kunt nu direct in contact komen via de chat. Maak een goede eerste indruk!`)}
     ${btn(`${BASE_URL}/chat?conversationId=${conversationId}`, "Open de chat →")}
@@ -140,7 +140,7 @@ export async function sendMatchAcceptedEmail(
   return getResend().emails.send({
     from: FROM,
     to,
-    subject: `✅ ${orgName} heeft je match geaccepteerd!`,
+    subject: `${orgName} heeft je match geaccepteerd!`,
     html: layout("Match geaccepteerd", body),
   })
 }
@@ -177,7 +177,7 @@ export async function sendCheckInEmail(
   const weekLabels: Record<number, string> = { 1: "1 week", 4: "4 weken", 12: "12 weken" }
   const weekLabel = weekLabels[weekNumber]
   const body = `
-    ${h1(`Check-in na ${weekLabel}! 🌟`)}
+    ${h1(`Check-in na ${weekLabel}!`)}
     ${p(`Hoi ${highlight(volunteerName)}! Je doet al ${weekLabel} vrijwilligerswerk bij ${highlight(orgName)} voor de vacature ${highlight(`"${vacancyTitle}"`)}.`)}
     ${p(`We zijn benieuwd hoe het gaat! Deel je ervaringen met ons en laat weten of we iets voor je kunnen doen.`)}
     ${btn(`${BASE_URL}/matches`, "Bekijk mijn matches →")}
@@ -194,7 +194,7 @@ export async function sendCheckInEmail(
 
 export async function sendOrgApprovedEmail(to: string, orgName: string) {
   const body = `
-    ${h1("Je organisatie is goedgekeurd! 🎉")}
+    ${h1("Je organisatie is goedgekeurd!")}
     ${p(`Goed nieuws! ${highlight(orgName)} is geverifieerd en staat nu live op <strong>Vrijwilligersmatch.nl</strong>.`)}
     ${p(`Vrijwilligers kunnen nu jouw vacatures zien en matchen. Zorg dat je vacatures volledig en aantrekkelijk zijn voor de beste resultaten.`)}
     ${btn(`${BASE_URL}/organisation/vacancies`, "Beheer je vacatures →")}
@@ -204,7 +204,7 @@ export async function sendOrgApprovedEmail(to: string, orgName: string) {
   return getResend().emails.send({
     from: FROM,
     to,
-    subject: `✅ ${orgName} is goedgekeurd op Vrijwilligersmatch!`,
+    subject: `${orgName} is goedgekeurd op Vrijwilligersmatch!`,
     html: layout("Organisatie goedgekeurd", body),
   })
 }
@@ -234,7 +234,7 @@ export async function sendInvitationEmail(
   invitationId: string
 ) {
   const body = `
-    ${h1(`${orgName} heeft je uitgenodigd! 🎉`)}
+    ${h1(`${orgName} heeft je uitgenodigd!`)}
     ${p(`Hoi ${highlight(volunteerName)}! ${highlight(orgName)} heeft je uitgenodigd voor de vacature ${highlight(`"${vacancyTitle}"`)}.`)}
     ${p(`Bekijk de uitnodiging en laat weten of je interesse hebt. Je kunt de uitnodiging accepteren of afwijzen vanuit je matchesoverzicht.`)}
     ${btn(`${BASE_URL}/matches`, "Bekijk uitnodiging →")}

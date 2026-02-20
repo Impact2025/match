@@ -200,7 +200,7 @@ export default function OrgVolunteersPage() {
                       : "border-gray-200 text-gray-600 hover:border-gray-300"
                   }`}
                 >
-                  {cat.icon} {cat.name}
+                  {cat.name}
                 </button>
               ))}
             </div>

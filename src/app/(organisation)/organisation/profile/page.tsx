@@ -257,7 +257,6 @@ export default function OrgProfilePage() {
                     : "border-gray-200 hover:border-gray-300"
                 }`}
               >
-                <span className="text-xl">{cat.icon}</span>
                 <span className="text-xs font-medium text-gray-700 leading-tight">{cat.name}</span>
               </button>
             ))}

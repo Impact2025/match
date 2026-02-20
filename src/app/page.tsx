@@ -82,7 +82,7 @@ export default function HomePage() {
                         </svg>
                       </div>
                       <div>
-                        <p className="text-[11px] font-bold text-gray-900 leading-none mb-0.5">It&apos;s a match! 🎉</p>
+                        <p className="text-[11px] font-bold text-gray-900 leading-none mb-0.5">It&apos;s a match!</p>
                         <p className="text-[10px] text-gray-400">Rode Kruis Amsterdam</p>
                       </div>
                     </div>

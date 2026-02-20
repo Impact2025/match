@@ -18,7 +18,7 @@ interface VacancyCardProps {
 const SWIPE_THRESHOLD = 100
 
 const CAT_MAP = Object.fromEntries(
-  CATEGORIES.map((c) => [c.name, { icon: c.icon, color: c.color }])
+  CATEGORIES.map((c) => [c.name, { color: c.color }])
 )
 
 const GRADIENT_PAIRS = [
@@ -133,8 +133,8 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
                 className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full opacity-20 blur-3xl"
                 style={{ background: gradFrom }}
               />
-              <span className="text-[80px] leading-none drop-shadow-lg select-none z-10">
-                {catInfo?.icon ?? "🧡"}
+              <span className="text-5xl font-black text-white/20 tracking-tight select-none z-10">
+                {orgInitials(vacancy.organisation.name)}
               </span>
             </div>
           )}
@@ -162,7 +162,7 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
             {firstCategory && (
               <div className="flex items-center gap-1.5 mb-1.5">
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-white/90 text-[11px] font-semibold">
-                  {catInfo?.icon} {firstCategory}
+                  {firstCategory}
                 </span>
               </div>
             )}

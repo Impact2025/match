@@ -97,7 +97,6 @@ export default async function AdminOrgDetailPage({
                     key={category.id}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg text-xs text-white/60"
                   >
-                    {category.icon && <span>{category.icon}</span>}
                     {category.name}
                   </span>
                 ))}

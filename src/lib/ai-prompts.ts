@@ -18,7 +18,7 @@ export interface DashboardUserContext {
 }
 
 export function buildPresaleSystemPrompt(): string {
-  const categoryList = CATEGORIES.map((c) => `${c.icon} ${c.name}`).join(", ")
+  const categoryList = CATEGORIES.map((c) => c.name).join(", ")
   return `Je bent Nova, de vriendelijke AI-assistent van Vrijwilligersmatch.nl.
 Platform: 100% gratis, swipe-interface (zoals dating maar voor vrijwilligerswerk), geverifieerde organisaties, VFI-matching algoritme.
 Matching: motivatie (40%) + afstand (30%) + vaardigheden (20%) + actualiteit (10%).

@@ -11,7 +11,7 @@ import { CATEGORIES } from "@/config"
 import type { MatchScore, VacancyWithOrgAndDistance } from "@/types"
 
 const CAT_MAP = Object.fromEntries(
-  CATEGORIES.map((c) => [c.name, { icon: c.icon, color: c.color }])
+  CATEGORIES.map((c) => [c.name, { color: c.color }])
 )
 
 const GRADIENT_PAIRS = [
@@ -202,7 +202,7 @@ export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailShee
                     key={category.id}
                     className="inline-flex items-center gap-1 px-2.5 py-1 bg-orange-50 text-orange-700 text-xs font-semibold rounded-full border border-orange-100"
                   >
-                    {catInfo?.icon} {category.name}
+                    {category.name}
                   </span>
                 )
               })}
