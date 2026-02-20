@@ -23,6 +23,7 @@ export default function HomePage() {
             <a href="#hoe-het-werkt" className="hover:text-gray-900 transition-colors">Hoe het werkt</a>
             <a href="#organisaties" className="hover:text-gray-900 transition-colors">Organisaties</a>
             <a href="#impact" className="hover:text-gray-900 transition-colors">Impact</a>
+            <Link href="/over-ons" className="hover:text-gray-900 transition-colors">Over ons</Link>
           </div>
 
           <div className="flex items-center gap-1.5 sm:gap-3">
@@ -308,7 +309,7 @@ export default function HomePage() {
             <div>
               <h4 className="text-xs font-bold uppercase tracking-widest text-gray-600 mb-5">Bedrijf</h4>
               <ul className="space-y-3 text-sm">
-                <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Over ons</a></li>
+                <li><Link href="/over-ons" className="text-gray-400 hover:text-white transition-colors">Over ons</Link></li>
                 <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacybeleid</a></li>
                 <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Gebruiksvoorwaarden</a></li>
               </ul>
@@ -317,7 +318,7 @@ export default function HomePage() {
 
           <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs text-gray-600">
-              © 2026 Vrijwilligersmatch. Gemaakt voor sociale impact.
+              © 2026 Vrijwilligersmatch · een initiatief van WeAreImpact · Hoofddorp
             </p>
             <div className="flex gap-5">
               <a href="#" className="text-gray-600 hover:text-gray-400 transition-colors">
