@@ -20,6 +20,14 @@ import {
   Upload,
   Users,
   Heart,
+  UserCheck,
+  Wallet,
+  GraduationCap,
+  Award,
+  Calendar,
+  Clock,
+  Briefcase,
+  Navigation,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -64,14 +72,14 @@ const INZET_TYPES = [
 ]
 
 const VOLUNTEER_BENEFITS = [
-  { value: "begeleiding",    label: "Persoonlijke begeleiding",    icon: "🤝" },
-  { value: "reiskosten",     label: "Reiskostenvergoeding",        icon: "🚌" },
-  { value: "onkosten",       label: "Onkostenvergoeding",          icon: "💶" },
-  { value: "opleiding",      label: "Opleiding / training",        icon: "🎓" },
-  { value: "certificaat",    label: "Certificaat / referentie",    icon: "📜" },
-  { value: "teamactiviteit", label: "Teamactiviteiten",            icon: "🎉" },
-  { value: "flexibel",       label: "Flexibele tijden",            icon: "⏰" },
-  { value: "werkervaring",   label: "Relevante werkervaring",      icon: "💼" },
+  { value: "begeleiding",    label: "Persoonlijke begeleiding",  icon: UserCheck },
+  { value: "reiskosten",     label: "Reiskostenvergoeding",      icon: Navigation },
+  { value: "onkosten",       label: "Onkostenvergoeding",        icon: Wallet },
+  { value: "opleiding",      label: "Opleiding / training",      icon: GraduationCap },
+  { value: "certificaat",    label: "Certificaat / referentie",  icon: Award },
+  { value: "teamactiviteit", label: "Teamactiviteiten",          icon: Calendar },
+  { value: "flexibel",       label: "Flexibele tijden",          icon: Clock },
+  { value: "werkervaring",   label: "Relevante werkervaring",    icon: Briefcase },
 ]
 
 export function OrgOnboardingFlow() {
@@ -540,7 +548,6 @@ export function OrgOnboardingFlow() {
                               : "bg-white text-gray-700 border-gray-200 hover:border-orange-300"
                           }`}
                         >
-                          <span>{cat.icon}</span>
                           {cat.name}
                           {selected && <Check className="w-3 h-3 ml-0.5" />}
                         </motion.button>
@@ -630,7 +637,7 @@ export function OrgOnboardingFlow() {
                   <p className="text-sm font-semibold text-gray-800">Wat bieden jullie vrijwilligers?</p>
                   <p className="text-xs text-gray-400 -mt-1">Selecteer alles wat van toepassing is</p>
                   <div className="grid grid-cols-2 gap-2">
-                    {VOLUNTEER_BENEFITS.map(({ value, label, icon }) => {
+                    {VOLUNTEER_BENEFITS.map(({ value, label, icon: Icon }) => {
                       const selected = selectedBenefits.includes(value)
                       return (
                         <motion.button
@@ -644,7 +651,7 @@ export function OrgOnboardingFlow() {
                               : "border-gray-100 bg-gray-50 hover:border-gray-200"
                           }`}
                         >
-                          <span className="text-lg flex-shrink-0">{icon}</span>
+                          <Icon className={`w-4 h-4 flex-shrink-0 ${selected ? "text-orange-500" : "text-gray-400"}`} strokeWidth={1.75} />
                           <span className={`text-xs font-medium leading-tight ${selected ? "text-orange-700" : "text-gray-700"}`}>
                             {label}
                           </span>
