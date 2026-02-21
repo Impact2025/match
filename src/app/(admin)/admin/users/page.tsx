@@ -68,14 +68,14 @@ export default async function AdminUsersPage({
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Gebruikers</h1>
-        <p className="text-white/40 text-sm mt-1">{total} gevonden</p>
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Gebruikers</h1>
+        <p className="text-gray-400 text-sm mt-1">{total} gevonden</p>
       </div>
 
       {/* Filters row */}
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Role tabs */}
-        <div className="flex gap-1 bg-[#161616] border border-white/[0.06] rounded-xl p-1">
+        <div className="flex gap-1 bg-white border border-gray-100 rounded-xl p-1">
           {ROLE_TABS.map((tab) => {
             const isActive = (tab.value ?? null) === (role ?? null)
             return (
@@ -83,7 +83,7 @@ export default async function AdminUsersPage({
                 key={tab.label}
                 href={buildHref({ role: tab.value, page: "1" })}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                  isActive ? "bg-[#FF6B35] text-white" : "text-white/40 hover:text-white/70"
+                  isActive ? "bg-orange-500 text-white" : "text-gray-400 hover:text-gray-600"
                 }`}
               >
                 {tab.label}
@@ -101,27 +101,27 @@ export default async function AdminUsersPage({
             name="q"
             defaultValue={q ?? ""}
             placeholder="Zoek op naam of e-mail..."
-            className="w-full bg-[#161616] border border-white/[0.06] rounded-xl px-4 py-2.5 text-sm text-white/80 placeholder-white/20 focus:outline-none focus:border-[#FF6B35]/40 transition-colors"
+            className="w-full bg-white border border-gray-100 rounded-xl px-4 py-2.5 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:border-orange-300 transition-colors"
           />
         </form>
       </div>
 
       {/* Table */}
-      <div className="bg-[#161616] border border-white/[0.06] rounded-xl overflow-hidden">
+      <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
         {items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3">
-            <Users className="w-8 h-8 text-white/15" />
-            <p className="text-white/30 text-sm">Geen gebruikers gevonden</p>
+            <Users className="w-8 h-8 text-gray-200" />
+            <p className="text-gray-400 text-sm">Geen gebruikers gevonden</p>
           </div>
         ) : (
           <table className="w-full">
             <thead>
-              <tr className="border-b border-white/[0.05]">
-                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-white/30 uppercase tracking-widest">Gebruiker</th>
-                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-white/30 uppercase tracking-widest hidden md:table-cell">Rol</th>
-                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-white/30 uppercase tracking-widest">Status</th>
-                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-white/30 uppercase tracking-widest hidden lg:table-cell">Activiteit</th>
-                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-white/30 uppercase tracking-widest hidden lg:table-cell">Lid sinds</th>
+              <tr className="border-b border-gray-100">
+                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Gebruiker</th>
+                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-widest hidden md:table-cell">Rol</th>
+                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Status</th>
+                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-widest hidden lg:table-cell">Activiteit</th>
+                <th className="text-left px-6 py-3.5 text-[11px] font-semibold text-gray-400 uppercase tracking-widest hidden lg:table-cell">Lid sinds</th>
                 <th className="px-6 py-3.5" />
               </tr>
             </thead>
@@ -129,31 +129,31 @@ export default async function AdminUsersPage({
               {items.map((user, i) => (
                 <tr
                   key={user.id}
-                  className={`${i < items.length - 1 ? "border-b border-white/[0.04]" : ""} hover:bg-white/[0.015] transition-colors`}
+                  className={`${i < items.length - 1 ? "border-b border-gray-100" : ""} hover:bg-gray-50 transition-colors`}
                 >
                   <td className="px-6 py-4">
-                    <p className="text-white/80 text-sm font-medium">{user.name ?? "Anoniem"}</p>
-                    <p className="text-white/30 text-xs mt-0.5">{user.email}</p>
+                    <p className="text-gray-700 text-sm font-medium">{user.name ?? "Anoniem"}</p>
+                    <p className="text-gray-400 text-xs mt-0.5">{user.email}</p>
                     {user.organisation && (
-                      <p className="text-white/20 text-[11px] mt-0.5">{user.organisation.name}</p>
+                      <p className="text-gray-300 text-[11px] mt-0.5">{user.organisation.name}</p>
                     )}
                   </td>
                   <td className="px-6 py-4 hidden md:table-cell">
-                    <span className="text-white/45 text-xs font-medium uppercase tracking-wide">
+                    <span className="text-gray-400 text-xs font-medium uppercase tracking-wide">
                       {user.role === "VOLUNTEER" ? "Vrijwilliger" : "Organisatie"}
                     </span>
                   </td>
                   <td className="px-6 py-4">
                     <UserStatusBadge status={user.status} />
                   </td>
-                  <td className="px-6 py-4 text-white/30 text-xs hidden lg:table-cell">
+                  <td className="px-6 py-4 text-gray-400 text-xs hidden lg:table-cell">
                     {user.role === "VOLUNTEER" ? (
                       <span>{user._count.swipesGiven} swipes · {user._count.matchesAsVol} matches</span>
                     ) : (
                       <span>—</span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-white/30 text-sm hidden lg:table-cell">
+                  <td className="px-6 py-4 text-gray-400 text-sm hidden lg:table-cell">
                     {user.createdAt.toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })}
                   </td>
                   <td className="px-6 py-4 text-right">
@@ -169,12 +169,12 @@ export default async function AdminUsersPage({
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
-          <p className="text-white/30 text-sm">Pagina {page} van {totalPages}</p>
+          <p className="text-gray-400 text-sm">Pagina {page} van {totalPages}</p>
           <div className="flex gap-2">
             {page > 1 && (
               <Link
                 href={buildHref({ page: String(page - 1) })}
-                className="px-4 py-2 bg-[#161616] border border-white/[0.06] rounded-lg text-white/60 text-sm hover:text-white transition-colors"
+                className="px-4 py-2 bg-white border border-gray-100 rounded-lg text-gray-500 text-sm hover:text-white transition-colors"
               >
                 ← Vorige
               </Link>
@@ -182,7 +182,7 @@ export default async function AdminUsersPage({
             {page < totalPages && (
               <Link
                 href={buildHref({ page: String(page + 1) })}
-                className="px-4 py-2 bg-[#FF6B35] rounded-lg text-white text-sm font-medium hover:bg-[#e55a27] transition-colors"
+                className="px-4 py-2 bg-orange-500 rounded-lg text-gray-900 text-sm font-medium hover:bg-orange-600 transition-colors"
               >
                 Volgende →
               </Link>

@@ -12,21 +12,21 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div
-      className="flex h-screen overflow-hidden bg-[#0f0f0f]"
+      className="flex h-screen overflow-hidden bg-gray-50"
       style={{ fontFamily: "var(--font-inter), Inter, -apple-system, sans-serif" }}
     >
       <AdminSidebar adminName={user?.name ?? "Admin"} />
 
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}
-        <header className="h-16 shrink-0 flex items-center justify-between px-8 border-b border-white/[0.05] bg-[#0f0f0f]">
+        <header className="h-16 shrink-0 flex items-center justify-between px-8 border-b border-gray-100 bg-gray-50">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#FF6B35]/10 border border-[#FF6B35]/20 text-[#FF6B35] text-[11px] font-bold uppercase tracking-widest">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#FF6B35] animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-orange-50 border border-orange-200 text-orange-500 text-[11px] font-bold uppercase tracking-widest">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
               Admin
             </span>
           </div>
-          <p className="text-white/20 text-xs uppercase tracking-widest">
+          <p className="text-gray-300 text-xs uppercase tracking-widest">
             Vrijwilligersmatch Platform
           </p>
         </header>

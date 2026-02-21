@@ -38,15 +38,15 @@ export default async function AdminSettingsPage() {
   return (
     <div className="p-8 max-w-4xl mx-auto space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Instellingen</h1>
-        <p className="text-white/40 text-sm mt-1">Platform configuratie en statistieken</p>
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Instellingen</h1>
+        <p className="text-gray-400 text-sm mt-1">Platform configuratie en statistieken</p>
       </div>
 
       {/* Platform stats */}
-      <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6">
+      <div className="bg-white border border-gray-100 rounded-xl p-6">
         <div className="flex items-center gap-2 mb-5">
-          <Database className="w-4 h-4 text-[#FF6B35]" />
-          <h2 className="text-white font-semibold text-sm">Database overzicht</h2>
+          <Database className="w-4 h-4 text-orange-500" />
+          <h2 className="text-gray-900 font-semibold text-sm">Database overzicht</h2>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           {[
@@ -57,51 +57,51 @@ export default async function AdminSettingsPage() {
             { label: "Berichten", value: messageCount },
             { label: "Gem. SLA score", value: avgSla._avg.slaScore != null ? `${Math.round(avgSla._avg.slaScore)}/100` : "—" },
           ].map((stat) => (
-            <div key={stat.label} className="bg-[#0d0d0d] rounded-xl p-4">
+            <div key={stat.label} className="bg-gray-50 rounded-xl p-4">
               <p className="text-2xl font-bold text-white">{stat.value}</p>
-              <p className="text-white/40 text-xs mt-0.5">{stat.label}</p>
-              {stat.sub && <p className="text-white/25 text-[11px] mt-1">{stat.sub}</p>}
+              <p className="text-gray-400 text-xs mt-0.5">{stat.label}</p>
+              {stat.sub && <p className="text-gray-300 text-[11px] mt-1">{stat.sub}</p>}
             </div>
           ))}
         </div>
       </div>
 
       {/* Cron jobs */}
-      <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6">
+      <div className="bg-white border border-gray-100 rounded-xl p-6">
         <div className="flex items-center gap-2 mb-5">
-          <Clock className="w-4 h-4 text-[#FF6B35]" />
-          <h2 className="text-white font-semibold text-sm">Geplande taken</h2>
+          <Clock className="w-4 h-4 text-orange-500" />
+          <h2 className="text-gray-900 font-semibold text-sm">Geplande taken</h2>
         </div>
         <div className="space-y-3">
-          <div className="flex items-center justify-between py-3 border-b border-white/[0.04]">
+          <div className="flex items-center justify-between py-3 border-b border-gray-100">
             <div>
-              <p className="text-white/70 text-sm font-medium">Check-in e-mails</p>
-              <p className="text-white/30 text-xs mt-0.5">
+              <p className="text-gray-600 text-sm font-medium">Check-in e-mails</p>
+              <p className="text-gray-400 text-xs mt-0.5">
                 Stuurt vrijwilligers een check-in na 1, 4 en 12 weken actieve match
               </p>
             </div>
             <div className="text-right">
-              <p className="text-white/50 text-xs font-mono">dagelijks 09:00 UTC</p>
-              <p className="text-white/25 text-xs mt-0.5">/api/cron/check-in</p>
+              <p className="text-gray-400 text-xs font-mono">dagelijks 09:00 UTC</p>
+              <p className="text-gray-300 text-xs mt-0.5">/api/cron/check-in</p>
             </div>
           </div>
         </div>
-        <p className="text-white/20 text-xs mt-4">
+        <p className="text-gray-300 text-xs mt-4">
           Cron-taken worden uitgevoerd via Vercel Cron (<code className="font-mono">vercel.json</code>) en vereisen de omgevingsvariabele <code className="font-mono">CRON_SECRET</code> (header: <code className="font-mono">x-cron-secret</code>).
         </p>
       </div>
 
       {/* Environment variables */}
-      <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6">
+      <div className="bg-white border border-gray-100 rounded-xl p-6">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-[#FF6B35]" />
-            <h2 className="text-white font-semibold text-sm">Omgevingsvariabelen</h2>
+            <ShieldCheck className="w-4 h-4 text-orange-500" />
+            <h2 className="text-gray-900 font-semibold text-sm">Omgevingsvariabelen</h2>
           </div>
           <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${
             configuredCount === envVars.length
-              ? "bg-green-500/10 text-green-400"
-              : "bg-amber-500/10 text-amber-400"
+              ? "bg-green-50 text-green-600"
+              : "bg-amber-50 text-amber-600"
           }`}>
             {configuredCount}/{envVars.length} geconfigureerd
           </span>
@@ -110,20 +110,20 @@ export default async function AdminSettingsPage() {
           {envVars.map((env) => (
             <div
               key={env.key}
-              className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-white/[0.02] transition-colors"
+              className="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${env.set ? "bg-green-400" : "bg-red-400"}`} />
                 <div>
-                  <p className="text-white/70 text-sm">{env.label}</p>
-                  <p className="text-white/25 text-[11px] font-mono">{env.key}</p>
+                  <p className="text-gray-600 text-sm">{env.label}</p>
+                  <p className="text-gray-300 text-[11px] font-mono">{env.key}</p>
                 </div>
               </div>
               <div className="text-right">
                 {env.value && env.set ? (
-                  <p className="text-white/40 text-xs font-mono max-w-[200px] truncate">{env.value}</p>
+                  <p className="text-gray-400 text-xs font-mono max-w-[200px] truncate">{env.value}</p>
                 ) : (
-                  <span className={`text-xs ${env.set ? "text-green-400" : "text-red-400/70"}`}>
+                  <span className={`text-xs ${env.set ? "text-green-600" : "text-red-600/70"}`}>
                     {env.set ? "✓ Ingesteld" : "✗ Ontbreekt"}
                   </span>
                 )}
@@ -134,10 +134,10 @@ export default async function AdminSettingsPage() {
       </div>
 
       {/* Platform links */}
-      <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6">
+      <div className="bg-white border border-gray-100 rounded-xl p-6">
         <div className="flex items-center gap-2 mb-5">
-          <Globe className="w-4 h-4 text-[#FF6B35]" />
-          <h2 className="text-white font-semibold text-sm">Handige links</h2>
+          <Globe className="w-4 h-4 text-orange-500" />
+          <h2 className="text-gray-900 font-semibold text-sm">Handige links</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {[
@@ -151,27 +151,27 @@ export default async function AdminSettingsPage() {
               href={link.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-start gap-3 p-4 bg-[#0d0d0d] rounded-xl hover:bg-white/[0.03] transition-colors group"
+              className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl hover:bg-gray-50 transition-colors group"
             >
               <div className="flex-1">
-                <p className="text-white/70 text-sm font-medium group-hover:text-white transition-colors">{link.label}</p>
-                <p className="text-white/30 text-xs mt-0.5">{link.desc}</p>
+                <p className="text-gray-600 text-sm font-medium group-hover:text-white transition-colors">{link.label}</p>
+                <p className="text-gray-400 text-xs mt-0.5">{link.desc}</p>
               </div>
-              <span className="text-white/20 group-hover:text-white/50 transition-colors text-lg leading-none">↗</span>
+              <span className="text-gray-300 group-hover:text-gray-400 transition-colors text-lg leading-none">↗</span>
             </a>
           ))}
         </div>
       </div>
 
       {/* Email templates note */}
-      <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6">
+      <div className="bg-white border border-gray-100 rounded-xl p-6">
         <div className="flex items-center gap-2 mb-3">
-          <Mail className="w-4 h-4 text-[#FF6B35]" />
-          <h2 className="text-white font-semibold text-sm">E-mail templates</h2>
+          <Mail className="w-4 h-4 text-orange-500" />
+          <h2 className="text-gray-900 font-semibold text-sm">E-mail templates</h2>
         </div>
-        <p className="text-white/40 text-sm leading-relaxed">
-          Alle transactionele e-mails worden verzonden via <strong className="text-white/60">Resend</strong> met HTML-templates
-          gedefinieerd in <code className="text-[#FF6B35]/80 bg-white/[0.03] px-1.5 py-0.5 rounded text-xs">src/lib/email.ts</code>.
+        <p className="text-gray-400 text-sm leading-relaxed">
+          Alle transactionele e-mails worden verzonden via <strong className="text-gray-500">Resend</strong> met HTML-templates
+          gedefinieerd in <code className="text-orange-500 bg-white/[0.03] px-1.5 py-0.5 rounded text-xs">src/lib/email.ts</code>.
         </p>
         <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
           {[
@@ -184,8 +184,8 @@ export default async function AdminSettingsPage() {
             "Organisatie afgewezen",
             "Wachtwoord resetten",
           ].map((t) => (
-            <div key={t} className="flex items-center gap-2 text-sm text-white/40">
-              <span className="text-green-400 text-xs">✓</span>
+            <div key={t} className="flex items-center gap-2 text-sm text-gray-400">
+              <span className="text-green-600 text-xs">✓</span>
               {t}
             </div>
           ))}

@@ -22,14 +22,14 @@ export function VacancyAdminActions({ vacancyId, currentStatus }: VacancyAdminAc
   }
 
   if (isPending) {
-    return <Loader2 className="w-4 h-4 animate-spin text-white/30" />
+    return <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
   }
 
   return (
     <div className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="p-1.5 rounded-lg text-white/25 hover:text-white/60 hover:bg-white/[0.05] transition-colors"
+        className="p-1.5 rounded-lg text-gray-300 hover:text-gray-500 hover:bg-white/[0.05] transition-colors"
       >
         <MoreHorizontal className="w-4 h-4" />
       </button>
@@ -37,11 +37,11 @@ export function VacancyAdminActions({ vacancyId, currentStatus }: VacancyAdminAc
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-8 z-20 bg-[#1a1a1a] border border-white/[0.08] rounded-xl shadow-2xl shadow-black/50 py-1.5 min-w-[160px]">
+          <div className="absolute right-0 top-8 z-20 bg-white border border-gray-200 rounded-xl shadow-lg shadow-gray-200/60 py-1.5 min-w-[160px]">
             {currentStatus !== "ACTIVE" && (
               <button
                 onClick={() => handleAction("ACTIVATE")}
-                className="w-full text-left px-4 py-2 text-sm text-green-400 hover:bg-white/[0.04] transition-colors"
+                className="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-gray-100 transition-colors"
               >
                 Activeren
               </button>
@@ -49,7 +49,7 @@ export function VacancyAdminActions({ vacancyId, currentStatus }: VacancyAdminAc
             {currentStatus === "ACTIVE" && (
               <button
                 onClick={() => handleAction("PAUSE")}
-                className="w-full text-left px-4 py-2 text-sm text-amber-400 hover:bg-white/[0.04] transition-colors"
+                className="w-full text-left px-4 py-2 text-sm text-amber-600 hover:bg-gray-100 transition-colors"
               >
                 Pauzeren
               </button>
@@ -57,7 +57,7 @@ export function VacancyAdminActions({ vacancyId, currentStatus }: VacancyAdminAc
             {currentStatus !== "CLOSED" && (
               <button
                 onClick={() => handleAction("CLOSE")}
-                className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/[0.04] transition-colors"
+                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 transition-colors"
               >
                 Sluiten
               </button>

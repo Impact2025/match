@@ -17,7 +17,7 @@ export function DeleteCategoryButton({ id }: { id: string }) {
     <button
       disabled={isPending}
       onClick={() => startTransition(() => deleteCategory(id))}
-      className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
+      className="p-1.5 rounded-lg text-gray-300 hover:text-red-600 hover:bg-red-500/10 transition-colors disabled:opacity-40"
     >
       {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
     </button>
@@ -30,7 +30,7 @@ export function DeleteSkillButton({ id }: { id: string }) {
     <button
       disabled={isPending}
       onClick={() => startTransition(() => deleteSkill(id))}
-      className="p-1.5 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
+      className="p-1.5 rounded-lg text-gray-300 hover:text-red-600 hover:bg-red-500/10 transition-colors disabled:opacity-40"
     >
       {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
     </button>
@@ -65,18 +65,18 @@ export function AddCategoryForm() {
         type="text"
         placeholder="Naam categorie..."
         required
-        className="flex-1 bg-[#1a1a1a] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 focus:outline-none focus:border-[#FF6B35]/40"
+        className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:border-orange-300"
       />
       <input
         ref={iconRef}
         type="text"
         placeholder="Emoji"
-        className="w-16 bg-[#1a1a1a] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 focus:outline-none focus:border-[#FF6B35]/40 text-center"
+        className="w-16 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:border-orange-300 text-center"
       />
       <button
         type="submit"
         disabled={isPending}
-        className="flex items-center gap-1.5 px-3 py-2 bg-[#FF6B35] hover:bg-[#e55a27] text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+        className="flex items-center gap-1.5 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-gray-900 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
       >
         {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
         Toevoegen
@@ -108,12 +108,12 @@ export function AddSkillForm() {
         type="text"
         placeholder="Naam vaardigheid..."
         required
-        className="flex-1 bg-[#1a1a1a] border border-white/[0.08] rounded-lg px-3 py-2 text-sm text-white/80 placeholder-white/20 focus:outline-none focus:border-[#FF6B35]/40"
+        className="flex-1 bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:border-orange-300"
       />
       <button
         type="submit"
         disabled={isPending}
-        className="flex items-center gap-1.5 px-3 py-2 bg-[#FF6B35] hover:bg-[#e55a27] text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
+        className="flex items-center gap-1.5 px-3 py-2 bg-orange-500 hover:bg-orange-600 text-gray-900 text-sm font-medium rounded-lg transition-colors disabled:opacity-50"
       >
         {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
         Toevoegen

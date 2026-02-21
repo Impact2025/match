@@ -102,14 +102,14 @@ function StatCard({ label, value, sub, icon: Icon, color }: {
   icon: React.ElementType; color: string
 }) {
   return (
-    <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-5 space-y-4">
+    <div className="bg-white border border-gray-100 rounded-xl p-5 space-y-4">
       <div className={`w-9 h-9 rounded-lg bg-${color}-400/10 border border-${color}-400/20 flex items-center justify-center`}>
         <Icon className={`w-4 h-4 text-${color}-400`} strokeWidth={1.5} />
       </div>
       <div>
-        <p className="text-2xl font-bold text-white tracking-tight">{value}</p>
-        <p className="text-xs text-white/40 mt-0.5">{label}</p>
-        {sub && <p className="text-[11px] text-white/25 mt-1">{sub}</p>}
+        <p className="text-2xl font-bold text-gray-900 tracking-tight">{value}</p>
+        <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+        {sub && <p className="text-[11px] text-gray-300 mt-1">{sub}</p>}
       </div>
     </div>
   )
@@ -120,8 +120,8 @@ function FunnelBar({ label, value, max, color }: { label: string; value: number;
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between text-xs">
-        <span className="text-white/50">{label}</span>
-        <span className="text-white/70 font-semibold">{value.toLocaleString("nl")} <span className="text-white/30 font-normal">({pct}%)</span></span>
+        <span className="text-gray-400">{label}</span>
+        <span className="text-gray-600 font-semibold">{value.toLocaleString("nl")} <span className="text-gray-400 font-normal">({pct}%)</span></span>
       </div>
       <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
         <div
@@ -138,17 +138,17 @@ function ScoreRow({ label, likeAvg, dislikeAvg }: { label: string; likeAvg?: num
   const diff = (likeAvg ?? 0) - (dislikeAvg ?? 0)
   const isPositive = diff > 0
   return (
-    <tr className="border-b border-white/[0.04]">
-      <td className="py-3 px-4 text-sm text-white/60">{label}</td>
-      <td className="py-3 px-4 text-sm text-right text-green-400 font-mono">
+    <tr className="border-b border-gray-100">
+      <td className="py-3 px-4 text-sm text-gray-500">{label}</td>
+      <td className="py-3 px-4 text-sm text-right text-green-600 font-mono">
         {likeAvg != null ? likeAvg.toFixed(1) : "—"}
       </td>
-      <td className="py-3 px-4 text-sm text-right text-red-400 font-mono">
+      <td className="py-3 px-4 text-sm text-right text-red-600 font-mono">
         {dislikeAvg != null ? dislikeAvg.toFixed(1) : "—"}
       </td>
       <td className="py-3 px-4 text-sm text-right font-mono">
         {likeAvg != null && dislikeAvg != null ? (
-          <span className={isPositive ? "text-green-400" : "text-red-400"}>
+          <span className={isPositive ? "text-green-600" : "text-red-600"}>
             {isPositive ? "+" : ""}{diff.toFixed(1)}
           </span>
         ) : "—"}
@@ -172,8 +172,8 @@ export default async function AnalyticsPage() {
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-10">
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">AI Matching Analytics</h1>
-        <p className="text-white/40 text-sm mt-1">Outcome-tracking en score-correlaties voor het matching algoritme</p>
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">AI Matching Analytics</h1>
+        <p className="text-gray-400 text-sm mt-1">Outcome-tracking en score-correlaties voor het matching algoritme</p>
       </div>
 
       {/* KPIs */}
@@ -185,10 +185,10 @@ export default async function AnalyticsPage() {
       </div>
 
       {/* Funnel */}
-      <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6 space-y-5">
+      <div className="bg-white border border-gray-100 rounded-xl p-6 space-y-5">
         <div className="flex items-center gap-2 mb-2">
-          <BarChart2 className="w-4 h-4 text-[#FF6B35]" />
-          <h2 className="text-white font-semibold text-sm">Matching funnel</h2>
+          <BarChart2 className="w-4 h-4 text-orange-500" />
+          <h2 className="text-gray-900 font-semibold text-sm">Matching funnel</h2>
         </div>
         <FunnelBar label="Swipes totaal" value={d.totalSwipes} max={d.totalSwipes} color="white" />
         <FunnelBar label="Likes + Super Likes" value={d.likeSwipes + d.superLikeSwipes} max={d.totalSwipes} color="green" />
@@ -199,10 +199,10 @@ export default async function AnalyticsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Retention check-ins */}
-        <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6 space-y-4">
+        <div className="bg-white border border-gray-100 rounded-xl p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#FF6B35]" />
-            <h2 className="text-white font-semibold text-sm">Retentie check-ins</h2>
+            <Clock className="w-4 h-4 text-orange-500" />
+            <h2 className="text-gray-900 font-semibold text-sm">Retentie check-ins</h2>
           </div>
           {[
             { label: "Check-in week 1 (7d)", sent: d.matchesWithCheckIn1 },
@@ -210,26 +210,26 @@ export default async function AnalyticsPage() {
             { label: "Check-in week 12 (84d)", sent: d.matchesWithCheckIn12 },
           ].map(({ label, sent }) => (
             <div key={label} className="flex items-center justify-between">
-              <span className="text-sm text-white/50">{label}</span>
+              <span className="text-sm text-gray-400">{label}</span>
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-3.5 h-3.5 text-green-400" />
-                <span className="text-sm text-white/70 font-semibold">{sent}</span>
+                <CheckCircle className="w-3.5 h-3.5 text-green-600" />
+                <span className="text-sm text-gray-600 font-semibold">{sent}</span>
               </div>
             </div>
           ))}
-          <p className="text-xs text-white/25 pt-2 border-t border-white/[0.04]">
+          <p className="text-xs text-gray-300 pt-2 border-t border-gray-100">
             Totaal geaccepteerde matches: {d.acceptedMatches}
           </p>
         </div>
 
         {/* Match reasons */}
-        <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6 space-y-4">
+        <div className="bg-white border border-gray-100 rounded-xl p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <Heart className="w-4 h-4 text-[#FF6B35]" />
-            <h2 className="text-white font-semibold text-sm">Like-redenen</h2>
+            <Heart className="w-4 h-4 text-orange-500" />
+            <h2 className="text-gray-900 font-semibold text-sm">Like-redenen</h2>
           </div>
           {d.matchReasonCounts.length === 0 ? (
-            <p className="text-white/30 text-sm">Nog geen data</p>
+            <p className="text-gray-400 text-sm">Nog geen data</p>
           ) : (
             d.matchReasonCounts.map((row) => {
               const total = d.likeSwipes + d.superLikeSwipes
@@ -237,12 +237,12 @@ export default async function AnalyticsPage() {
               return (
                 <div key={row.matchReason} className="space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span className="text-white/50">{row.matchReason}</span>
-                    <span className="text-white/60 font-semibold">{row._count.matchReason} <span className="text-white/30">({pct}%)</span></span>
+                    <span className="text-gray-400">{row.matchReason}</span>
+                    <span className="text-gray-500 font-semibold">{row._count.matchReason} <span className="text-gray-400">({pct}%)</span></span>
                   </div>
                   <div className="h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-[#FF6B35] rounded-full"
+                      className="h-full bg-orange-500 rounded-full"
                       style={{ width: `${pct}%` }}
                     />
                   </div>
@@ -254,11 +254,11 @@ export default async function AnalyticsPage() {
       </div>
 
       {/* pgvector embedding coverage */}
-      <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6 space-y-4">
+      <div className="bg-white border border-gray-100 rounded-xl p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <Cpu className="w-4 h-4 text-[#FF6B35]" />
-          <h2 className="text-white font-semibold text-sm">Semantische embeddings (Stage 1)</h2>
-          <span className={`ml-auto text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${emb.available ? "text-green-400 bg-green-400/10" : "text-amber-400 bg-amber-400/10"}`}>
+          <Cpu className="w-4 h-4 text-orange-500" />
+          <h2 className="text-gray-900 font-semibold text-sm">Semantische embeddings (Stage 1)</h2>
+          <span className={`ml-auto text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${emb.available ? "text-green-600 bg-green-50" : "text-amber-600 bg-amber-50"}`}>
             {emb.available ? "pgvector actief" : "pgvector niet ingesteld"}
           </span>
         </div>
@@ -273,8 +273,8 @@ export default async function AnalyticsPage() {
               return (
                 <div key={label} className="space-y-2">
                   <div className="flex justify-between text-xs">
-                    <span className="text-white/50">{label}</span>
-                    <span className="text-white/70 font-semibold">{value}/{total} <span className="text-white/30">({pct}%)</span></span>
+                    <span className="text-gray-400">{label}</span>
+                    <span className="text-gray-600 font-semibold">{value}/{total} <span className="text-gray-400">({pct}%)</span></span>
                   </div>
                   <div className="h-2 bg-white/[0.06] rounded-full overflow-hidden">
                     <div className="h-full bg-blue-400 rounded-full" style={{ width: `${pct}%` }} />
@@ -284,33 +284,33 @@ export default async function AnalyticsPage() {
             })}
           </div>
         ) : (
-          <p className="text-white/30 text-sm">
+          <p className="text-gray-400 text-sm">
             Voer <code className="bg-white/[0.06] px-1.5 py-0.5 rounded text-xs">POST /api/admin/embeddings?setup</code> uit om pgvector te initialiseren, daarna <code className="bg-white/[0.06] px-1.5 py-0.5 rounded text-xs">POST /api/admin/embeddings</code> om embeddings te genereren.
           </p>
         )}
       </div>
 
       {/* Score component correlation */}
-      <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6">
+      <div className="bg-white border border-gray-100 rounded-xl p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Activity className="w-4 h-4 text-[#FF6B35]" />
-          <h2 className="text-white font-semibold text-sm">Score-component correlatie (RL feedback)</h2>
-          <span className="ml-auto text-[10px] text-white/25 uppercase tracking-widest">Gemiddeld per swipe-richting</span>
+          <Activity className="w-4 h-4 text-orange-500" />
+          <h2 className="text-gray-900 font-semibold text-sm">Score-component correlatie (RL feedback)</h2>
+          <span className="ml-auto text-[10px] text-gray-300 uppercase tracking-widest">Gemiddeld per swipe-richting</span>
         </div>
         {!d.hasScoreData ? (
           <div className="text-center py-10 space-y-2">
-            <p className="text-white/30 text-sm">Nog geen score snapshots beschikbaar.</p>
-            <p className="text-white/20 text-xs">Zodra vrijwilligers swipen worden score-componenten opgeslagen voor analyse.</p>
+            <p className="text-gray-400 text-sm">Nog geen score snapshots beschikbaar.</p>
+            <p className="text-gray-300 text-xs">Zodra vrijwilligers swipen worden score-componenten opgeslagen voor analyse.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/[0.06]">
-                  <th className="py-3 px-4 text-left text-[11px] text-white/30 uppercase tracking-widest">Component</th>
-                  <th className="py-3 px-4 text-right text-[11px] text-green-400/60 uppercase tracking-widest">LIKE avg</th>
-                  <th className="py-3 px-4 text-right text-[11px] text-red-400/60 uppercase tracking-widest">DISLIKE avg</th>
-                  <th className="py-3 px-4 text-right text-[11px] text-white/30 uppercase tracking-widest">Δ</th>
+                <tr className="border-b border-gray-100">
+                  <th className="py-3 px-4 text-left text-[11px] text-gray-400 uppercase tracking-widest">Component</th>
+                  <th className="py-3 px-4 text-right text-[11px] text-green-600/60 uppercase tracking-widest">LIKE avg</th>
+                  <th className="py-3 px-4 text-right text-[11px] text-red-600/60 uppercase tracking-widest">DISLIKE avg</th>
+                  <th className="py-3 px-4 text-right text-[11px] text-gray-400 uppercase tracking-widest">Δ</th>
                 </tr>
               </thead>
               <tbody>
@@ -321,7 +321,7 @@ export default async function AnalyticsPage() {
                 <ScoreRow label="Versheid (10%)" likeAvg={d.scoreByDir["LIKE"]?.avg_freshness} dislikeAvg={d.scoreByDir["DISLIKE"]?.avg_freshness} />
               </tbody>
             </table>
-            <p className="text-xs text-white/20 mt-4">
+            <p className="text-xs text-gray-300 mt-4">
               Positieve Δ = vrijwilligers met hogere score op dit component liiken vaker. Gebruik dit om gewichten te herijken.
             </p>
           </div>

@@ -30,8 +30,8 @@ export default async function AdminScoringPage() {
   return (
     <div className="p-8 max-w-3xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white tracking-tight">Scoring Gewichten</h1>
-        <p className="text-white/40 text-sm mt-1">
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Scoring Gewichten</h1>
+        <p className="text-gray-400 text-sm mt-1">
           Pas de gewichten van het matching-algoritme aan. Wijzigingen zijn direct actief.
         </p>
       </div>

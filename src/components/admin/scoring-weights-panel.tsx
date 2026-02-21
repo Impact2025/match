@@ -77,12 +77,12 @@ export function ScoringWeightsPanel({ initialWeights, defaults }: Props) {
   return (
     <div className="space-y-6">
       {/* Component weights */}
-      <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6">
+      <div className="bg-white border border-gray-100 rounded-xl p-6">
         <div className="flex items-center gap-2 mb-2">
-          <Sliders className="w-4 h-4 text-[#FF6B35]" />
-          <h2 className="text-white font-semibold text-sm">Component gewichten</h2>
+          <Sliders className="w-4 h-4 text-orange-500" />
+          <h2 className="text-gray-900 font-semibold text-sm">Component gewichten</h2>
         </div>
-        <p className="text-white/30 text-xs mb-5">
+        <p className="text-gray-400 text-xs mb-5">
           Elk gewicht bepaalt hoe zwaar die factor meeweegt in de eindscore (0–100). De som moet exact 100% zijn.
         </p>
 
@@ -95,14 +95,14 @@ export function ScoringWeightsPanel({ initialWeights, defaults }: Props) {
               <div key={key}>
                 <div className="flex items-center justify-between mb-1.5">
                   <div className="flex items-center gap-2">
-                    <span className="text-white/70 text-sm font-medium">{LABELS[key]?.nl}</span>
+                    <span className="text-gray-600 text-sm font-medium">{LABELS[key]?.nl}</span>
                     {changed && (
-                      <span className="text-[10px] text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded-full">
+                      <span className="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
                         gewijzigd (standaard: {defPct}%)
                       </span>
                     )}
                   </div>
-                  <span className="text-[#FF6B35] font-mono text-sm font-semibold">{pctVal}%</span>
+                  <span className="text-orange-500 font-mono text-sm font-semibold">{pctVal}%</span>
                 </div>
                 <input
                   type="range"
@@ -116,24 +116,24 @@ export function ScoringWeightsPanel({ initialWeights, defaults }: Props) {
                     background: `linear-gradient(to right, #FF6B35 0%, #FF6B35 ${pctVal}%, #333 ${pctVal}%, #333 100%)`,
                   }}
                 />
-                <p className="text-white/25 text-[11px] mt-1">{LABELS[key]?.desc}</p>
+                <p className="text-gray-300 text-[11px] mt-1">{LABELS[key]?.desc}</p>
               </div>
             )
           })}
         </div>
 
         {/* Sum indicator */}
-        <div className={`mt-4 flex items-center gap-2 text-sm font-medium ${sumOk ? "text-green-400" : "text-red-400"}`}>
+        <div className={`mt-4 flex items-center gap-2 text-sm font-medium ${sumOk ? "text-green-600" : "text-red-600"}`}>
           <span className={`w-2 h-2 rounded-full ${sumOk ? "bg-green-400" : "bg-red-400"}`} />
           Totaal: {sumPct}% {sumOk ? "✓" : `(${sumPct > 100 ? "te hoog" : "te laag"} — moet 100% zijn)`}
         </div>
       </div>
 
       {/* Advanced config */}
-      <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6">
+      <div className="bg-white border border-gray-100 rounded-xl p-6">
         <div className="flex items-center gap-2 mb-5">
-          <Info className="w-4 h-4 text-[#FF6B35]" />
-          <h2 className="text-white font-semibold text-sm">Geavanceerde instellingen</h2>
+          <Info className="w-4 h-4 text-orange-500" />
+          <h2 className="text-gray-900 font-semibold text-sm">Geavanceerde instellingen</h2>
         </div>
 
         <div className="space-y-5">
@@ -145,9 +145,9 @@ export function ScoringWeightsPanel({ initialWeights, defaults }: Props) {
               <div key={key}>
                 <div className="flex items-center justify-between mb-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-white/70 text-sm font-medium">{LABELS[key]?.nl}</span>
+                    <span className="text-gray-600 text-sm font-medium">{LABELS[key]?.nl}</span>
                     {changed && (
-                      <span className="text-[10px] text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded-full">
+                      <span className="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">
                         gewijzigd (standaard: {defVal})
                       </span>
                     )}
@@ -158,10 +158,10 @@ export function ScoringWeightsPanel({ initialWeights, defaults }: Props) {
                     max={key === "freshnessWindowDays" ? 365 : 10000}
                     value={val}
                     onChange={(e) => updateWeight(key, parseInt(e.target.value) || defVal)}
-                    className="w-24 bg-[#0d0d0d] border border-white/[0.08] rounded-lg px-3 py-1.5 text-white text-sm text-right font-mono focus:outline-none focus:border-[#FF6B35]/50"
+                    className="w-24 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-gray-900 text-sm text-right font-mono focus:outline-none focus:border-orange-300"
                   />
                 </div>
-                <p className="text-white/25 text-[11px]">{LABELS[key]?.desc}</p>
+                <p className="text-gray-300 text-[11px]">{LABELS[key]?.desc}</p>
               </div>
             )
           })}
@@ -172,7 +172,7 @@ export function ScoringWeightsPanel({ initialWeights, defaults }: Props) {
       <div className="flex items-center gap-3">
         <button
           onClick={resetToDefaults}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-white/[0.08] text-white/50 hover:text-white/80 hover:bg-white/[0.04] text-sm transition-colors"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 text-gray-400 hover:text-gray-700 hover:bg-gray-100 text-sm transition-colors"
         >
           <RotateCcw className="w-4 h-4" />
           Standaardwaarden
@@ -181,14 +181,14 @@ export function ScoringWeightsPanel({ initialWeights, defaults }: Props) {
         <button
           onClick={save}
           disabled={saving || !dirty || !sumOk}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#FF6B35] hover:bg-[#FF6B35]/90 text-white text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-orange-500 hover:bg-orange-500/90 text-gray-900 text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Save className="w-4 h-4" />
           {saving ? "Opslaan..." : "Opslaan"}
         </button>
 
         {dirty && !sumOk && (
-          <p className="text-red-400 text-xs">
+          <p className="text-red-600 text-xs">
             Gewichten moeten optellen tot 100%
           </p>
         )}

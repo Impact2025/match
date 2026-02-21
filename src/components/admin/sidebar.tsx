@@ -38,15 +38,15 @@ export function AdminSidebar({ adminName }: AdminSidebarProps) {
   const pathname = usePathname()
 
   return (
-    <aside className="w-[220px] shrink-0 flex flex-col h-full bg-[#080808] border-r border-white/[0.05]">
+    <aside className="w-[220px] shrink-0 flex flex-col h-full bg-white border-r border-gray-100">
       {/* Logo */}
-      <div className="h-16 flex items-center gap-2.5 px-5 border-b border-white/[0.05]">
-        <div className="w-7 h-7 bg-[#FF6B35] rounded-full flex items-center justify-center flex-shrink-0">
+      <div className="h-16 flex items-center gap-2.5 px-5 border-b border-gray-100">
+        <div className="w-7 h-7 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
           <Heart className="w-3.5 h-3.5 text-white fill-white" />
         </div>
         <div className="leading-none">
-          <p className="text-white text-sm font-semibold tracking-tight">Vrijwilligers</p>
-          <p className="text-[#FF6B35] text-[10px] font-bold uppercase tracking-widest">Admin</p>
+          <p className="text-gray-900 text-sm font-semibold tracking-tight">Vrijwilligers</p>
+          <p className="text-orange-500 text-[10px] font-bold uppercase tracking-widest">Admin</p>
         </div>
       </div>
 
@@ -61,19 +61,19 @@ export function AdminSidebar({ adminName }: AdminSidebarProps) {
               className={`
                 group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
                 ${isActive
-                  ? "bg-[#FF6B35]/10 text-[#FF6B35]"
-                  : "text-white/40 hover:text-white/80 hover:bg-white/[0.04]"
+                  ? "bg-orange-50 text-orange-500"
+                  : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
                 }
               `}
             >
               <Icon
                 className={`w-4 h-4 flex-shrink-0 transition-colors ${
-                  isActive ? "text-[#FF6B35]" : "text-white/30 group-hover:text-white/60"
+                  isActive ? "text-orange-500" : "text-gray-400 group-hover:text-gray-500"
                 }`}
               />
               <span className="flex-1">{label}</span>
               {isActive && (
-                <ChevronRight className="w-3.5 h-3.5 text-[#FF6B35]/50" />
+                <ChevronRight className="w-3.5 h-3.5 text-orange-500/50" />
               )}
             </Link>
           )
@@ -81,21 +81,21 @@ export function AdminSidebar({ adminName }: AdminSidebarProps) {
       </nav>
 
       {/* User footer */}
-      <div className="p-3 border-t border-white/[0.05]">
+      <div className="p-3 border-t border-gray-100">
         <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1">
-          <div className="w-7 h-7 rounded-full bg-[#FF6B35]/20 flex items-center justify-center flex-shrink-0">
-            <span className="text-[#FF6B35] text-xs font-bold">
+          <div className="w-7 h-7 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+            <span className="text-orange-500 text-xs font-bold">
               {adminName.charAt(0).toUpperCase()}
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white/70 text-xs font-medium truncate">{adminName}</p>
-            <p className="text-white/25 text-[10px] uppercase tracking-widest">Admin</p>
+            <p className="text-gray-600 text-xs font-medium truncate">{adminName}</p>
+            <p className="text-gray-300 text-[10px] uppercase tracking-widest">Admin</p>
           </div>
         </div>
         <button
           onClick={() => signOut({ callbackUrl: "/login" })}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-white/30 hover:text-white/70 hover:bg-white/[0.04] text-sm transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 text-sm transition-colors"
         >
           <LogOut className="w-4 h-4" />
           <span>Uitloggen</span>

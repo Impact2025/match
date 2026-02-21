@@ -31,20 +31,20 @@ export function OrgActionForm({ orgId, currentStatus }: OrgActionFormProps) {
   const isPending_ = (action: string) => isPending && activeAction === action
 
   return (
-    <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6 space-y-5">
-      <h3 className="text-sm font-semibold text-white/60 uppercase tracking-widest">Actie</h3>
+    <div className="bg-white border border-gray-100 rounded-xl p-6 space-y-5">
+      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-widest">Actie</h3>
 
       {/* Reason field */}
       <div className="space-y-2">
-        <label className="text-white/50 text-xs font-medium">
-          Reden <span className="text-white/25">(verplicht bij afwijzen of schorsen)</span>
+        <label className="text-gray-400 text-xs font-medium">
+          Reden <span className="text-gray-300">(verplicht bij afwijzen of schorsen)</span>
         </label>
         <textarea
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           placeholder="Voeg een toelichting toe voor de organisatie..."
           rows={3}
-          className="w-full bg-[#0f0f0f] border border-white/[0.08] rounded-lg px-4 py-3 text-sm text-white/80 placeholder-white/20 focus:outline-none focus:border-[#FF6B35]/40 resize-none transition-colors"
+          className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:border-orange-300 resize-none transition-colors"
         />
       </div>
 
@@ -54,7 +54,7 @@ export function OrgActionForm({ orgId, currentStatus }: OrgActionFormProps) {
           <button
             onClick={() => handleAction("APPROVE_ORG")}
             disabled={isPending}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500/10 border border-green-500/25 text-green-400 rounded-lg text-sm font-medium hover:bg-green-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-green-50 border border-green-500/25 text-green-600 rounded-lg text-sm font-medium hover:bg-green-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending_("APPROVE_ORG") ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -69,7 +69,7 @@ export function OrgActionForm({ orgId, currentStatus }: OrgActionFormProps) {
           <button
             onClick={() => handleAction("REJECT_ORG")}
             disabled={isPending}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/25 text-red-400 rounded-lg text-sm font-medium hover:bg-red-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 border border-red-500/25 text-red-600 rounded-lg text-sm font-medium hover:bg-red-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending_("REJECT_ORG") ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -84,7 +84,7 @@ export function OrgActionForm({ orgId, currentStatus }: OrgActionFormProps) {
           <button
             onClick={() => handleAction("SUSPEND_ORG")}
             disabled={isPending}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-amber-500/10 border border-amber-500/25 text-amber-400 rounded-lg text-sm font-medium hover:bg-amber-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-amber-50 border border-amber-500/25 text-amber-600 rounded-lg text-sm font-medium hover:bg-amber-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending_("SUSPEND_ORG") ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -99,7 +99,7 @@ export function OrgActionForm({ orgId, currentStatus }: OrgActionFormProps) {
           <button
             onClick={() => handleAction("UNSUSPEND_ORG")}
             disabled={isPending}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-500/10 border border-blue-500/25 text-blue-400 rounded-lg text-sm font-medium hover:bg-blue-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-500/10 border border-blue-500/25 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isPending_("UNSUSPEND_ORG") ? (
               <Loader2 className="w-4 h-4 animate-spin" />

@@ -36,15 +36,15 @@ export default async function AdminOrgDetailPage({
       <div>
         <Link
           href="/admin/organisations"
-          className="inline-flex items-center gap-1.5 text-white/35 hover:text-white/70 text-sm transition-colors mb-5"
+          className="inline-flex items-center gap-1.5 text-gray-400 hover:text-gray-600 text-sm transition-colors mb-5"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           Terug naar organisaties
         </Link>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">{org.name}</h1>
-            <p className="text-white/35 text-sm mt-1">
+            <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{org.name}</h1>
+            <p className="text-gray-400 text-sm mt-1">
               Aangemeld op {org.createdAt.toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" })}
             </p>
           </div>
@@ -57,15 +57,15 @@ export default async function AdminOrgDetailPage({
         <div className="lg:col-span-2 space-y-6">
           {/* Description */}
           {org.description && (
-            <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6">
-              <h3 className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-3">Omschrijving</h3>
-              <p className="text-white/65 text-sm leading-relaxed">{org.description}</p>
+            <div className="bg-white border border-gray-100 rounded-xl p-6">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Omschrijving</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{org.description}</p>
             </div>
           )}
 
           {/* Contact info */}
-          <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6">
-            <h3 className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4">Contactgegevens</h3>
+          <div className="bg-white border border-gray-100 rounded-xl p-6">
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Contactgegevens</h3>
             <div className="space-y-3">
               {[
                 { icon: Mail, label: org.email ?? "—" },
@@ -74,13 +74,13 @@ export default async function AdminOrgDetailPage({
                 { icon: Globe, label: org.website ?? "—", href: org.website ?? undefined },
               ].map(({ icon: Icon, label, href }) => (
                 <div key={label} className="flex items-start gap-3">
-                  <Icon className="w-4 h-4 text-white/25 mt-0.5 flex-shrink-0" />
+                  <Icon className="w-4 h-4 text-gray-300 mt-0.5 flex-shrink-0" />
                   {href ? (
-                    <a href={href} target="_blank" rel="noopener noreferrer" className="text-sm text-[#FF6B35] hover:underline">
+                    <a href={href} target="_blank" rel="noopener noreferrer" className="text-sm text-orange-500 hover:underline">
                       {label}
                     </a>
                   ) : (
-                    <span className="text-sm text-white/55">{label}</span>
+                    <span className="text-sm text-gray-500">{label}</span>
                   )}
                 </div>
               ))}
@@ -89,13 +89,13 @@ export default async function AdminOrgDetailPage({
 
           {/* Categories */}
           {org.categories.length > 0 && (
-            <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6">
-              <h3 className="text-xs font-semibold text-white/30 uppercase tracking-widest mb-4">Categorieën</h3>
+            <div className="bg-white border border-gray-100 rounded-xl p-6">
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">Categorieën</h3>
               <div className="flex flex-wrap gap-2">
                 {org.categories.map(({ category }) => (
                   <span
                     key={category.id}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.04] border border-white/[0.06] rounded-lg text-xs text-white/60"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 border border-gray-100 rounded-lg text-xs text-gray-500"
                   >
                     {category.name}
                   </span>
@@ -106,9 +106,9 @@ export default async function AdminOrgDetailPage({
 
           {/* Vacancies */}
           {org.vacancies.length > 0 && (
-            <div className="bg-[#161616] border border-white/[0.06] rounded-xl overflow-hidden">
-              <div className="px-6 py-4 border-b border-white/[0.05]">
-                <h3 className="text-xs font-semibold text-white/30 uppercase tracking-widest">
+            <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100">
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">
                   Vacatures ({org._count.vacancies})
                 </h3>
               </div>
@@ -117,18 +117,18 @@ export default async function AdminOrgDetailPage({
                   {org.vacancies.map((vacancy, i) => (
                     <tr
                       key={vacancy.id}
-                      className={`${i < org.vacancies.length - 1 ? "border-b border-white/[0.04]" : ""}`}
+                      className={`${i < org.vacancies.length - 1 ? "border-b border-gray-100" : ""}`}
                     >
                       <td className="px-6 py-3.5">
-                        <p className="text-white/75 text-sm font-medium">{vacancy.title}</p>
-                        <p className="text-white/30 text-xs mt-0.5 flex items-center gap-2">
+                        <p className="text-gray-600 text-sm font-medium">{vacancy.title}</p>
+                        <p className="text-gray-400 text-xs mt-0.5 flex items-center gap-2">
                           <Briefcase className="w-3 h-3" />
                           {vacancy.hours ? `${vacancy.hours}u/week` : "Flexibel"}
                           {vacancy.city && ` · ${vacancy.city}`}
                         </p>
                       </td>
                       <td className="px-6 py-3.5 text-right">
-                        <span className="text-white/30 text-xs">
+                        <span className="text-gray-400 text-xs">
                           {vacancy._count.matches} matches · {vacancy._count.swipes} swipes
                         </span>
                       </td>
@@ -143,21 +143,21 @@ export default async function AdminOrgDetailPage({
         {/* Right col: account info + action form */}
         <div className="space-y-6">
           {/* Account info */}
-          <div className="bg-[#161616] border border-white/[0.06] rounded-xl p-6 space-y-4">
-            <h3 className="text-xs font-semibold text-white/30 uppercase tracking-widest">Beheerder</h3>
+          <div className="bg-white border border-gray-100 rounded-xl p-6 space-y-4">
+            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest">Beheerder</h3>
             <div className="space-y-3">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-full bg-[#FF6B35]/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-[#FF6B35] text-xs font-bold">
+                <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <span className="text-orange-500 text-xs font-bold">
                     {org.admin.name?.charAt(0).toUpperCase() ?? "?"}
                   </span>
                 </div>
                 <div>
-                  <p className="text-white/75 text-sm font-medium">{org.admin.name ?? "Onbekend"}</p>
-                  <p className="text-white/35 text-xs">{org.admin.email}</p>
+                  <p className="text-gray-600 text-sm font-medium">{org.admin.name ?? "Onbekend"}</p>
+                  <p className="text-gray-400 text-xs">{org.admin.email}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-white/30 text-xs">
+              <div className="flex items-center gap-2 text-gray-400 text-xs">
                 <Calendar className="w-3.5 h-3.5" />
                 Lid sinds {org.admin.createdAt.toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })}
               </div>
@@ -167,16 +167,16 @@ export default async function AdminOrgDetailPage({
           {/* Rejection reason if present */}
           {org.rejectionReason && (
             <div className="bg-red-500/[0.07] border border-red-500/20 rounded-xl p-5">
-              <h3 className="text-xs font-semibold text-red-400/70 uppercase tracking-widest mb-2">Reden afwijzing</h3>
-              <p className="text-white/50 text-sm">{org.rejectionReason}</p>
+              <h3 className="text-xs font-semibold text-red-600/70 uppercase tracking-widest mb-2">Reden afwijzing</h3>
+              <p className="text-gray-400 text-sm">{org.rejectionReason}</p>
             </div>
           )}
 
           {/* Verified at */}
           {org.verifiedAt && (
             <div className="bg-green-500/[0.07] border border-green-500/20 rounded-xl p-5">
-              <h3 className="text-xs font-semibold text-green-400/70 uppercase tracking-widest mb-2">Geverifieerd</h3>
-              <p className="text-white/50 text-sm">
+              <h3 className="text-xs font-semibold text-green-600/70 uppercase tracking-widest mb-2">Geverifieerd</h3>
+              <p className="text-gray-400 text-sm">
                 {org.verifiedAt.toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" })}
               </p>
             </div>

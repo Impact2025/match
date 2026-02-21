@@ -40,35 +40,35 @@ export default async function AdminDashboardPage() {
       label: "Vrijwilligers",
       value: totalUsers.toLocaleString("nl"),
       icon: Users,
-      color: "text-blue-400",
-      bg: "bg-blue-400/10",
-      border: "border-blue-400/20",
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+      border: "border-blue-200",
     },
     {
       label: "Organisaties",
       value: approvedOrgs.toLocaleString("nl"),
       sub: `${totalOrgs} totaal`,
       icon: Building2,
-      color: "text-green-400",
-      bg: "bg-green-400/10",
-      border: "border-green-400/20",
+      color: "text-green-600",
+      bg: "bg-green-50",
+      border: "border-green-200",
     },
     {
       label: "Actieve vacatures",
       value: activeVacancies.toLocaleString("nl"),
       icon: Briefcase,
-      color: "text-purple-400",
-      bg: "bg-purple-400/10",
-      border: "border-purple-400/20",
+      color: "text-purple-600",
+      bg: "bg-purple-50",
+      border: "border-purple-200",
     },
     {
       label: "Matches totaal",
       value: totalMatches.toLocaleString("nl"),
       sub: `+${recentMatches} deze week`,
       icon: GitMerge,
-      color: "text-[#FF6B35]",
-      bg: "bg-[#FF6B35]/10",
-      border: "border-[#FF6B35]/20",
+      color: "text-orange-500",
+      bg: "bg-orange-50",
+      border: "border-orange-200",
     },
   ]
 
@@ -76,8 +76,8 @@ export default async function AdminDashboardPage() {
     <div className="p-8 max-w-6xl mx-auto space-y-10">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white tracking-tight">Dashboard</h1>
-        <p className="text-white/40 text-sm mt-1">Platform overzicht — live data</p>
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
+        <p className="text-gray-400 text-sm mt-1">Platform overzicht — live data</p>
       </div>
 
       {/* KPI grid */}
@@ -87,16 +87,16 @@ export default async function AdminDashboardPage() {
           return (
             <div
               key={kpi.label}
-              className="bg-[#161616] border border-white/[0.06] rounded-xl p-5 space-y-4"
+              className="bg-white border border-gray-100 rounded-xl p-5 space-y-4"
             >
               <div className={`w-9 h-9 rounded-lg ${kpi.bg} border ${kpi.border} flex items-center justify-center`}>
                 <Icon className={`w-4.5 h-4.5 ${kpi.color}`} strokeWidth={1.5} />
               </div>
               <div>
-                <p className="text-2xl font-bold text-white tracking-tight">{kpi.value}</p>
-                <p className="text-xs text-white/40 mt-0.5">{kpi.label}</p>
+                <p className="text-2xl font-bold text-gray-900 tracking-tight">{kpi.value}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{kpi.label}</p>
                 {kpi.sub && (
-                  <p className="text-[11px] text-white/25 mt-1 flex items-center gap-1">
+                  <p className="text-[11px] text-gray-300 mt-1 flex items-center gap-1">
                     <TrendingUp className="w-3 h-3" />
                     {kpi.sub}
                   </p>
@@ -109,23 +109,23 @@ export default async function AdminDashboardPage() {
 
       {/* Pending orgs alert */}
       {pendingOrgs > 0 && (
-        <div className="bg-amber-500/8 border border-amber-500/20 rounded-xl p-5 flex items-center justify-between">
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center flex-shrink-0">
-              <Clock className="w-4 h-4 text-amber-400" />
+            <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+              <Clock className="w-4 h-4 text-amber-600" />
             </div>
             <div>
-              <p className="text-white/80 text-sm font-medium">
+              <p className="text-gray-700 text-sm font-medium">
                 {pendingOrgs} {pendingOrgs === 1 ? "organisatie wacht" : "organisaties wachten"} op goedkeuring
               </p>
-              <p className="text-white/35 text-xs mt-0.5">
+              <p className="text-gray-400 text-xs mt-0.5">
                 Verificatie is vereist voordat hun vacatures zichtbaar worden
               </p>
             </div>
           </div>
           <Link
             href="/admin/organisations?status=PENDING_APPROVAL"
-            className="shrink-0 px-4 py-2 bg-amber-500/15 border border-amber-500/30 text-amber-400 text-sm font-medium rounded-lg hover:bg-amber-500/25 transition-colors"
+            className="shrink-0 px-4 py-2 bg-amber-100 border border-amber-300 text-amber-600 text-sm font-medium rounded-lg hover:bg-amber-100 transition-colors"
           >
             Bekijken →
           </Link>
@@ -136,20 +136,20 @@ export default async function AdminDashboardPage() {
       {recentOrgs.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-white/60 uppercase tracking-widest">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-widest">
               In behandeling
             </h2>
-            <Link href="/admin/organisations?status=PENDING_APPROVAL" className="text-[#FF6B35] text-xs hover:underline">
+            <Link href="/admin/organisations?status=PENDING_APPROVAL" className="text-orange-500 text-xs hover:underline">
               Alle bekijken
             </Link>
           </div>
-          <div className="bg-[#161616] border border-white/[0.06] rounded-xl overflow-hidden">
+          <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/[0.05]">
-                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-white/30 uppercase tracking-widest">Naam</th>
-                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-white/30 uppercase tracking-widest hidden md:table-cell">E-mail</th>
-                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-white/30 uppercase tracking-widest">Vacatures</th>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Naam</th>
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-widest hidden md:table-cell">E-mail</th>
+                  <th className="text-left px-5 py-3 text-[11px] font-semibold text-gray-400 uppercase tracking-widest">Vacatures</th>
                   <th className="px-5 py-3" />
                 </tr>
               </thead>
@@ -157,22 +157,22 @@ export default async function AdminDashboardPage() {
                 {recentOrgs.map((org, i) => (
                   <tr
                     key={org.id}
-                    className={`${i < recentOrgs.length - 1 ? "border-b border-white/[0.04]" : ""} hover:bg-white/[0.02] transition-colors`}
+                    className={`${i < recentOrgs.length - 1 ? "border-b border-gray-100" : ""} hover:bg-gray-50 transition-colors`}
                   >
                     <td className="px-5 py-4">
-                      <p className="text-white/80 text-sm font-medium">{org.name}</p>
-                      <p className="text-white/30 text-xs">{org.city ?? "—"}</p>
+                      <p className="text-gray-700 text-sm font-medium">{org.name}</p>
+                      <p className="text-gray-400 text-xs">{org.city ?? "—"}</p>
                     </td>
-                    <td className="px-5 py-4 text-white/40 text-sm hidden md:table-cell">
+                    <td className="px-5 py-4 text-gray-400 text-sm hidden md:table-cell">
                       {org.admin.email}
                     </td>
-                    <td className="px-5 py-4 text-white/40 text-sm">
+                    <td className="px-5 py-4 text-gray-400 text-sm">
                       {org._count.vacancies}
                     </td>
                     <td className="px-5 py-4 text-right">
                       <Link
                         href={`/admin/organisations/${org.id}`}
-                        className="text-[#FF6B35] text-xs font-medium hover:underline"
+                        className="text-orange-500 text-xs font-medium hover:underline"
                       >
                         Beoordelen →
                       </Link>
