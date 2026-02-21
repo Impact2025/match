@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { AdminSidebar } from "@/components/admin/sidebar"
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -10,12 +11,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/login")
   }
 
+  const pendingCount = await prisma.organisation.count({ where: { status: "PENDING_APPROVAL" } })
+
   return (
     <div
       className="flex h-screen overflow-hidden bg-gray-50"
       style={{ fontFamily: "var(--font-inter), Inter, -apple-system, sans-serif" }}
     >
-      <AdminSidebar adminName={user?.name ?? "Admin"} />
+      <AdminSidebar adminName={user?.name ?? "Admin"} pendingCount={pendingCount} />
 
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top bar */}

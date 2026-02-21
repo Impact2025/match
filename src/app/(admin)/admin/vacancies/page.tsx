@@ -132,7 +132,12 @@ export default async function AdminVacanciesPage({
                   className={`${i < items.length - 1 ? "border-b border-gray-100" : ""} hover:bg-gray-50 transition-colors`}
                 >
                   <td className="px-6 py-4">
-                    <p className="text-gray-700 text-sm font-medium">{vacancy.title}</p>
+                    <Link
+                      href={`/admin/vacancies/${vacancy.id}`}
+                      className="text-gray-700 text-sm font-medium hover:text-orange-500 transition-colors"
+                    >
+                      {vacancy.title}
+                    </Link>
                     <p className="text-gray-400 text-xs mt-0.5">
                       {vacancy.city ?? "—"}{vacancy.remote ? " · Remote" : ""}
                     </p>

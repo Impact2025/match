@@ -21,6 +21,17 @@ export async function createCategory(name: string, icon?: string, color?: string
   revalidatePath("/admin/categories")
 }
 
+export async function updateCategory(id: string, name: string, color?: string) {
+  await requireAdmin()
+  const trimmed = name.trim()
+  if (!trimmed) throw new Error("Naam is verplicht")
+  await prisma.category.update({
+    where: { id },
+    data: { name: trimmed, ...(color !== undefined ? { color: color || null } : {}) },
+  })
+  revalidatePath("/admin/categories")
+}
+
 export async function deleteCategory(id: string) {
   await requireAdmin()
   await prisma.category.delete({ where: { id } })
@@ -32,6 +43,14 @@ export async function createSkill(name: string) {
   const trimmed = name.trim()
   if (!trimmed) throw new Error("Naam is verplicht")
   await prisma.skill.create({ data: { name: trimmed } })
+  revalidatePath("/admin/categories")
+}
+
+export async function updateSkill(id: string, name: string) {
+  await requireAdmin()
+  const trimmed = name.trim()
+  if (!trimmed) throw new Error("Naam is verplicht")
+  await prisma.skill.update({ where: { id }, data: { name: trimmed } })
   revalidatePath("/admin/categories")
 }
 

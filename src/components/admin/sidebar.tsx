@@ -18,24 +18,37 @@ import {
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 
-const NAV_ITEMS = [
-  { href: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/admin/organisations", icon: Building2, label: "Organisaties" },
-  { href: "/admin/users", icon: Users, label: "Gebruikers" },
-  { href: "/admin/vacancies", icon: Briefcase, label: "Vacatures" },
-  { href: "/admin/categories", icon: Tag, label: "Categorieën" },
-  { href: "/admin/analytics", icon: BarChart2, label: "AI Analytics" },
-  { href: "/admin/scoring", icon: Sliders, label: "Scoring" },
-  { href: "/admin/logs", icon: ScrollText, label: "Audit Log" },
-  { href: "/admin/settings", icon: Settings, label: "Instellingen" },
+interface NavItem {
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  badge?: number
+}
+
+const BASE_NAV_ITEMS: Omit<NavItem, "badge">[] = [
+  { href: "/admin/dashboard",     icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/admin/organisations", icon: Building2,        label: "Organisaties" },
+  { href: "/admin/users",         icon: Users,            label: "Gebruikers" },
+  { href: "/admin/vacancies",     icon: Briefcase,        label: "Vacatures" },
+  { href: "/admin/categories",    icon: Tag,              label: "Categorieën" },
+  { href: "/admin/analytics",     icon: BarChart2,        label: "AI Analytics" },
+  { href: "/admin/scoring",       icon: Sliders,          label: "Scoring" },
+  { href: "/admin/logs",          icon: ScrollText,        label: "Audit Log" },
+  { href: "/admin/settings",      icon: Settings,         label: "Instellingen" },
 ]
 
 interface AdminSidebarProps {
   adminName: string
+  pendingCount?: number
 }
 
-export function AdminSidebar({ adminName }: AdminSidebarProps) {
+export function AdminSidebar({ adminName, pendingCount = 0 }: AdminSidebarProps) {
   const pathname = usePathname()
+
+  const navItems: NavItem[] = BASE_NAV_ITEMS.map((item) => ({
+    ...item,
+    badge: item.href === "/admin/organisations" && pendingCount > 0 ? pendingCount : undefined,
+  }))
 
   return (
     <aside className="w-[220px] shrink-0 flex flex-col h-full bg-white border-r border-gray-100">
@@ -52,7 +65,7 @@ export function AdminSidebar({ adminName }: AdminSidebarProps) {
 
       {/* Nav */}
       <nav className="flex-1 py-4 px-3 space-y-0.5">
-        {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
+        {navItems.map(({ href, icon: Icon, label, badge }) => {
           const isActive = pathname === href || pathname.startsWith(href + "/")
           return (
             <Link
@@ -72,7 +85,12 @@ export function AdminSidebar({ adminName }: AdminSidebarProps) {
                 }`}
               />
               <span className="flex-1">{label}</span>
-              {isActive && (
+              {badge !== undefined && badge > 0 && (
+                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-orange-500 text-white text-[10px] font-bold">
+                  {badge > 99 ? "99+" : badge}
+                </span>
+              )}
+              {isActive && !badge && (
                 <ChevronRight className="w-3.5 h-3.5 text-orange-500/50" />
               )}
             </Link>

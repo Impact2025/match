@@ -5,6 +5,8 @@ import {
   AddSkillForm,
   DeleteCategoryButton,
   DeleteSkillButton,
+  EditCategoryForm,
+  EditSkillForm,
 } from "@/components/admin/taxonomy-forms"
 
 export const dynamic = "force-dynamic"
@@ -59,14 +61,15 @@ export default async function AdminCategoriesPage() {
                   key={cat.id}
                   className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 group transition-colors"
                 >
-                  <span className="w-6 h-6 rounded-md bg-gray-100 flex items-center justify-center">
+                  <span className="w-6 h-6 rounded-md bg-gray-100 flex items-center justify-center flex-shrink-0">
                     <Tag className="w-3 h-3 text-gray-300" />
                   </span>
-                  <span className="flex-1 text-sm text-gray-600">{cat.name}</span>
-                  <span className="text-xs text-gray-300 tabular-nums">
+                  <span className="flex-1 text-sm text-gray-600 truncate">{cat.name}</span>
+                  <span className="text-xs text-gray-300 tabular-nums whitespace-nowrap">
                     {cat._count.vacancyCategories}v · {cat._count.userInterests}u
                   </span>
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                    <EditCategoryForm id={cat.id} currentName={cat.name} />
                     <DeleteCategoryButton id={cat.id} />
                   </div>
                 </div>
@@ -101,11 +104,12 @@ export default async function AdminCategoriesPage() {
                   <span className="w-6 h-6 rounded-md bg-blue-500/10 flex items-center justify-center flex-shrink-0">
                     <Wrench className="w-3 h-3 text-blue-600/50" />
                   </span>
-                  <span className="flex-1 text-sm text-gray-600">{skill.name}</span>
-                  <span className="text-xs text-gray-300 tabular-nums">
+                  <span className="flex-1 text-sm text-gray-600 truncate">{skill.name}</span>
+                  <span className="text-xs text-gray-300 tabular-nums whitespace-nowrap">
                     {skill._count.vacancySkills}v · {skill._count.userSkills}u
                   </span>
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                    <EditSkillForm id={skill.id} currentName={skill.name} />
                     <DeleteSkillButton id={skill.id} />
                   </div>
                 </div>

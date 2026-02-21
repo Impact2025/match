@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Globe, Mail, Phone, MapPin, Calendar, Briefcase } from "lucide-react"
+import { Globe, Mail, Phone, MapPin, Calendar, Briefcase } from "lucide-react"
 import { OrgStatusBadge } from "@/components/admin/status-badges"
 import { OrgActionForm } from "./org-action-form"
+import { Breadcrumbs } from "@/components/admin/breadcrumbs"
 
 export const dynamic = "force-dynamic"
 
@@ -32,15 +33,14 @@ export default async function AdminOrgDetailPage({
 
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-8">
-      {/* Back + header */}
+      {/* Breadcrumb + header */}
       <div>
-        <Link
-          href="/admin/organisations"
-          className="inline-flex items-center gap-1.5 text-gray-400 hover:text-gray-600 text-sm transition-colors mb-5"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" />
-          Terug naar organisaties
-        </Link>
+        <Breadcrumbs
+          items={[
+            { label: "Organisaties", href: "/admin/organisations" },
+            { label: org.name },
+          ]}
+        />
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{org.name}</h1>

@@ -17,14 +17,24 @@ const STATUS_TABS: { label: string; value: OrgStatus | null }[] = [
 export default async function AdminOrganisationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; page?: string }>
+  searchParams: Promise<{ status?: string; page?: string; q?: string }>
 }) {
-  const { status: statusParam, page: pageParam } = await searchParams
+  const { status: statusParam, page: pageParam, q } = await searchParams
   const activeStatus = (statusParam as OrgStatus | undefined) ?? null
   const page = Math.max(1, parseInt(pageParam ?? "1"))
   const pageSize = 20
 
-  const where = activeStatus ? { status: activeStatus } : {}
+  const where: any = {
+    ...(activeStatus ? { status: activeStatus } : {}),
+    ...(q
+      ? {
+          OR: [
+            { name: { contains: q, mode: "insensitive" } },
+            { admin: { email: { contains: q, mode: "insensitive" } } },
+          ],
+        }
+      : {}),
+  }
 
   const [items, total] = await Promise.all([
     prisma.organisation.findMany({
@@ -42,37 +52,62 @@ export default async function AdminOrganisationsPage({
 
   const totalPages = Math.ceil(total / pageSize)
 
+  const buildHref = (overrides: Record<string, string | null>) => {
+    const params = new URLSearchParams()
+    const merged: Record<string, string | null> = {
+      status: activeStatus,
+      q: q ?? null,
+      page: "1",
+      ...overrides,
+    }
+    Object.entries(merged).forEach(([k, v]) => { if (v) params.set(k, v) })
+    const qs = params.toString()
+    return `/admin/organisations${qs ? "?" + qs : ""}`
+  }
+
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Organisaties</h1>
-          <p className="text-gray-400 text-sm mt-1">{total} in totaal</p>
+          <p className="text-gray-400 text-sm mt-1">{total} gevonden</p>
         </div>
       </div>
 
-      {/* Status filter tabs */}
-      <div className="flex gap-1 bg-white border border-gray-100 rounded-xl p-1 w-fit">
-        {STATUS_TABS.map((tab) => {
-          const isActive = tab.value === activeStatus
-          const href = tab.value
-            ? `/admin/organisations?status=${tab.value}`
-            : "/admin/organisations"
-          return (
-            <Link
-              key={tab.label}
-              href={href}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                isActive
-                  ? "bg-orange-500 text-white"
-                  : "text-gray-400 hover:text-gray-600"
-              }`}
-            >
-              {tab.label}
-            </Link>
-          )
-        })}
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        {/* Status filter tabs */}
+        <div className="flex gap-1 bg-white border border-gray-100 rounded-xl p-1 flex-wrap">
+          {STATUS_TABS.map((tab) => {
+            const isActive = tab.value === activeStatus
+            return (
+              <Link
+                key={tab.label}
+                href={buildHref({ status: tab.value })}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                  isActive
+                    ? "bg-orange-500 text-white"
+                    : "text-gray-400 hover:text-gray-600"
+                }`}
+              >
+                {tab.label}
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* Search */}
+        <form action="/admin/organisations" method="GET" className="flex-1">
+          {activeStatus && <input type="hidden" name="status" value={activeStatus} />}
+          <input
+            type="text"
+            name="q"
+            defaultValue={q ?? ""}
+            placeholder="Zoek op naam of e-mail..."
+            className="w-full bg-white border border-gray-100 rounded-xl px-4 py-2.5 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:border-orange-300 transition-colors"
+          />
+        </form>
       </div>
 
       {/* Table */}
@@ -100,10 +135,10 @@ export default async function AdminOrganisationsPage({
                   key={org.id}
                   className={`${
                     i < items.length - 1 ? "border-b border-gray-100" : ""
-                  } hover:bg-gray-50 transition-colors group`}
+                  } hover:bg-gray-50 transition-colors`}
                 >
                   <td className="px-6 py-4">
-                    <p className="text-gray-700 text-sm font-medium group-hover:text-white transition-colors">
+                    <p className="text-gray-700 text-sm font-medium">
                       {org.name}
                     </p>
                     <p className="text-gray-400 text-xs mt-0.5">{org.admin.email}</p>
@@ -144,16 +179,16 @@ export default async function AdminOrganisationsPage({
           <div className="flex gap-2">
             {page > 1 && (
               <Link
-                href={`/admin/organisations${activeStatus ? `?status=${activeStatus}&` : "?"}page=${page - 1}`}
-                className="px-4 py-2 bg-white border border-gray-100 rounded-lg text-gray-500 text-sm hover:text-white transition-colors"
+                href={buildHref({ page: String(page - 1) })}
+                className="px-4 py-2 bg-white border border-gray-100 rounded-lg text-gray-500 text-sm transition-colors"
               >
                 ← Vorige
               </Link>
             )}
             {page < totalPages && (
               <Link
-                href={`/admin/organisations${activeStatus ? `?status=${activeStatus}&` : "?"}page=${page + 1}`}
-                className="px-4 py-2 bg-orange-500 rounded-lg text-gray-900 text-sm font-medium hover:bg-orange-600 transition-colors"
+                href={buildHref({ page: String(page + 1) })}
+                className="px-4 py-2 bg-orange-500 rounded-lg text-white text-sm font-medium hover:bg-orange-600 transition-colors"
               >
                 Volgende →
               </Link>

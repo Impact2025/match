@@ -57,6 +57,13 @@ export default async function AdminUsersPage({
     { label: "Organisaties", value: "ORGANISATION" },
   ]
 
+  const STATUS_TABS = [
+    { label: "Alle", value: null },
+    { label: "Actief", value: "ACTIVE" },
+    { label: "Geschorst", value: "SUSPENDED" },
+    { label: "Verbannen", value: "BANNED" },
+  ]
+
   const buildHref = (overrides: Record<string, string | null>) => {
     const params = new URLSearchParams()
     const merged = { role: role ?? null, status: status ?? null, q: q ?? null, page: "1", ...overrides }
@@ -73,7 +80,7 @@ export default async function AdminUsersPage({
       </div>
 
       {/* Filters row */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
         {/* Role tabs */}
         <div className="flex gap-1 bg-white border border-gray-100 rounded-xl p-1">
           {ROLE_TABS.map((tab) => {
@@ -82,6 +89,24 @@ export default async function AdminUsersPage({
               <Link
                 key={tab.label}
                 href={buildHref({ role: tab.value, page: "1" })}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                  isActive ? "bg-orange-500 text-white" : "text-gray-400 hover:text-gray-600"
+                }`}
+              >
+                {tab.label}
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* Status tabs */}
+        <div className="flex gap-1 bg-white border border-gray-100 rounded-xl p-1">
+          {STATUS_TABS.map((tab) => {
+            const isActive = (tab.value ?? null) === (status ?? null)
+            return (
+              <Link
+                key={tab.label}
+                href={buildHref({ status: tab.value, page: "1" })}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                   isActive ? "bg-orange-500 text-white" : "text-gray-400 hover:text-gray-600"
                 }`}
@@ -132,7 +157,12 @@ export default async function AdminUsersPage({
                   className={`${i < items.length - 1 ? "border-b border-gray-100" : ""} hover:bg-gray-50 transition-colors`}
                 >
                   <td className="px-6 py-4">
-                    <p className="text-gray-700 text-sm font-medium">{user.name ?? "Anoniem"}</p>
+                    <Link
+                      href={`/admin/users/${user.id}`}
+                      className="text-gray-700 text-sm font-medium hover:text-orange-500 transition-colors"
+                    >
+                      {user.name ?? "Anoniem"}
+                    </Link>
                     <p className="text-gray-400 text-xs mt-0.5">{user.email}</p>
                     {user.organisation && (
                       <p className="text-gray-300 text-[11px] mt-0.5">{user.organisation.name}</p>
