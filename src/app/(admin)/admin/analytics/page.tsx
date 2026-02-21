@@ -21,6 +21,8 @@ async function getEmbeddingCoverage() {
   }
 }
 
+type ScoreRow = { dir: string; avg_total: number; avg_motivation: number; avg_distance: number; avg_skill: number; avg_freshness: number; cnt: number }
+
 async function getAnalytics() {
   const [
     totalSwipes,
@@ -36,7 +38,6 @@ async function getAnalytics() {
     matchesWithCheckIn4,
     matchesWithCheckIn12,
     matchReasonCounts,
-    swipeScoreData,
   ] = await Promise.all([
     prisma.swipe.count(),
     prisma.swipe.count({ where: { direction: "LIKE" } }),
@@ -56,8 +57,12 @@ async function getAnalytics() {
       _count: { matchReason: true },
       orderBy: { _count: { matchReason: "desc" } },
     }),
-    // Avg score components from stored snapshots
-    prisma.$queryRaw<{ dir: string; avg_total: number; avg_motivation: number; avg_distance: number; avg_skill: number; avg_freshness: number; cnt: number }[]>`
+  ])
+
+  // Raw score query — may fail if score_snapshot column not yet populated
+  let swipeScoreData: ScoreRow[] = []
+  try {
+    swipeScoreData = await prisma.$queryRaw<ScoreRow[]>`
       SELECT
         direction as dir,
         COUNT(*)::int as cnt,
@@ -69,8 +74,10 @@ async function getAnalytics() {
       FROM swipes
       WHERE score_snapshot IS NOT NULL
       GROUP BY direction
-    `,
-  ])
+    `
+  } catch {
+    // Column may not exist yet or no data — handled gracefully below
+  }
 
   const likeRate = totalSwipes > 0 ? ((likeSwipes + superLikeSwipes) / totalSwipes) * 100 : 0
   const matchToAcceptRate = totalMatches > 0 ? (acceptedMatches / totalMatches) * 100 : 0
@@ -151,7 +158,16 @@ function ScoreRow({ label, likeAvg, dislikeAvg }: { label: string; likeAvg?: num
 }
 
 export default async function AnalyticsPage() {
-  const [d, emb] = await Promise.all([getAnalytics(), getEmbeddingCoverage()])
+  const [d, emb] = await Promise.all([
+    getAnalytics().catch(() => ({
+      totalSwipes: 0, likeSwipes: 0, dislikeSwipes: 0, superLikeSwipes: 0,
+      totalMatches: 0, pendingMatches: 0, acceptedMatches: 0, rejectedMatches: 0, completedMatches: 0,
+      matchesWithCheckIn1: 0, matchesWithCheckIn4: 0, matchesWithCheckIn12: 0,
+      matchReasonCounts: [], likeRate: 0, matchToAcceptRate: 0, retentionWeek12Rate: 0,
+      scoreByDir: {} as Record<string, ScoreRow>, hasScoreData: false,
+    })),
+    getEmbeddingCoverage(),
+  ])
 
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-10">
