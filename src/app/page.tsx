@@ -277,7 +277,7 @@ export default function HomePage() {
       </main>
 
       {/* ─── FOOTER ─── */}
-      <footer className="bg-gray-950 py-12 sm:py-16">
+      <footer className="bg-gray-950 py-12 sm:py-16 pb-24 sm:pb-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 mb-10 sm:mb-12">
             <div className="col-span-2 md:col-span-2">
