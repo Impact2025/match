@@ -275,9 +275,9 @@ export function TourLauncher({ tourId, accentColor }: TourLauncherProps) {
       setPhase("welcome")
     }
     const wKey = `__restartTour_${tourId}` as keyof Window
-    ;(window as Record<string, unknown>)[wKey as string] = restart
+    ;(window as unknown as Record<string, unknown>)[wKey as string] = restart
     return () => {
-      delete (window as Record<string, unknown>)[wKey as string]
+      delete (window as unknown as Record<string, unknown>)[wKey as string]
     }
   }, [key, tourId])
 
