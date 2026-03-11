@@ -63,8 +63,10 @@ async function getImpactData(): Promise<ImpactData> {
     }
   }
 
-  // orgWhere is typed as a proper Prisma OrganisationWhereInput to avoid spread type errors
-  const orgWhere = gid ? { gemeenteId: gid } : undefined
+  // Typed as `any`: Vercel Prisma client may not include gemeente fields in
+  // OrganisationWhereInput when generated from an older schema snapshot.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const orgWhere: any = gid ? { gemeenteId: gid } : undefined
 
   function estimateHours(hoursPerWeek: number | null, status: string, startedAt: Date | null) {
     const h = hoursPerWeek ?? 2

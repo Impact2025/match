@@ -91,8 +91,10 @@ export async function GET(req: NextRequest) {
     ? { id: gemeenteRow.id, name: gemeenteRow.name, displayName: gemeenteRow.display_name, primaryColor: gemeenteRow.primary_color, tagline: gemeenteRow.tagline }
     : null
 
-  // Typed org filter — avoids spreading unknown keys into Prisma WhereInput
-  const orgWhere = gid ? { gemeenteId: gid } : undefined
+  // Typed as `any`: Vercel Prisma client may not include gemeente fields in
+  // OrganisationWhereInput when generated from an older schema snapshot.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const orgWhere: any = gid ? { gemeenteId: gid } : undefined
 
   // ── Parallel basic counts ────────────────────────────────────────────────
   const [
