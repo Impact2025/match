@@ -11,6 +11,7 @@ import Link from "next/link"
 import { MapPin, TrendingUp } from "lucide-react"
 import type { KaartOrg } from "@/components/kaart/ImpactKaart"
 import { KaartClient } from "./KaartClient"
+import { prisma } from "@/lib/prisma"
 
 export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
@@ -19,13 +20,69 @@ export const metadata: Metadata = {
 }
 
 async function getKaartData(gemeenteSlug: string | null): Promise<KaartOrg[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  const url = new URL("/api/kaart/organisaties", baseUrl)
-  if (gemeenteSlug) url.searchParams.set("gemeente", gemeenteSlug)
+  try {
+    let gemeenteWhere: { gemeenteId?: string } = {}
+    if (gemeenteSlug) {
+      const gemeente = await prisma.gemeente.findUnique({
+        where: { slug: gemeenteSlug },
+        select: { id: true },
+      })
+      if (gemeente) gemeenteWhere = { gemeenteId: gemeente.id }
+    }
 
-  const res = await fetch(url.toString(), { next: { revalidate: 3600 } })
-  if (!res.ok) return []
-  return res.json()
+    const orgs = await prisma.organisation.findMany({
+      where: {
+        status: "APPROVED",
+        lat: { not: null },
+        lon: { not: null },
+        ...gemeenteWhere,
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        logo: true,
+        city: true,
+        lat: true,
+        lon: true,
+        categories: { select: { category: { select: { name: true, color: true } } } },
+        handprint: {
+          select: {
+            maatschappelijkeWaarde: true,
+            sroiWaarde: true,
+            retentieScore: true,
+            totaalUrenJaarlijks: true,
+            sdgScores: true,
+            dominantMotivatie: true,
+          },
+        },
+      },
+    })
+
+    return orgs.map((org) => ({
+      id: org.id,
+      name: org.name,
+      slug: org.slug,
+      description: org.description,
+      city: org.city,
+      lat: org.lat!,
+      lng: org.lon!,
+      categories: org.categories.map((c) => c.category.name),
+      handprint: org.handprint
+        ? {
+            waarde: org.handprint.maatschappelijkeWaarde,
+            sroiWaarde: org.handprint.sroiWaarde,
+            retentieScore: org.handprint.retentieScore,
+            totalHours: org.handprint.totaalUrenJaarlijks,
+            sdgScores: org.handprint.sdgScores,
+            dominantMotivatie: org.handprint.dominantMotivatie,
+          }
+        : null,
+    }))
+  } catch {
+    return []
+  }
 }
 
 export default async function KaartPage({
