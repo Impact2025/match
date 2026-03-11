@@ -54,10 +54,10 @@ export default async function SwipePage() {
 
   return (
     <div className="min-h-[calc(100svh-8.5rem)] bg-gray-50 flex flex-col items-center px-4 pt-3 pb-4 gap-3">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm" data-tour-id="profile-completeness">
         <ProfileCompleteness percent={percent} missing={missing} />
       </div>
-      <div className="w-full max-w-sm flex-1">
+      <div className="w-full max-w-sm flex-1" data-tour-id="swipe-deck">
         <SwipeDeck />
       </div>
     </div>

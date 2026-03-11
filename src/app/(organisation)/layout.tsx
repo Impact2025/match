@@ -4,6 +4,7 @@ import { OrgBottomNav } from "@/components/layout/org-bottom-nav"
 import { QueryProvider } from "@/components/providers/query-provider"
 import Link from "next/link"
 import { Heart, Bell } from "lucide-react"
+import { TourLauncher } from "@/components/onboarding/tour/TourLauncher"
 
 export default async function OrganisationLayout({
   children,
@@ -43,6 +44,7 @@ export default async function OrganisationLayout({
       </header>
       <main className="pt-14 pb-[calc(5rem+env(safe-area-inset-bottom))]">{children}</main>
       <OrgBottomNav />
+      <TourLauncher tourId="organisation" />
     </QueryProvider>
   )
 }

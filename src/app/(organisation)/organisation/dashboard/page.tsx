@@ -193,7 +193,7 @@ export default async function OrgDashboardPage() {
       </div>
 
       {/* Stat cards grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3" data-tour-id="org-stats">
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
@@ -218,7 +218,7 @@ export default async function OrgDashboardPage() {
       </div>
 
       {/* Vacancies section */}
-      <div>
+      <div data-tour-id="org-vacancies-section">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold text-gray-900">Mijn Vacatures</h2>
           <Link

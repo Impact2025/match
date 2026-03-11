@@ -128,7 +128,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* KPI grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" data-tour-id="admin-kpis">
         {kpis.map((kpi) => {
           const Icon = kpi.icon
           const isPositive = kpi.delta !== null && kpi.delta >= 0

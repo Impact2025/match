@@ -7,6 +7,7 @@ import Link from "next/link"
 import { MapPin, Settings, Pencil, Heart, ChevronRight } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogoutButton } from "@/components/profile/logout-button"
+import { RestartTourButton } from "@/components/onboarding/tour/RestartTourButton"
 
 export default async function ProfilePage() {
   const session = await auth()
@@ -249,6 +250,7 @@ export default async function ProfilePage() {
           <Pencil className="w-4 h-4" />
           Profiel Bewerken
         </Link>
+        <RestartTourButton tourId="volunteer" />
         <LogoutButton />
       </div>
     </div>

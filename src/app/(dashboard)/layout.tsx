@@ -7,6 +7,7 @@ import { Heart } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { AiAssistant } from "@/components/ai/ai-assistant"
 import { getCurrentGemeente } from "@/lib/gemeente"
+import { TourLauncher } from "@/components/onboarding/tour/TourLauncher"
 
 export default async function DashboardLayout({
   children,
@@ -108,6 +109,7 @@ export default async function DashboardLayout({
 
       <BottomNav gemeente={gemeente} />
       <AiAssistant mode="dashboard" />
+      <TourLauncher tourId="volunteer" accentColor={gemeente?.primaryColor} />
     </QueryProvider>
   )
 }

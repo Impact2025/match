@@ -909,7 +909,106 @@ async function main() {
 
   console.log("✅  Gesprek 2 aangemaakt (WIJ Heemstede wandelteam — 5 berichten)")
 
-  // ── 10. Summary ───────────────────────────────────────────────────────────
+  // ── 10. Handprint data per organisatie ────────────────────────────────────
+
+  const handprints = [
+    {
+      organisationId: "org-wij-eten-heemstede-demo",
+      totaalUrenJaarlijks: 1248,   // 24 vrijwilligers × 52 weken × 1 uur
+      maatschappelijkeWaarde: 19194,  // 1248 × €15,38
+      sroiWaarde: 80615,             // 19194 × 4,2
+      retentieScore: 78,
+      aantalActieveMatches: 18,
+      aantalAfgerondMatches: 6,
+      gemLooptijdMaanden: 14.2,
+      sdgScores: { "2": 0.9, "3": 0.7, "10": 0.8, "11": 0.6 },
+      dominantMotivatie: "sociaal",
+    },
+    {
+      organisationId: "org-fietsmaatjes-heemstede-demo",
+      totaalUrenJaarlijks: 936,    // 18 vrijwilligers × 52 weken × 1 uur
+      maatschappelijkeWaarde: 14396,
+      sroiWaarde: 60462,
+      retentieScore: 85,
+      aantalActieveMatches: 15,
+      aantalAfgerondMatches: 3,
+      gemLooptijdMaanden: 19.5,
+      sdgScores: { "3": 0.9, "10": 0.7, "11": 0.5 },
+      dominantMotivatie: "sociaal",
+    },
+    {
+      organisationId: "org-wij-heemstede-heemstede-demo",
+      totaalUrenJaarlijks: 2080,   // 40 vrijwilligers × 52 weken × 1 uur
+      maatschappelijkeWaarde: 31990,
+      sroiWaarde: 134360,
+      retentieScore: 62,
+      aantalActieveMatches: 28,
+      aantalAfgerondMatches: 12,
+      gemLooptijdMaanden: 9.8,
+      sdgScores: { "3": 0.6, "10": 0.8, "11": 0.9, "15": 0.5 },
+      dominantMotivatie: "buurt",
+    },
+    {
+      organisationId: "org-schuldhulp-heemstede-demo",
+      totaalUrenJaarlijks: 520,    // 10 vrijwilligers × 52 weken × 1 uur
+      maatschappelijkeWaarde: 7998,
+      sroiWaarde: 33590,
+      retentieScore: 44,
+      aantalActieveMatches: 8,
+      aantalAfgerondMatches: 6,
+      gemLooptijdMaanden: 7.1,
+      sdgScores: { "1": 0.9, "10": 0.9, "16": 0.6 },
+      dominantMotivatie: "waarden",
+    },
+    {
+      organisationId: "org-welzijn-heemstede-demo",
+      totaalUrenJaarlijks: 3120,   // 60 vrijwilligers × 52 weken × 1 uur
+      maatschappelijkeWaarde: 47986,
+      sroiWaarde: 201541,
+      retentieScore: 71,
+      aantalActieveMatches: 45,
+      aantalAfgerondMatches: 15,
+      gemLooptijdMaanden: 12.3,
+      sdgScores: { "3": 0.8, "4": 0.5, "10": 0.7, "11": 0.8 },
+      dominantMotivatie: "sociaal",
+    },
+  ]
+
+  for (const hp of handprints) {
+    await prisma.orgHandprint.upsert({
+      where: { organisationId: hp.organisationId },
+      update: {
+        totaalUrenJaarlijks: hp.totaalUrenJaarlijks,
+        maatschappelijkeWaarde: hp.maatschappelijkeWaarde,
+        sroiWaarde: hp.sroiWaarde,
+        retentieScore: hp.retentieScore,
+        aantalActieveMatches: hp.aantalActieveMatches,
+        aantalAfgerondMatches: hp.aantalAfgerondMatches,
+        gemLooptijdMaanden: hp.gemLooptijdMaanden,
+        sdgScores: hp.sdgScores,
+        dominantMotivatie: hp.dominantMotivatie,
+        laasteBerekening: new Date(),
+      },
+      create: {
+        organisationId: hp.organisationId,
+        totaalUrenJaarlijks: hp.totaalUrenJaarlijks,
+        maatschappelijkeWaarde: hp.maatschappelijkeWaarde,
+        sroiWaarde: hp.sroiWaarde,
+        retentieScore: hp.retentieScore,
+        aantalActieveMatches: hp.aantalActieveMatches,
+        aantalAfgerondMatches: hp.aantalAfgerondMatches,
+        gemLooptijdMaanden: hp.gemLooptijdMaanden,
+        sdgScores: hp.sdgScores,
+        dominantMotivatie: hp.dominantMotivatie,
+        isPubliek: true,
+        laasteBerekening: new Date(),
+      },
+    })
+  }
+
+  console.log("✅  Handprint data aangemaakt voor 5 organisaties")
+
+  // ── 11. Summary ───────────────────────────────────────────────────────────
 
   console.log(`
 ╔════════════════════════════════════════════════════════════╗

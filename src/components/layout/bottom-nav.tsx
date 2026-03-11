@@ -6,11 +6,11 @@ import { LayoutGrid, Heart, MessageCircle, User, Map } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 
 const NAV_ITEMS = [
-  { href: "/swipe", label: "Home", icon: LayoutGrid, badge: null as "pendingItems" | "unreadMessages" | null },
-  { href: "/matches", label: "Matches", icon: Heart, badge: "pendingItems" as const },
-  { href: "/kaart", label: "Kaart", icon: Map, badge: null },
-  { href: "/chat", label: "Berichten", icon: MessageCircle, badge: "unreadMessages" as const },
-  { href: "/profile", label: "Profiel", icon: User, badge: null },
+  { href: "/swipe",   label: "Home",      icon: LayoutGrid,    badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-home" },
+  { href: "/matches", label: "Matches",   icon: Heart,         badge: "pendingItems" as const,                          tourId: "nav-matches" },
+  { href: "/kaart",   label: "Kaart",     icon: Map,           badge: null,                                             tourId: "nav-kaart" },
+  { href: "/chat",    label: "Berichten", icon: MessageCircle, badge: "unreadMessages" as const,                        tourId: "nav-chat" },
+  { href: "/profile", label: "Profiel",   icon: User,          badge: null,                                             tourId: "nav-profiel" },
 ]
 
 interface NotificationCounts {
@@ -46,6 +46,7 @@ export function BottomNav({ gemeente }: BottomNavProps = {}) {
             <Link
               key={item.href}
               href={item.href}
+              data-tour-id={item.tourId}
               className="flex flex-col items-center gap-1 py-3 px-3 relative"
             >
               {isActive && (

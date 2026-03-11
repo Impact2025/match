@@ -6,11 +6,11 @@ import { LayoutDashboard, MessageCircle, Briefcase, User, Users, Sprout } from "
 import { useQuery } from "@tanstack/react-query"
 
 const NAV_ITEMS = [
-  { href: "/organisation/dashboard", label: "Dashboard", icon: LayoutDashboard, badge: "pendingItems" as const },
-  { href: "/organisation/volunteers", label: "Zoeken", icon: Users, badge: null as "pendingItems" | "unreadMessages" | null },
-  { href: "/impact", label: "Impact", icon: Sprout, badge: null as "pendingItems" | "unreadMessages" | null },
-  { href: "/chat", label: "Berichten", icon: MessageCircle, badge: "unreadMessages" as const },
-  { href: "/organisation/vacancies", label: "Vacatures", icon: Briefcase, badge: null as "pendingItems" | "unreadMessages" | null },
+  { href: "/organisation/dashboard",  label: "Dashboard", icon: LayoutDashboard, badge: "pendingItems" as const,                          tourId: "nav-org-dashboard" },
+  { href: "/organisation/volunteers", label: "Zoeken",    icon: Users,           badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-org-zoeken" },
+  { href: "/impact",                  label: "Impact",    icon: Sprout,          badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-org-impact" },
+  { href: "/chat",                    label: "Berichten", icon: MessageCircle,   badge: "unreadMessages" as const,                        tourId: "nav-org-chat" },
+  { href: "/organisation/vacancies",  label: "Vacatures", icon: Briefcase,       badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-org-vacatures" },
 ]
 
 interface NotificationCounts {
@@ -40,6 +40,7 @@ export function OrgBottomNav() {
             <Link
               key={item.href}
               href={item.href}
+              data-tour-id={item.tourId}
               className="flex flex-col items-center gap-1 py-3 px-2 relative"
             >
               {isActive && (

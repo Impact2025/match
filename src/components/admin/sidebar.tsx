@@ -26,17 +26,17 @@ interface NavItem {
   badge?: number
 }
 
-const BASE_NAV_ITEMS: Omit<NavItem, "badge">[] = [
-  { href: "/admin/dashboard",     icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/admin/organisations", icon: Building2,        label: "Organisaties" },
+const BASE_NAV_ITEMS: (Omit<NavItem, "badge"> & { tourId?: string })[] = [
+  { href: "/admin/dashboard",     icon: LayoutDashboard, label: "Dashboard",     tourId: "sidebar-dashboard" },
+  { href: "/admin/organisations", icon: Building2,        label: "Organisaties",  tourId: "sidebar-organisaties" },
   { href: "/admin/users",         icon: Users,            label: "Gebruikers" },
   { href: "/admin/vacancies",     icon: Briefcase,        label: "Vacatures" },
   { href: "/admin/categories",    icon: Tag,              label: "Categorieën" },
   { href: "/admin/analytics",     icon: BarChart2,        label: "AI Analytics" },
-  { href: "/admin/impact",        icon: Leaf,             label: "Impactmeting" },
-  { href: "/admin/scoring",       icon: Sliders,          label: "Scoring" },
+  { href: "/admin/impact",        icon: Leaf,             label: "Impactmeting",  tourId: "sidebar-impact" },
+  { href: "/admin/scoring",       icon: Sliders,          label: "Scoring",       tourId: "sidebar-scoring" },
   { href: "/admin/logs",          icon: ScrollText,        label: "Audit Log" },
-  { href: "/admin/settings",      icon: Settings,         label: "Instellingen" },
+  { href: "/admin/settings",      icon: Settings,         label: "Instellingen",  tourId: "sidebar-settings" },
 ]
 
 interface AdminSidebarProps {
@@ -47,7 +47,7 @@ interface AdminSidebarProps {
 export function AdminSidebar({ adminName, pendingCount = 0 }: AdminSidebarProps) {
   const pathname = usePathname()
 
-  const navItems: NavItem[] = BASE_NAV_ITEMS.map((item) => ({
+  const navItems: (NavItem & { tourId?: string })[] = BASE_NAV_ITEMS.map((item) => ({
     ...item,
     badge: item.href === "/admin/organisations" && pendingCount > 0 ? pendingCount : undefined,
   }))
@@ -67,12 +67,13 @@ export function AdminSidebar({ adminName, pendingCount = 0 }: AdminSidebarProps)
 
       {/* Nav */}
       <nav className="flex-1 py-4 px-3 space-y-0.5">
-        {navItems.map(({ href, icon: Icon, label, badge }) => {
+        {navItems.map(({ href, icon: Icon, label, badge, tourId }) => {
           const isActive = pathname === href || pathname.startsWith(href + "/")
           return (
             <Link
               key={href}
               href={href}
+              {...(tourId ? { "data-tour-id": tourId } : {})}
               className={`
                 group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
                 ${isActive
