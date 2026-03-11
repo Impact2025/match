@@ -60,6 +60,7 @@ export async function GET(req: NextRequest) {
     },
   })
 
+  let gemeentenUpdated = 0
   for (const g of gemeenten) {
     const orgsWithHandprint = g.organisations.filter((o) => o.handprint !== null)
     const totaalUren   = orgsWithHandprint.reduce((s, o) => s + (o.handprint?.totaalUrenJaarlijks    ?? 0), 0)
@@ -86,6 +87,7 @@ export async function GET(req: NextRequest) {
         laasteSync:          new Date(),
       },
     })
+    gemeentenUpdated++
   }
 
   const duration = ((Date.now() - startedAt) / 1000).toFixed(1)
@@ -93,7 +95,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     ...results,
-    gemeentenUpdated: gemeenten.length,
+    gemeentenUpdated,
     durationSeconds: duration,
   })
 }
