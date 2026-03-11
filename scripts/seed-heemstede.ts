@@ -469,7 +469,447 @@ async function main() {
     console.log(`✅  Vacature: ${vac.title.slice(0, 60)}...`)
   }
 
-  // ── 6. Summary ───────────────────────────────────────────────────────────
+  // ── 6. Stichting Welzijn Heemstede — extra org met 5 vacatures ──────────
+
+  const welzijnAdminUser = await prisma.user.upsert({
+    where: { email: "beheerder.welzijn@heemstede-demo.nl" },
+    update: {},
+    create: {
+      id: "org-welzijn-heemstede-demo-admin",
+      name: "Beheerder Stichting Welzijn Heemstede",
+      email: "beheerder.welzijn@heemstede-demo.nl",
+      password: await hashPassword("demo1234"),
+      role: "ORGANISATION",
+      status: "ACTIVE",
+      onboarded: true,
+    },
+  })
+
+  const welzijnOrg = await prisma.organisation.upsert({
+    where: { slug: "stichting-welzijn-heemstede" },
+    update: { name: "Stichting Welzijn Heemstede" },
+    create: {
+      id: "org-welzijn-heemstede-demo",
+      name: "Stichting Welzijn Heemstede",
+      slug: "stichting-welzijn-heemstede",
+      description:
+        "Stichting Welzijn Heemstede werkt aan het welzijn en de leefbaarheid van alle " +
+        "inwoners van Heemstede. Wij verbinden mensen, organisaties en gemeente om samen " +
+        "een warme en betrokken samenleving te bouwen. Onze vrijwilligers vormen het hart " +
+        "van onze organisatie.",
+      city: "Heemstede",
+      postcode: "2102",
+      lat: 52.3578,
+      lon: 4.6182,
+      email: "info@welzijnheemstede.nl",
+      website: "https://www.welzijnheemstede.nl",
+      status: "APPROVED",
+      verifiedAt: new Date(),
+      adminId: welzijnAdminUser.id,
+      gemeenteId: "gemeente-heemstede",
+    },
+  })
+
+  await prisma.organisation.update({
+    where: { id: welzijnOrg.id },
+    data: { gemeenteId: "gemeente-heemstede" },
+  })
+
+  for (const catName of ["Buurt & Gemeenschap", "Zorg & Welzijn", "Ouderen"]) {
+    const catId = categories[catName]
+    if (!catId) continue
+    await prisma.orgCategory.upsert({
+      where: { organisationId_categoryId: { organisationId: welzijnOrg.id, categoryId: catId } },
+      update: {},
+      create: { organisationId: welzijnOrg.id, categoryId: catId },
+    })
+  }
+
+  console.log("✅  Organisatie: Stichting Welzijn Heemstede")
+
+  const welzijnVacancies = [
+    {
+      id: "vac-welzijn-activiteiten-heemstede-demo",
+      title: "Activiteitenbegeleider voor ouderen bij Welzijn Heemstede",
+      description:
+        "Stichting Welzijn Heemstede organiseert wekelijkse activiteiten voor ouderen in onze " +
+        "buurtcentra. Denk aan spelletjesmiddagen, creatieve workshops en gezellige koffie-ochtenden.\n\n" +
+        "Als activiteitenbegeleider:\n" +
+        "• Begeleid je activiteiten voor groepen van 8–15 ouderen\n" +
+        "• Help je deelnemers actief mee te doen en nieuwe mensen te ontmoeten\n" +
+        "• Zorg je voor een warme en uitnodigende sfeer\n" +
+        "• Werk je samen met andere vrijwilligers en onze professionele coördinatorenteam\n\n" +
+        "Tijdsinvestering: 3 uur per week, doordeweeks overdag. " +
+        "Wij bieden een introductietraining en begeleiding. Onkosten worden vergoed.",
+      location: "Buurtcentrum De Hartekamp, Heemstede",
+      city: "Heemstede",
+      postcode: "2102",
+      lat: 52.3578,
+      lon: 4.6182,
+      hours: 3,
+      duration: "Doorlopend",
+      categories: ["Ouderen", "Buurt & Gemeenschap"],
+      skills: ["Communicatie", "Coaching / Begeleiding", "Teamwork"],
+    },
+    {
+      id: "vac-welzijn-transport-heemstede-demo",
+      title: "Vrijwillig taxichauffeur voor mensen met een beperking",
+      description:
+        "Heb jij een rijbewijs en een auto, en wil jij mensen met een beperking of ouderen " +
+        "helpen om zich te verplaatsen? Dan zoeken wij jou!\n\n" +
+        "Als vrijwillig taxichauffeur bij Welzijn Heemstede breng je deelnemers naar afspraken, " +
+        "activiteiten of andere bestemmingen die ze anders niet kunnen bereiken. " +
+        "Je rijdt met eigen auto; kilometervergoeding wordt uitbetaald.\n\n" +
+        "Wat vragen wij:\n" +
+        "• Geldig rijbewijs B en eigen auto\n" +
+        "• Geduldig en vriendelijk karakter\n" +
+        "• Flexibele beschikbaarheid (overdag, minimaal 1× per week)\n\n" +
+        "Aanmelden of meer info: info@welzijnheemstede.nl",
+      location: "Heemstede en omgeving",
+      city: "Heemstede",
+      postcode: "2102",
+      lat: 52.3578,
+      lon: 4.6182,
+      hours: 4,
+      duration: "Doorlopend",
+      categories: ["Ouderen", "Zorg & Welzijn"],
+      skills: ["Vervoer / Rijbewijs", "Communicatie"],
+    },
+    {
+      id: "vac-welzijn-leesmaatje-heemstede-demo",
+      title: "Leesmaatje voor laaggeletterden in Heemstede",
+      description:
+        "In Nederland hebben meer dan 2,5 miljoen volwassenen moeite met lezen en schrijven. " +
+        "Ook in Heemstede zijn er mensen die hier hulp bij kunnen gebruiken.\n\n" +
+        "Als leesmaatje ga je 1-op-1 aan de slag met een volwassene die zijn of haar lees- en " +
+        "schrijfvaardigheden wil verbeteren. Je werkt met materiaal dat wij je aanreiken en " +
+        "krijgt een gratis training vooraf.\n\n" +
+        "Tijdsinvestering: 1,5 uur per week op een zelf in te plannen moment.\n\n" +
+        "Geen onderwijservaring nodig — enthousiasme en geduld zijn voldoende!",
+      location: "Heemstede (locatie nader te bepalen)",
+      city: "Heemstede",
+      postcode: "2101",
+      lat: 52.359,
+      lon: 4.617,
+      hours: 2,
+      duration: "Minimaal 6 maanden",
+      categories: ["Buurt & Gemeenschap", "Zorg & Welzijn"],
+      skills: ["Communicatie", "Coaching / Begeleiding"],
+    },
+    {
+      id: "vac-welzijn-tuinteam-heemstede-demo",
+      title: "Vrijwilliger gezocht voor ons Tuinteam Heemstede",
+      description:
+        "Welzijn Heemstede beheert samen met bewoners een aantal gemeenschappelijke tuinen " +
+        "in de wijk. Elke twee weken komen we bij elkaar om samen te tuinieren, te oogsten " +
+        "en de tuin te onderhouden.\n\n" +
+        "Als tuinteamlid:\n" +
+        "• Help je mee met onderhoud van perken, moestuinbedden en paden\n" +
+        "• Ontmoet je enthousiaste buurtbewoners\n" +
+        "• Draag je bij aan een groenere en leefbaardere wijk\n\n" +
+        "Tijdsinvestering: 2 uur per twee weken, zaterdagochtend. " +
+        "Tuinervaring is welkom maar niet vereist.",
+      location: "Gemeenschappelijke tuin Julianalaan, Heemstede",
+      city: "Heemstede",
+      postcode: "2103",
+      lat: 52.362,
+      lon: 4.614,
+      hours: 1,
+      duration: "Doorlopend",
+      categories: ["Natuur & Milieu", "Buurt & Gemeenschap"],
+      skills: ["Teamwork"],
+    },
+    {
+      id: "vac-welzijn-admin-heemstede-demo",
+      title: "Administratief ondersteuner voor Welzijn Heemstede (thuiswerk mogelijk)",
+      description:
+        "Welzijn Heemstede zoekt een vrijwilliger die ons kleine kantoorteam ondersteunt " +
+        "bij administratieve taken. Dit kan grotendeels vanuit huis.\n\n" +
+        "Takenpakket:\n" +
+        "• Verwerken van aanmeldingen voor activiteiten en vrijwilligers\n" +
+        "• Bijhouden van contactenlijsten en deelnemersregistratie\n" +
+        "• Versturen van uitnodigingen en herinneringen per e-mail\n" +
+        "• Ondersteunen bij het opstellen van nieuwsbrieven\n\n" +
+        "Wat wij vragen:\n" +
+        "• Basiskennis van Word, Excel en e-mail\n" +
+        "• Nauwkeurig en betrouwbaar\n" +
+        "• Beschikbaar voor 2–3 uur per week\n\n" +
+        "Je werkt zoveel mogelijk op eigen tijden. Eén keer per maand een kort overleg op kantoor.",
+      location: "Thuiswerk + kantoor Heemstede",
+      city: "Heemstede",
+      postcode: "2102",
+      lat: 52.3578,
+      lon: 4.6182,
+      remote: true,
+      hours: 3,
+      duration: "Doorlopend",
+      categories: ["Buurt & Gemeenschap"],
+      skills: ["Administratie", "Communicatie", "Organisatie"],
+    },
+  ]
+
+  for (const vac of welzijnVacancies) {
+    const skillRecords = await Promise.all(
+      vac.skills.map((n) =>
+        prisma.skill.upsert({ where: { name: n }, update: {}, create: { name: n } }),
+      ),
+    )
+    const categoryRecords = await Promise.all(
+      vac.categories.map((n) =>
+        prisma.category.upsert({ where: { name: n }, update: {}, create: { name: n } }),
+      ),
+    )
+    await prisma.vacancy.deleteMany({ where: { id: vac.id } })
+    await prisma.vacancy.create({
+      data: {
+        id: vac.id,
+        title: vac.title,
+        description: vac.description,
+        location: vac.location ?? null,
+        city: vac.city,
+        postcode: vac.postcode,
+        lat: vac.lat,
+        lon: vac.lon,
+        remote: vac.remote ?? false,
+        hours: vac.hours,
+        duration: vac.duration,
+        status: "ACTIVE",
+        organisationId: welzijnOrg.id,
+        skills: { create: skillRecords.map((s) => ({ skillId: s.id })) },
+        categories: { create: categoryRecords.map((c) => ({ categoryId: c.id })) },
+      },
+    })
+    console.log(`✅  Vacature: ${vac.title.slice(0, 60)}...`)
+  }
+
+  // ── 7. Swipes van de demo vrijwilliger ───────────────────────────────────
+
+  const swipeData = [
+    { vacancyId: cuid("vac-gastheer"),      direction: "LIKE",    reason: "Goede zaak" },
+    { vacancyId: cuid("vac-wandelteam"),    direction: "LIKE",    reason: "Dichtbij mij" },
+    { vacancyId: "vac-welzijn-activiteiten-heemstede-demo", direction: "SUPER_LIKE", reason: "Past bij mijn skills" },
+    { vacancyId: "vac-welzijn-transport-heemstede-demo",    direction: "LIKE",       reason: "Flexibele tijden" },
+    { vacancyId: cuid("vac-telefonisch"),   direction: "DISLIKE", reason: null },
+    { vacancyId: cuid("vac-secretaris"),    direction: "DISLIKE", reason: null },
+    { vacancyId: "vac-welzijn-leesmaatje-heemstede-demo",  direction: "LIKE",       reason: "Goede zaak" },
+  ]
+
+  for (const s of swipeData) {
+    await prisma.swipe.deleteMany({
+      where: { fromId: volunteerUser.id, vacancyId: s.vacancyId },
+    })
+    await prisma.swipe.create({
+      data: {
+        fromId: volunteerUser.id,
+        vacancyId: s.vacancyId,
+        direction: s.direction as "LIKE" | "DISLIKE" | "SUPER_LIKE",
+        matchReason: s.reason ?? undefined,
+      },
+    })
+  }
+
+  console.log("✅  Swipes aangemaakt")
+
+  // ── 8. Matches ────────────────────────────────────────────────────────────
+
+  // match-1: ACCEPTED — WIJ Eten Samen gastheer
+  const match1Id = "match-gastheer-heemstede-demo"
+  await prisma.match.deleteMany({ where: { id: match1Id } })
+  const match1 = await prisma.match.create({
+    data: {
+      id: match1Id,
+      volunteerId: volunteerUser.id,
+      vacancyId: cuid("vac-gastheer"),
+      status: "ACCEPTED",
+      startedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 dagen geleden
+    },
+  })
+
+  // match-2: ACCEPTED — WIJ Heemstede wandelteam
+  const match2Id = "match-wandelteam-heemstede-demo"
+  await prisma.match.deleteMany({ where: { id: match2Id } })
+  const match2 = await prisma.match.create({
+    data: {
+      id: match2Id,
+      volunteerId: volunteerUser.id,
+      vacancyId: cuid("vac-wandelteam"),
+      status: "ACCEPTED",
+      startedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 dagen geleden
+    },
+  })
+
+  // match-3: PENDING — Welzijn activiteiten
+  const match3Id = "match-welzijn-activiteiten-heemstede-demo"
+  await prisma.match.deleteMany({ where: { id: match3Id } })
+  const match3 = await prisma.match.create({
+    data: {
+      id: match3Id,
+      volunteerId: volunteerUser.id,
+      vacancyId: "vac-welzijn-activiteiten-heemstede-demo",
+      status: "PENDING",
+    },
+  })
+
+  // match-4: PENDING — Welzijn transport
+  const match4Id = "match-welzijn-transport-heemstede-demo"
+  await prisma.match.deleteMany({ where: { id: match4Id } })
+  await prisma.match.create({
+    data: {
+      id: match4Id,
+      volunteerId: volunteerUser.id,
+      vacancyId: "vac-welzijn-transport-heemstede-demo",
+      status: "PENDING",
+    },
+  })
+
+  console.log("✅  Matches aangemaakt (2× ACCEPTED, 2× PENDING)")
+
+  // ── 9. Gesprekken & berichten ──────────────────────────────────────────────
+
+  const orgWijEtenAdminId = "org-wij-eten-heemstede-demo-admin"
+  const orgWijHeemstedeAdminId = "org-wij-heemstede-heemstede-demo-admin"
+
+  // Gesprek 1 — WIJ Eten Samen gastheer (match1)
+  const conv1Id = "conv-gastheer-heemstede-demo"
+  await prisma.message.deleteMany({ where: { conversationId: conv1Id } })
+  await prisma.conversationParticipant.deleteMany({ where: { conversationId: conv1Id } })
+  await prisma.conversation.deleteMany({ where: { id: conv1Id } })
+
+  const conv1 = await prisma.conversation.create({
+    data: {
+      id: conv1Id,
+      matchId: match1.id,
+      participants: {
+        create: [
+          { userId: volunteerUser.id },
+          { userId: orgWijEtenAdminId },
+        ],
+      },
+    },
+  })
+
+  const conv1Messages = [
+    {
+      senderId: orgWijEtenAdminId,
+      content: "Hallo Sam! Wat fijn dat je interesse hebt getoond in onze gastvrouw/gastheer functie bij WIJ Eten Samen. Ik ben Petra, de coördinator. Heb je nog vragen over de rol?",
+      offsetDays: -6,
+    },
+    {
+      senderId: volunteerUser.id,
+      content: "Hoi Petra! Ja hoor, ik vind het een geweldig initiatief. Ik woon zelf ook in Heemstede en zou me er graag voor inzetten. Elke maandagavond lukt me goed. Is er ook een inwerkperiode?",
+      offsetDays: -6,
+      offsetHours: 2,
+    },
+    {
+      senderId: orgWijEtenAdminId,
+      content: "Top! We hebben altijd een korte introductiebijeenkomst van ongeveer een uur, en daarna loop je twee keer mee met een ervaren vrijwilliger. Kun je aanstaande maandag al langskomen om 17:00 uur?",
+      offsetDays: -5,
+    },
+    {
+      senderId: volunteerUser.id,
+      content: "Dat klinkt perfect. Maandag om 17:00 uur is helemaal goed voor mij. Welk adres moet ik hebben?",
+      offsetDays: -5,
+      offsetHours: 1,
+    },
+    {
+      senderId: orgWijEtenAdminId,
+      content: "Geweldig! We zitten in het buurtcentrum aan de Raadhuisstraat 22 in Heemstede. Parkeren kan op het plein ervoor. We hebben er zin in! Tot maandag! 😊",
+      offsetDays: -5,
+      offsetHours: 3,
+    },
+    {
+      senderId: volunteerUser.id,
+      content: "Ik ook! Tot maandag.",
+      offsetDays: -5,
+      offsetHours: 4,
+    },
+  ]
+
+  for (const msg of conv1Messages) {
+    const createdAt = new Date(
+      Date.now() + msg.offsetDays * 24 * 60 * 60 * 1000 + (msg.offsetHours ?? 0) * 60 * 60 * 1000,
+    )
+    await prisma.message.create({
+      data: {
+        conversationId: conv1.id,
+        senderId: msg.senderId,
+        content: msg.content,
+        createdAt,
+        updatedAt: createdAt,
+      },
+    })
+  }
+
+  console.log("✅  Gesprek 1 aangemaakt (WIJ Eten Samen — 6 berichten)")
+
+  // Gesprek 2 — WIJ Heemstede wandelteam (match2)
+  const conv2Id = "conv-wandelteam-heemstede-demo"
+  await prisma.message.deleteMany({ where: { conversationId: conv2Id } })
+  await prisma.conversationParticipant.deleteMany({ where: { conversationId: conv2Id } })
+  await prisma.conversation.deleteMany({ where: { id: conv2Id } })
+
+  const conv2 = await prisma.conversation.create({
+    data: {
+      id: conv2Id,
+      matchId: match2.id,
+      participants: {
+        create: [
+          { userId: volunteerUser.id },
+          { userId: orgWijHeemstedeAdminId },
+        ],
+      },
+    },
+  })
+
+  const conv2Messages = [
+    {
+      senderId: orgWijHeemstedeAdminId,
+      content: "Dag Sam! Welkom bij het wandelteam van WIJ Heemstede. Ik ben Mirjam van het Vrijwilligerspunt. Fijn dat je mee wil helpen met de wandelingen!",
+      offsetDays: -2,
+    },
+    {
+      senderId: volunteerUser.id,
+      content: "Hoi Mirjam! Bedankt voor het welkom. Ik woon vlakbij en wandel zelf graag. Op welke ochtenden zijn de wandelingen precies?",
+      offsetDays: -2,
+      offsetHours: 1,
+    },
+    {
+      senderId: orgWijHeemstedeAdminId,
+      content: "Wij lopen op dinsdag- en donderdagochtend, start om 10:00 bij het parkeerterrein aan de Blekersvaartweg. Gemiddeld 5–6 km, altijd terug voor de lunch. Welke dag past jou het beste?",
+      offsetDays: -1,
+    },
+    {
+      senderId: volunteerUser.id,
+      content: "Donderdag werkt goed voor mij. Kan ik aanstaande donderdag al meedraaien als kennismaking?",
+      offsetDays: -1,
+      offsetHours: 2,
+    },
+    {
+      senderId: orgWijHeemstedeAdminId,
+      content: "Absoluut! We starten om 10:00 uur. Je hoeft niks mee te nemen, behalve comfortabel schoeisel en een goed humeur. We verheugen ons erop!",
+      offsetDays: 0,
+      offsetHours: -3,
+    },
+  ]
+
+  for (const msg of conv2Messages) {
+    const createdAt = new Date(
+      Date.now() + msg.offsetDays * 24 * 60 * 60 * 1000 + (msg.offsetHours ?? 0) * 60 * 60 * 1000,
+    )
+    await prisma.message.create({
+      data: {
+        conversationId: conv2.id,
+        senderId: msg.senderId,
+        content: msg.content,
+        createdAt,
+        updatedAt: createdAt,
+      },
+    })
+  }
+
+  console.log("✅  Gesprek 2 aangemaakt (WIJ Heemstede wandelteam — 5 berichten)")
+
+  // ── 10. Summary ───────────────────────────────────────────────────────────
 
   console.log(`
 ╔════════════════════════════════════════════════════════════╗
@@ -484,6 +924,7 @@ async function main() {
 ║    beheerder.fietsmaatjes@heemstede-demo.nl                ║
 ║    beheerder.wij@heemstede-demo.nl                         ║
 ║    beheerder.schuldhulp@heemstede-demo.nl                  ║
+║    beheerder.welzijn@heemstede-demo.nl                     ║
 ╠════════════════════════════════════════════════════════════╣
 ║  Subdomain:  heemstede.localhost:3000  (of GEMEENTE_SLUG)  ║
 ╚════════════════════════════════════════════════════════════╝
