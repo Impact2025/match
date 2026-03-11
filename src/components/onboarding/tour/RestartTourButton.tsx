@@ -11,7 +11,7 @@ export function RestartTourButton({
   label?: string
 }) {
   const handleClick = () => {
-    const fn = (window as Record<string, unknown>)[`__restartTour_${tourId}`]
+    const fn = (window as unknown as Record<string, unknown>)[`__restartTour_${tourId}`]
     if (typeof fn === "function") {
       ;(fn as () => void)()
     }
