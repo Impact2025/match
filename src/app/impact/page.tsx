@@ -63,7 +63,8 @@ async function getImpactData(): Promise<ImpactData> {
     }
   }
 
-  const gemeenteFilter = gid ? { organisation: { gemeenteId: gid } } : {}
+  // orgWhere is typed as a proper Prisma OrganisationWhereInput to avoid spread type errors
+  const orgWhere = gid ? { gemeenteId: gid } : undefined
 
   function estimateHours(hoursPerWeek: number | null, status: string, startedAt: Date | null) {
     const h = hoursPerWeek ?? 2
@@ -83,14 +84,14 @@ async function getImpactData(): Promise<ImpactData> {
   ] = await Promise.all([
     prisma.user.count({ where: { role: "VOLUNTEER", status: "ACTIVE", onboarded: true } }),
     prisma.organisation.count({ where: { status: "APPROVED", ...(gid ? { gemeenteId: gid } : {}) } }),
-    prisma.vacancy.count({ where: { status: "ACTIVE", ...gemeenteFilter } }),
-    prisma.match.count({ where: { vacancy: { ...gemeenteFilter } } }),
-    prisma.match.count({ where: { status: "ACCEPTED",   vacancy: { ...gemeenteFilter } } }),
-    prisma.match.count({ where: { status: "COMPLETED",  vacancy: { ...gemeenteFilter } } }),
+    prisma.vacancy.count({ where: { status: "ACTIVE", organisation: orgWhere } }),
+    prisma.match.count({ where: { vacancy: { organisation: orgWhere } } }),
+    prisma.match.count({ where: { status: "ACCEPTED",  vacancy: { organisation: orgWhere } } }),
+    prisma.match.count({ where: { status: "COMPLETED", vacancy: { organisation: orgWhere } } }),
     prisma.swipe.count(),
     prisma.swipe.count({ where: { direction: "LIKE" } }),
     prisma.swipe.count({ where: { direction: "SUPER_LIKE" } }),
-    prisma.match.count({ where: { checkIn12SentAt: { not: null }, vacancy: { ...gemeenteFilter } } }),
+    prisma.match.count({ where: { checkIn12SentAt: { not: null }, vacancy: { organisation: orgWhere } } }),
     gid
       ? prisma.$queryRaw<[{ cnt: bigint }]>`
           SELECT COUNT(DISTINCT u.id)::bigint as cnt
@@ -112,7 +113,7 @@ async function getImpactData(): Promise<ImpactData> {
             AND m.started_at >= NOW() - INTERVAL '90 days'
         `.then((r) => Number(r[0]?.cnt ?? 0)).catch(() => 0),
     prisma.match.findMany({
-      where: { status: { in: ["ACCEPTED","COMPLETED"] }, vacancy: { ...gemeenteFilter } },
+      where: { status: { in: ["ACCEPTED","COMPLETED"] }, vacancy: { organisation: orgWhere } },
       select: {
         status: true, startedAt: true,
         vacancy: { select: { hours: true, categories: { select: { category: { select: { name: true } } } } } },

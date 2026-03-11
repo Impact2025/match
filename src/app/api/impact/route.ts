@@ -75,7 +75,6 @@ export async function GET(req: NextRequest) {
     null
 
   // ── Gemeente filter ──────────────────────────────────────────────────────
-  let gemeenteWhere: { gemeenteId?: string } = {}
   type GemeenteRow = { id: string; name: string; display_name: string; primary_color: string; tagline: string | null }
   let gemeenteRow: GemeenteRow | null = null
 
@@ -85,13 +84,15 @@ export async function GET(req: NextRequest) {
       FROM gemeenten WHERE slug = ${gemeenteSlug} LIMIT 1
     `.catch(() => [])
     gemeenteRow = rows[0] ?? null
-    if (gemeenteRow) gemeenteWhere = { gemeenteId: gemeenteRow.id }
   }
 
-  const gid = gemeenteWhere.gemeenteId ?? null
+  const gid: string | null = gemeenteRow?.id ?? null
   const gemeente = gemeenteRow
     ? { id: gemeenteRow.id, name: gemeenteRow.name, displayName: gemeenteRow.display_name, primaryColor: gemeenteRow.primary_color, tagline: gemeenteRow.tagline }
     : null
+
+  // Typed org filter — avoids spreading unknown keys into Prisma WhereInput
+  const orgWhere = gid ? { gemeenteId: gid } : undefined
 
   // ── Parallel basic counts ────────────────────────────────────────────────
   const [
@@ -107,32 +108,22 @@ export async function GET(req: NextRequest) {
     likeSwipes,
     superLikeSwipes,
   ] = await Promise.all([
-    prisma.user.count({
-      where: {
-        role: "VOLUNTEER",
-        status: "ACTIVE",
-        onboarded: true,
-        ...(gemeenteSlug ? {} : {}), // volunteers are not org-linked, so no gemeente filter
-      },
-    }),
-    prisma.organisation.count({ where: { status: "APPROVED", ...gemeenteWhere } }),
+    prisma.user.count({ where: { role: "VOLUNTEER", status: "ACTIVE", onboarded: true } }),
+    prisma.organisation.count({ where: { status: "APPROVED", ...(orgWhere ?? {}) } }),
     prisma.vacancy.count({
-      where: {
-        status: "ACTIVE",
-        organisation: { status: "APPROVED", ...gemeenteWhere },
-      },
+      where: { status: "ACTIVE", organisation: { status: "APPROVED", ...orgWhere } },
     }),
     prisma.match.count({
-      where: { vacancy: { organisation: { ...gemeenteWhere } } },
+      where: { vacancy: { organisation: orgWhere } },
     }),
     prisma.match.count({
-      where: { status: "PENDING", vacancy: { organisation: { ...gemeenteWhere } } },
+      where: { status: "PENDING", vacancy: { organisation: orgWhere } },
     }),
     prisma.match.count({
-      where: { status: "ACCEPTED", vacancy: { organisation: { ...gemeenteWhere } } },
+      where: { status: "ACCEPTED", vacancy: { organisation: orgWhere } },
     }),
     prisma.match.count({
-      where: { status: "COMPLETED", vacancy: { organisation: { ...gemeenteWhere } } },
+      where: { status: "COMPLETED", vacancy: { organisation: orgWhere } },
     }),
     prisma.conversation.count(),
     prisma.swipe.count(),
@@ -166,7 +157,7 @@ export async function GET(req: NextRequest) {
   const activeFulfilledMatches = await prisma.match.findMany({
     where: {
       status: { in: ["ACCEPTED", "COMPLETED"] },
-      vacancy: { organisation: { ...gemeenteWhere } },
+      vacancy: { organisation: orgWhere },
     },
     select: { status: true, startedAt: true, vacancy: { select: { hours: true } } },
   })
@@ -182,13 +173,13 @@ export async function GET(req: NextRequest) {
   // ── Retention rates ──────────────────────────────────────────────────────
   const [checkIn1Count, checkIn4Count, checkIn12Count] = await Promise.all([
     prisma.match.count({
-      where: { checkIn1SentAt: { not: null }, vacancy: { organisation: { ...gemeenteWhere } } },
+      where: { checkIn1SentAt: { not: null }, vacancy: { organisation: orgWhere } },
     }),
     prisma.match.count({
-      where: { checkIn4SentAt: { not: null }, vacancy: { organisation: { ...gemeenteWhere } } },
+      where: { checkIn4SentAt: { not: null }, vacancy: { organisation: orgWhere } },
     }),
     prisma.match.count({
-      where: { checkIn12SentAt: { not: null }, vacancy: { organisation: { ...gemeenteWhere } } },
+      where: { checkIn12SentAt: { not: null }, vacancy: { organisation: orgWhere } },
     }),
   ])
 
@@ -212,7 +203,7 @@ export async function GET(req: NextRequest) {
   const matchesWithCategories: MatchWithCats[] = await prisma.match.findMany({
     where: {
       status: { in: ["ACCEPTED", "COMPLETED"] },
-      vacancy: { organisation: { ...gemeenteWhere } },
+      vacancy: { organisation: orgWhere },
     },
     select: {
       id: true,
