@@ -32,7 +32,7 @@ async function getAdminImpact() {
     totalVolunteers, activeVolunteers, totalOrgs, totalVacancies,
     totalMatches, acceptedMatches, completedMatches, totalSwipes, likeSwipes, superLikeSwipes,
     checkIn1, checkIn4, checkIn12,
-    gemeenten,
+    gemeentenRaw,
     matchesWithCategories,
   ] = await Promise.all([
     prisma.user.count({ where: { role: "VOLUNTEER", status: "ACTIVE", onboarded: true } }),
@@ -55,19 +55,29 @@ async function getAdminImpact() {
     prisma.match.count({ where: { checkIn1SentAt: { not: null } } }),
     prisma.match.count({ where: { checkIn4SentAt: { not: null } } }),
     prisma.match.count({ where: { checkIn12SentAt: { not: null } } }),
-    prisma.gemeente.findMany({
-      include: {
-        organisations: {
-          where: { status: "APPROVED" },
-          include: {
-            vacancies: {
-              where: { status: "ACTIVE" },
-              include: { matches: { where: { status: { in: ["ACCEPTED","COMPLETED"] } } } },
-            },
-          },
-        },
-      },
-    }),
+    prisma.$queryRaw<{
+      gemeente_id: string; gemeente_name: string; display_name: string
+      primary_color: string; slug: string; org_id: string | null
+      org_name: string | null; vac_id: string | null; vac_hours: number | null
+      match_status: string | null
+    }[]>`
+      SELECT
+        g.id          AS gemeente_id,
+        g.name        AS gemeente_name,
+        g.display_name,
+        g.primary_color,
+        g.slug,
+        o.id          AS org_id,
+        o.name        AS org_name,
+        v.id          AS vac_id,
+        v.hours       AS vac_hours,
+        m.status      AS match_status
+      FROM gemeenten g
+      LEFT JOIN organisations o ON o.gemeente_id = g.id AND o.status = 'APPROVED'
+      LEFT JOIN vacancies v     ON v.organisation_id = o.id AND v.status = 'ACTIVE'
+      LEFT JOIN matches m       ON m.vacancy_id = v.id AND m.status IN ('ACCEPTED','COMPLETED')
+      ORDER BY g.id
+    `.catch(() => []),
     prisma.match.findMany({
       where: { status: { in: ["ACCEPTED","COMPLETED"] } },
       select: {
@@ -112,28 +122,36 @@ async function getAdminImpact() {
     }))
     .sort((a, b) => b.hours - a.hours)
 
-  // Per-gemeente stats
-  const gemeenteStats = gemeenten.map((g) => {
-    let gHours = 0
-    let gMatches = 0
-    const orgs = g.organisations.length
-    const vacancies = g.organisations.reduce((s, o) => s + o.vacancies.length, 0)
-    for (const org of g.organisations) {
-      for (const vac of org.vacancies) {
-        for (const m of vac.matches) {
-          gHours += estimateHours(vac.hours, m.status, null)
-          gMatches++
-        }
-      }
+  // Per-gemeente stats — aggregate flat raw rows
+  type GStatAcc = {
+    name: string; displayName: string; primaryColor: string; slug: string
+    orgs: Set<string>; vacancies: Set<string>; hours: number; matches: number
+  }
+  const gMap = new Map<string, GStatAcc>()
+  const gemeenten = Array.isArray(gemeentenRaw) ? gemeentenRaw : []
+  for (const row of gemeenten) {
+    if (!gMap.has(row.gemeente_id)) {
+      gMap.set(row.gemeente_id, {
+        name: row.gemeente_name, displayName: row.display_name,
+        primaryColor: row.primary_color, slug: row.slug,
+        orgs: new Set(), vacancies: new Set(), hours: 0, matches: 0,
+      })
     }
-    return {
-      id: g.id, name: g.name, displayName: g.displayName,
-      primaryColor: g.primaryColor, slug: (g as { slug?: string }).slug ?? "",
-      orgs, vacancies, matches: gMatches,
-      hours: Math.round(gHours),
-      economicValue: Math.round(gHours * IMPACT_CONSTANTS.HOURLY_VALUE_EUR),
+    const g = gMap.get(row.gemeente_id)!
+    if (row.org_id) g.orgs.add(row.org_id)
+    if (row.vac_id) g.vacancies.add(row.vac_id)
+    if (row.match_status) {
+      g.hours += estimateHours(row.vac_hours, row.match_status, null)
+      g.matches++
     }
-  }).sort((a, b) => b.matches - a.matches)
+  }
+  const gemeenteStats = Array.from(gMap.entries()).map(([id, g]) => ({
+    id, name: g.name, displayName: g.displayName,
+    primaryColor: g.primaryColor, slug: g.slug,
+    orgs: g.orgs.size, vacancies: g.vacancies.size, matches: g.matches,
+    hours: Math.round(g.hours),
+    economicValue: Math.round(g.hours * IMPACT_CONSTANTS.HOURLY_VALUE_EUR),
+  })).sort((a, b) => b.matches - a.matches)
 
   return {
     overview: {

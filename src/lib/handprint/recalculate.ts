@@ -119,7 +119,8 @@ export async function recalculateOrgHandprint(organisationId: string) {
     laasteBerekening:       new Date(),
   }
 
-  const handprint = await prisma.orgHandprint.upsert({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handprint = await (prisma as any).orgHandprint.upsert({
     where:  { organisationId },
     create: { organisationId, ...data },
     update: data,

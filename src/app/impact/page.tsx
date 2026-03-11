@@ -51,11 +51,16 @@ async function getImpactData(): Promise<ImpactData> {
   let gid: string | null = null
 
   if (slug) {
-    gemeente = await prisma.gemeente.findUnique({
-      where: { slug },
-      select: { id: true, name: true, displayName: true, primaryColor: true, tagline: true },
-    })
-    gid = gemeente?.id ?? null
+    type GRow = { id: string; name: string; display_name: string; primary_color: string; tagline: string | null }
+    const rows = await prisma.$queryRaw<GRow[]>`
+      SELECT id, name, display_name, primary_color, tagline
+      FROM gemeenten WHERE slug = ${slug} LIMIT 1
+    `.catch(() => [])
+    const row = rows[0]
+    if (row) {
+      gemeente = { id: row.id, name: row.name, displayName: row.display_name, primaryColor: row.primary_color, tagline: row.tagline }
+      gid = row.id
+    }
   }
 
   const gemeenteFilter = gid ? { organisation: { gemeenteId: gid } } : {}

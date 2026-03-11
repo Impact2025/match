@@ -76,17 +76,22 @@ export async function GET(req: NextRequest) {
 
   // ── Gemeente filter ──────────────────────────────────────────────────────
   let gemeenteWhere: { gemeenteId?: string } = {}
-  let gemeente: { id: string; name: string; displayName: string; primaryColor: string; tagline: string | null } | null = null
+  type GemeenteRow = { id: string; name: string; display_name: string; primary_color: string; tagline: string | null }
+  let gemeenteRow: GemeenteRow | null = null
 
   if (gemeenteSlug) {
-    gemeente = await prisma.gemeente.findUnique({
-      where: { slug: gemeenteSlug },
-      select: { id: true, name: true, displayName: true, primaryColor: true, tagline: true },
-    })
-    if (gemeente) gemeenteWhere = { gemeenteId: gemeente.id }
+    const rows = await prisma.$queryRaw<GemeenteRow[]>`
+      SELECT id, name, display_name, primary_color, tagline
+      FROM gemeenten WHERE slug = ${gemeenteSlug} LIMIT 1
+    `.catch(() => [])
+    gemeenteRow = rows[0] ?? null
+    if (gemeenteRow) gemeenteWhere = { gemeenteId: gemeenteRow.id }
   }
 
   const gid = gemeenteWhere.gemeenteId ?? null
+  const gemeente = gemeenteRow
+    ? { id: gemeenteRow.id, name: gemeenteRow.name, displayName: gemeenteRow.display_name, primaryColor: gemeenteRow.primary_color, tagline: gemeenteRow.tagline }
+    : null
 
   // ── Parallel basic counts ────────────────────────────────────────────────
   const [
