@@ -2,15 +2,15 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, MessageCircle, Briefcase, User, Users } from "lucide-react"
+import { LayoutDashboard, MessageCircle, Briefcase, User, Users, Sprout } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 
 const NAV_ITEMS = [
   { href: "/organisation/dashboard", label: "Dashboard", icon: LayoutDashboard, badge: "pendingItems" as const },
   { href: "/organisation/volunteers", label: "Zoeken", icon: Users, badge: null as "pendingItems" | "unreadMessages" | null },
+  { href: "/impact", label: "Impact", icon: Sprout, badge: null as "pendingItems" | "unreadMessages" | null },
   { href: "/chat", label: "Berichten", icon: MessageCircle, badge: "unreadMessages" as const },
   { href: "/organisation/vacancies", label: "Vacatures", icon: Briefcase, badge: null as "pendingItems" | "unreadMessages" | null },
-  { href: "/organisation/profile", label: "Profiel", icon: User, badge: null },
 ]
 
 interface NotificationCounts {

@@ -2,12 +2,13 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutGrid, Heart, MessageCircle, User } from "lucide-react"
+import { LayoutGrid, Heart, MessageCircle, User, Map } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 
 const NAV_ITEMS = [
   { href: "/swipe", label: "Home", icon: LayoutGrid, badge: null as "pendingItems" | "unreadMessages" | null },
   { href: "/matches", label: "Matches", icon: Heart, badge: "pendingItems" as const },
+  { href: "/kaart", label: "Kaart", icon: Map, badge: null },
   { href: "/chat", label: "Berichten", icon: MessageCircle, badge: "unreadMessages" as const },
   { href: "/profile", label: "Profiel", icon: User, badge: null },
 ]
@@ -45,7 +46,7 @@ export function BottomNav({ gemeente }: BottomNavProps = {}) {
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-col items-center gap-1 py-3 px-5 relative"
+              className="flex flex-col items-center gap-1 py-3 px-3 relative"
             >
               {isActive && (
                 <span
