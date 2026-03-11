@@ -162,6 +162,10 @@ model Organisation {
   avgResponseHours   Float?
   slaScore           Int     @default(100)
 
+  // Multi-tenant: optional link to a municipality (gemeente)
+  gemeenteId  String?
+  gemeente    Gemeente? @relation(fields: [gemeenteId], references: [id])
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -437,6 +441,29 @@ model Invitation {
 
   @@unique([organisationId, vacancyId, volunteerId])
   @@map("invitations")
+}
+
+// ========================
+// MULTI-TENANT / GEMEENTEN
+// ========================
+
+model Gemeente {
+  id           String         @id @default(cuid())
+  slug         String         @unique   // "heemstede", "amsterdam"
+  name         String                   // "WijHeemstede" (platform-branded name shown in UI)
+  displayName  String                   // "Heemstede"  (official municipality name)
+  logoUrl      String?                  // "/images/gemeenten/heemstede-logo.svg"
+  primaryColor String         @default("#7c3aed")
+  tagline      String?                  // "Vrijwilligerswerk in Heemstede & omgeving"
+  website      String?
+  contactEmail String?
+
+  organisations Organisation[]
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("gemeenten")
 }
 
 // ========================

@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion"
-import { MapPin, Clock, Wifi, Info, Check } from "lucide-react"
+import { MapPin, Clock, Wifi, ChevronRight, Check } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { AiScoreBadge } from "./ai-score-badge"
 import { CATEGORIES } from "@/config"
@@ -20,6 +20,32 @@ const SWIPE_THRESHOLD = 100
 const CAT_MAP = Object.fromEntries(
   CATEGORIES.map((c) => [c.name, { color: c.color }])
 )
+
+const CAT_EMOJI: Record<string, string> = {
+  "Kinderen (0–12 jaar)": "🧒",
+  "Jongeren (12–18 jaar)": "🧑‍🎓",
+  "Ouderen": "👴",
+  "Mensen met een beperking": "♿",
+  "Gezinnen & Ouderschap": "👨‍👩‍👧",
+  "Daklozen & Armoede": "🤝",
+  "Vluchtelingen & Integratie": "🌍",
+  "Verslaving & Herstel": "💪",
+  "Justitie & Re-integratie": "⚖️",
+  "Onderwijs": "📚",
+  "Zorg & Welzijn": "❤️",
+  "Gezondheid": "🏥",
+  "Sport & Recreatie": "⚽",
+  "Cultuur & Kunst": "🎨",
+  "Natuur & Milieu": "🌱",
+  "Dieren": "🐾",
+  "Levensbeschouwing & Religie": "🕊️",
+  "Internationale samenwerking": "🌐",
+  "Buurt & Gemeenschap": "🏘️",
+  "Technologie": "💻",
+  "Evenementen": "🎉",
+  "Financieel / Schuldhulp": "💰",
+  "Anders / Overig": "✨",
+}
 
 const GRADIENT_PAIRS = [
   ["#f97316", "#f59e0b"],
@@ -63,9 +89,10 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
 
   const firstCategory = vacancy.categories?.[0]?.category?.name
   const catInfo = firstCategory ? CAT_MAP[firstCategory] : null
+  const catEmoji = firstCategory ? (CAT_EMOJI[firstCategory] ?? "🌟") : "🌟"
+  const catColor = catInfo?.color ?? "#f97316"
   const [gradFrom, gradTo] = orgGradient(vacancy.organisation.name)
 
-  // Max 2 highlights; only used when this is the top card to avoid visual noise on stacked cards
   const highlights = isTop ? (matchScore?.highlights ?? []).slice(0, 2) : []
   const hasHighlights = highlights.length > 0
 
@@ -122,20 +149,35 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
             />
           ) : (
             <div
-              className="absolute inset-0 flex items-center justify-center overflow-hidden"
+              className="absolute inset-0 overflow-hidden"
               style={{ background: `linear-gradient(145deg, ${gradFrom}, ${gradTo})` }}
             >
+              {/* Subtle diagonal stripe texture */}
               <div
-                className="absolute -top-10 -left-10 w-48 h-48 rounded-full opacity-20 blur-3xl"
+                className="absolute inset-0 opacity-[0.07]"
+                style={{
+                  backgroundImage: "repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%)",
+                  backgroundSize: "14px 14px",
+                }}
+              />
+              {/* Glow blobs */}
+              <div
+                className="absolute -top-12 -left-12 w-52 h-52 rounded-full opacity-30 blur-3xl"
                 style={{ background: gradTo }}
               />
               <div
-                className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full opacity-20 blur-3xl"
+                className="absolute -bottom-12 -right-12 w-44 h-44 rounded-full opacity-30 blur-3xl"
                 style={{ background: gradFrom }}
               />
-              <span className="text-5xl font-black text-white/20 tracking-tight select-none z-10">
-                {orgInitials(vacancy.organisation.name)}
-              </span>
+              {/* Category visual */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10">
+                <span className="text-6xl drop-shadow-sm">{catEmoji}</span>
+                {firstCategory && (
+                  <span className="text-white/70 text-[11px] font-bold tracking-widest uppercase px-6 text-center line-clamp-1">
+                    {firstCategory}
+                  </span>
+                )}
+              </div>
             </div>
           )}
 
@@ -146,7 +188,7 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
 
           {/* Org avatar – top left */}
           <div className="absolute top-3 left-3 z-10">
-            <Avatar className="w-9 h-9 border-2 border-white/90 shadow-md">
+            <Avatar className="w-10 h-10 border-2 border-white/90 shadow-md">
               <AvatarImage src={vacancy.organisation.logo ?? ""} alt={vacancy.organisation.name} />
               <AvatarFallback
                 className="text-white text-[11px] font-black"
@@ -158,10 +200,14 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
           </div>
 
           {/* Bottom gradient + text overlay */}
-          <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/85 via-black/40 to-transparent pt-14 pb-3 px-4">
+          <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-16 pb-3 px-4">
             {firstCategory && (
               <div className="flex items-center gap-1.5 mb-1.5">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm text-white/90 text-[11px] font-semibold">
+                <span
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-white text-[11px] font-bold"
+                  style={{ backgroundColor: `${catColor}cc` }}
+                >
+                  <span className="text-[10px]">{catEmoji}</span>
                   {firstCategory}
                 </span>
               </div>
@@ -169,7 +215,7 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
             <h2 className="text-white font-bold text-[19px] leading-snug line-clamp-2 drop-shadow-sm">
               {vacancy.title}
             </h2>
-            <p className="text-white/75 text-[13px] font-medium mt-0.5 truncate">
+            <p className="text-white/70 text-[13px] font-medium mt-0.5 truncate">
               {vacancy.organisation.name}
             </p>
           </div>
@@ -202,7 +248,7 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
             )}
           </div>
 
-          {/* Description — 2 lines when highlights follow, 3 otherwise */}
+          {/* Description */}
           <p
             className={`text-[13px] text-gray-600 leading-relaxed flex-1 min-h-0 ${
               hasHighlights ? "line-clamp-2" : "line-clamp-3"
@@ -211,7 +257,7 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
             {vacancy.description}
           </p>
 
-          {/* Match highlights — only on the top card */}
+          {/* Match highlights */}
           {hasHighlights && (
             <div className="flex flex-wrap gap-1.5 flex-shrink-0">
               {highlights.map((h) => (
@@ -226,7 +272,7 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
             </div>
           )}
 
-          {/* Skill chips + info button */}
+          {/* Skill chips + details button */}
           <div className="flex items-end justify-between gap-2 flex-shrink-0">
             <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
               {vacancy.skills && vacancy.skills.length > 0 && (
@@ -254,10 +300,10 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
                   e.stopPropagation()
                   onExpand()
                 }}
-                className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center transition-colors"
+                className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-full bg-gray-900 hover:bg-gray-700 text-white text-[11px] font-bold transition-colors"
                 aria-label="Meer informatie"
               >
-                <Info className="w-4 h-4 text-gray-500" />
+                Details <ChevronRight className="w-3 h-3" />
               </button>
             )}
           </div>

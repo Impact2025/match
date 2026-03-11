@@ -1,6 +1,6 @@
 "use client"
 
-import { MapPin, Clock, Wifi, Calendar, Building2, Check } from "lucide-react"
+import { MapPin, Clock, Wifi, Calendar, Building2, Check, Heart, Navigation, Zap, Sparkles } from "lucide-react"
 import {
   Sheet,
   SheetContent,
@@ -13,6 +13,32 @@ import type { MatchScore, VacancyWithOrgAndDistance } from "@/types"
 const CAT_MAP = Object.fromEntries(
   CATEGORIES.map((c) => [c.name, { color: c.color }])
 )
+
+const CAT_EMOJI: Record<string, string> = {
+  "Kinderen (0–12 jaar)": "🧒",
+  "Jongeren (12–18 jaar)": "🧑‍🎓",
+  "Ouderen": "👴",
+  "Mensen met een beperking": "♿",
+  "Gezinnen & Ouderschap": "👨‍👩‍👧",
+  "Daklozen & Armoede": "🤝",
+  "Vluchtelingen & Integratie": "🌍",
+  "Verslaving & Herstel": "💪",
+  "Justitie & Re-integratie": "⚖️",
+  "Onderwijs": "📚",
+  "Zorg & Welzijn": "❤️",
+  "Gezondheid": "🏥",
+  "Sport & Recreatie": "⚽",
+  "Cultuur & Kunst": "🎨",
+  "Natuur & Milieu": "🌱",
+  "Dieren": "🐾",
+  "Levensbeschouwing & Religie": "🕊️",
+  "Internationale samenwerking": "🌐",
+  "Buurt & Gemeenschap": "🏘️",
+  "Technologie": "💻",
+  "Evenementen": "🎉",
+  "Financieel / Schuldhulp": "💰",
+  "Anders / Overig": "✨",
+}
 
 const GRADIENT_PAIRS = [
   ["#f97316", "#f59e0b"],
@@ -34,6 +60,36 @@ function orgInitials(name: string) {
   return name.split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase()
 }
 
+// Parse description: bullet lines (starting with •, -, *) → proper list items
+function DescriptionBody({ text }: { text: string }) {
+  const paragraphs = text.split(/\n{2,}/)
+  return (
+    <div className="space-y-3">
+      {paragraphs.map((para, i) => {
+        const lines = para.split("\n").map((l) => l.trim()).filter(Boolean)
+        const isList = lines.every((l) => /^[•\-\*]/.test(l))
+        if (isList) {
+          return (
+            <ul key={i} className="space-y-1.5">
+              {lines.map((l, j) => (
+                <li key={j} className="flex items-start gap-2 text-sm text-gray-600 leading-relaxed">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400 flex-shrink-0 mt-1.5" />
+                  {l.replace(/^[•\-\*]\s*/, "")}
+                </li>
+              ))}
+            </ul>
+          )
+        }
+        return (
+          <p key={i} className="text-sm text-gray-600 leading-relaxed">
+            {para}
+          </p>
+        )
+      })}
+    </div>
+  )
+}
+
 // ─── Match score breakdown panel ───────────────────────────────────────────
 
 function scoreColor(score: number): string {
@@ -42,11 +98,11 @@ function scoreColor(score: number): string {
   return "#ef4444"
 }
 
-const SCORE_DIMS: { key: keyof MatchScore; label: string }[] = [
-  { key: "motivation", label: "Motivatie" },
-  { key: "distance",   label: "Nabijheid" },
-  { key: "skill",      label: "Skills" },
-  { key: "freshness",  label: "Actualiteit" },
+const SCORE_DIMS: { key: keyof MatchScore; label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
+  { key: "motivation", label: "Motivatie",   Icon: Heart },
+  { key: "distance",   label: "Nabijheid",   Icon: Navigation },
+  { key: "skill",      label: "Skills",      Icon: Zap },
+  { key: "freshness",  label: "Actualiteit", Icon: Sparkles },
 ]
 
 function MatchScorePanel({ matchScore }: { matchScore: MatchScore }) {
@@ -73,18 +129,20 @@ function MatchScorePanel({ matchScore }: { matchScore: MatchScore }) {
 
       {/* Component breakdown */}
       <div className="space-y-2 pt-1">
-        {SCORE_DIMS.map(({ key, label }) => {
+        {SCORE_DIMS.map(({ key, label, Icon }) => {
           const val = Math.round(matchScore[key] as number)
+          const barColor = scoreColor(val)
           return (
             <div key={key} className="flex items-center gap-2">
-              <span className="text-[11px] text-gray-500 w-20 flex-shrink-0">{label}</span>
+              <Icon className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+              <span className="text-[11px] text-gray-500 w-[68px] flex-shrink-0">{label}</span>
               <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-orange-400 rounded-full transition-all duration-700"
-                  style={{ width: `${val}%` }}
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{ width: `${val}%`, backgroundColor: barColor }}
                 />
               </div>
-              <span className="text-[11px] font-semibold text-gray-600 w-7 text-right flex-shrink-0">
+              <span className="text-[11px] font-semibold w-7 text-right flex-shrink-0" style={{ color: barColor }}>
                 {val}
               </span>
             </div>
@@ -121,28 +179,50 @@ export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailShee
 
   const [gradFrom, gradTo] = orgGradient(vacancy.organisation.name)
   const categories = vacancy.categories ?? []
+  const firstCategory = categories[0]?.category?.name
+  const catEmoji = firstCategory ? (CAT_EMOJI[firstCategory] ?? "🌟") : null
 
   return (
     <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
       <SheetContent side="bottom" className="h-[85svh] rounded-t-3xl p-0 overflow-hidden flex flex-col">
-        {/* Header image/gradient */}
+        {/* Header image/gradient — taller for more visual impact */}
         <div
-          className="relative flex-shrink-0 h-36 flex items-end"
+          className="relative flex-shrink-0 h-48 flex items-end overflow-hidden"
           style={{ background: `linear-gradient(145deg, ${gradFrom}, ${gradTo})` }}
         >
-          {vacancy.imageUrl && (
+          {vacancy.imageUrl ? (
             <img
               src={vacancy.imageUrl}
               alt={vacancy.title}
               className="absolute inset-0 w-full h-full object-cover"
             />
+          ) : (
+            <>
+              {/* Texture */}
+              <div
+                className="absolute inset-0 opacity-[0.07]"
+                style={{
+                  backgroundImage: "repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%)",
+                  backgroundSize: "14px 14px",
+                }}
+              />
+              {/* Glow blobs */}
+              <div className="absolute -top-12 -left-12 w-52 h-52 rounded-full opacity-30 blur-3xl" style={{ background: gradTo }} />
+              <div className="absolute -bottom-12 -right-12 w-44 h-44 rounded-full opacity-30 blur-3xl" style={{ background: gradFrom }} />
+              {/* Category emoji centered */}
+              {catEmoji && (
+                <div className="absolute inset-0 flex items-center justify-center z-10">
+                  <span className="text-7xl drop-shadow-sm">{catEmoji}</span>
+                </div>
+              )}
+            </>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
           <div className="relative z-10 p-4 flex items-end gap-3 w-full">
-            <Avatar className="w-10 h-10 border-2 border-white/90 shadow-md flex-shrink-0">
+            <Avatar className="w-11 h-11 border-2 border-white/90 shadow-md flex-shrink-0">
               <AvatarImage src={vacancy.organisation.logo ?? ""} alt={vacancy.organisation.name} />
               <AvatarFallback
-                className="text-white text-[11px] font-black"
+                className="text-white text-[12px] font-black"
                 style={{ background: `linear-gradient(135deg, ${gradFrom}, ${gradTo})` }}
               >
                 {orgInitials(vacancy.organisation.name)}
@@ -152,7 +232,7 @@ export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailShee
               <SheetTitle className="text-white font-bold text-base leading-tight line-clamp-2 text-left">
                 {vacancy.title}
               </SheetTitle>
-              <p className="text-white/75 text-[13px] truncate">{vacancy.organisation.name}</p>
+              <p className="text-white/70 text-[13px] truncate">{vacancy.organisation.name}</p>
             </div>
           </div>
         </div>
@@ -197,11 +277,19 @@ export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailShee
             <div className="flex flex-wrap gap-1.5">
               {categories.map(({ category }) => {
                 const catInfo = CAT_MAP[category.name]
+                const color = catInfo?.color ?? "#f97316"
+                const emoji = CAT_EMOJI[category.name] ?? "🌟"
                 return (
                   <span
                     key={category.id}
-                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-orange-50 text-orange-700 text-xs font-semibold rounded-full border border-orange-100"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full border"
+                    style={{
+                      backgroundColor: `${color}18`,
+                      borderColor: `${color}40`,
+                      color,
+                    }}
                   >
+                    <span className="text-[11px]">{emoji}</span>
                     {category.name}
                   </span>
                 )
@@ -212,9 +300,7 @@ export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailShee
           {/* Description */}
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-2">Over deze vacature</h3>
-            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
-              {vacancy.description}
-            </p>
+            <DescriptionBody text={vacancy.description} />
           </div>
 
           {/* Skills */}
@@ -263,7 +349,6 @@ export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailShee
             )}
           </div>
 
-          {/* Bottom spacer */}
           <div className="h-4" />
         </div>
       </SheetContent>

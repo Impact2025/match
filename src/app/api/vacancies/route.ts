@@ -17,6 +17,13 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
     const take = parseInt(searchParams.get("take") ?? "10")
 
+    // ── Multi-tenant gemeente filter ──────────────────────────────────────
+    // Read from request header (set by proxy.ts) or env var override.
+    const gemeenteSlug =
+      req.headers.get("x-gemeente-slug") ??
+      process.env.GEMEENTE_SLUG ??
+      null
+
     // Exclude already-swiped vacancies
     const swipedIds = await prisma.swipe
       .findMany({
@@ -85,11 +92,21 @@ export async function GET(req: Request) {
             ? `AND v.id NOT IN (${swipedIds.map((id) => `'${id}'`).join(",")})`
             : ""
 
+          // gemeente filter: JOIN gemeenten and filter by slug when in tenant mode
+          const gemeenteJoin = gemeenteSlug
+            ? `LEFT JOIN gemeenten g ON o.gemeente_id = g.id`
+            : ""
+          const gemeenteClause = gemeenteSlug
+            ? `AND g.slug = '${gemeenteSlug.replace(/'/g, "''")}'`
+            : ""
+
           const candidates = await prisma.$queryRawUnsafe<{ id: string }[]>(
             `SELECT v.id FROM vacancies v
              INNER JOIN organisations o ON v.organisation_id = o.id
+             ${gemeenteJoin}
              WHERE v.status = 'ACTIVE' AND o.status = 'APPROVED'
              AND v.embedding IS NOT NULL
+             ${gemeenteClause}
              ${excludeClause}
              ORDER BY v.embedding <=> '${vectorLiteral}'::vector
              LIMIT ${take * 8}`
@@ -109,7 +126,10 @@ export async function GET(req: Request) {
 
     const baseWhere = {
       status: "ACTIVE" as const,
-      organisation: { status: "APPROVED" as const },
+      organisation: {
+        status: "APPROVED" as const,
+        ...(gemeenteSlug ? { gemeente: { slug: gemeenteSlug } } : {}),
+      },
       ...(swipedIds.length > 0 ? { id: { notIn: swipedIds } } : {}),
     }
 

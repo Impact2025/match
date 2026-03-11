@@ -17,8 +17,14 @@ interface NotificationCounts {
   pendingItems: number
 }
 
-export function BottomNav() {
+interface BottomNavProps {
+  /** Optional gemeente branding — overrides orange accent with gemeente primary color */
+  gemeente?: { primaryColor: string } | null
+}
+
+export function BottomNav({ gemeente }: BottomNavProps = {}) {
   const pathname = usePathname()
+  const activeColor = gemeente?.primaryColor ?? "#f97316"
 
   const { data: counts } = useQuery<NotificationCounts>({
     queryKey: ["notificationCounts"],
@@ -42,11 +48,15 @@ export function BottomNav() {
               className="flex flex-col items-center gap-1 py-3 px-5 relative"
             >
               {isActive && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-orange-500 rounded-full" />
+                <span
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
+                  style={{ backgroundColor: activeColor }}
+                />
               )}
               <div className="relative">
                 <Icon
-                  className={`w-5 h-5 ${isActive ? "text-orange-500" : "text-gray-400"}`}
+                  className={`w-5 h-5 ${isActive ? "" : "text-gray-400"}`}
+                  style={isActive ? { color: activeColor } : undefined}
                   strokeWidth={isActive ? 2.5 : 1.8}
                 />
                 {showBadge && (
@@ -56,9 +66,8 @@ export function BottomNav() {
                 )}
               </div>
               <span
-                className={`text-[10px] font-semibold tracking-widest ${
-                  isActive ? "text-orange-500" : "text-gray-400"
-                }`}
+                className={`text-[10px] font-semibold tracking-widest ${isActive ? "" : "text-gray-400"}`}
+                style={isActive ? { color: activeColor } : undefined}
               >
                 {item.label}
               </span>
