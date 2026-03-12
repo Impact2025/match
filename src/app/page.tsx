@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { AiAssistant } from "@/components/ai/ai-assistant"
+import { TourLauncher } from "@/components/onboarding/tour/TourLauncher"
 
 export default function HomePage() {
   return (
@@ -45,7 +46,7 @@ export default function HomePage() {
 
       <main>
         {/* ─── HERO ─── */}
-        <section className="relative pt-16 min-h-screen flex items-center overflow-hidden">
+        <section data-tour-id="website-hero" className="relative pt-16 min-h-screen flex items-center overflow-hidden">
           {/* Full-bleed background image */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -143,7 +144,7 @@ export default function HomePage() {
         </section>
 
         {/* ─── HOW IT WORKS ─── */}
-        <section className="py-16 sm:py-24 border-t border-gray-100" id="hoe-het-werkt">
+        <section data-tour-id="website-hoe-het-werkt" className="py-16 sm:py-24 border-t border-gray-100" id="hoe-het-werkt">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="mb-10 sm:mb-16">
               <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-4">Hoe het werkt</p>
@@ -181,7 +182,7 @@ export default function HomePage() {
         </section>
 
         {/* ─── FOR ORGANISATIONS ─── */}
-        <section className="py-16 sm:py-24 bg-gray-50 border-y border-gray-100" id="organisaties">
+        <section data-tour-id="website-organisaties" className="py-16 sm:py-24 bg-gray-50 border-y border-gray-100" id="organisaties">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="grid lg:grid-cols-2 gap-12 sm:gap-16 items-center">
               <div>
@@ -229,7 +230,7 @@ export default function HomePage() {
         </section>
 
         {/* ─── IMPACT STATS ─── */}
-        <section className="py-16 sm:py-20 border-b border-gray-100" id="impact">
+        <section data-tour-id="website-impact" className="py-16 sm:py-20 border-b border-gray-100" id="impact">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-gray-100">
               {[
@@ -250,7 +251,7 @@ export default function HomePage() {
         </section>
 
         {/* ─── CTA ─── */}
-        <section className="py-16 sm:py-20 bg-orange-500">
+        <section data-tour-id="website-cta" className="py-16 sm:py-20 bg-orange-500">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-white mb-4">
               Klaar om impact te maken?
@@ -339,6 +340,7 @@ export default function HomePage() {
         </div>
       </footer>
       <AiAssistant mode="presale" />
+      <TourLauncher tourId="website" />
     </div>
   )
 }

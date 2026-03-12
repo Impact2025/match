@@ -10,7 +10,7 @@ export interface TourStep {
   scrollIntoView?: boolean
 }
 
-export type TourId = "volunteer" | "organisation" | "gemeente" | "admin"
+export type TourId = "volunteer" | "organisation" | "gemeente" | "admin" | "website"
 
 export interface TourConfig {
   id: TourId
