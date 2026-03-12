@@ -17,6 +17,7 @@ import {
   Lightbulb,
   Sparkles,
   CheckCircle,
+  Info,
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -43,6 +44,60 @@ const STEP_SUBTITLES: Record<Step, string> = {
   availability: "Geef aan wanneer je beschikbaar bent voor vrijwilligerswerk.",
   vfi:          "Geef aan hoeveel elke reden voor jou telt. Dit helpt ons jou beter te matchen.",
   schwartz:     "Hoe erg lijkt deze persoon op jou? Dit verfijnt jouw matches.",
+}
+
+const STEP_TOOLTIPS: Partial<Record<Step, { title: string; body: string }>> = {
+  personal: {
+    title: "Waarom je locatie?",
+    body: "Je postcode gebruiken we om de reisafstand tot vacatures te berekenen. Afstand telt voor 30% in je matchscore. Je exacte adres wordt nooit gedeeld met organisaties.",
+  },
+  skills: {
+    title: "Hoe werkt skillmatching?",
+    body: "Vaardigheidsmatch telt voor 20% in je totaalscore. Ons systeem herkent ook synoniemen — 'JS' en 'JavaScript' worden automatisch als hetzelfde gezien.",
+  },
+  interests: {
+    title: "Waarom interesses?",
+    body: "Interesses vormen de basis van je motivatieprofiel, dat voor 40% meetelt in je score. Hoe meer overlap met een vacature, hoe relevanter de match.",
+  },
+  vfi: {
+    title: "Wat is het VFI-model?",
+    body: "VFI staat voor Volunteer Functions Inventory — een wetenschappelijk model (Clary et al., 1998) dat in 50+ landen wordt gebruikt. Je antwoorden worden omgezet in een motivatievector die we vergelijken met het profiel van elke vacature. Dit maakt onze matching uniek.",
+  },
+  schwartz: {
+    title: "Waarom kernwaarden?",
+    body: "Het Schwartz-waardenmodel (1992) is gevalideerd in 80+ landen en meet diepere drijfveren zoals zorgzaamheid, autonomie of stabiliteit. Dit voegt 25% extra precisie toe bovenop je motivatieprofiel — en onderscheidt ons van gewone vrijwilligersplatforms.",
+  },
+}
+
+function StepTooltip({ tooltip }: { tooltip: { title: string; body: string } }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="mt-2 mb-4">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="inline-flex items-center gap-1.5 text-xs text-orange-500 font-medium hover:text-orange-600 transition-colors"
+      >
+        <Info className="w-3.5 h-3.5" />
+        {tooltip.title}
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className="mt-2 bg-orange-50 border border-orange-100 rounded-xl px-4 py-3 text-xs text-gray-600 leading-relaxed">
+              {tooltip.body}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
 }
 
 const STEP_ICONS: Record<Step, React.ReactNode> = {
@@ -445,9 +500,12 @@ export default function OnboardingPage() {
             <h2 className="text-2xl font-bold text-gray-900 leading-tight mb-1.5">
               {STEP_TITLES[step]}
             </h2>
-            <p className="text-sm text-gray-500 leading-relaxed mb-6">
+            <p className="text-sm text-gray-500 leading-relaxed mb-2">
               {STEP_SUBTITLES[step]}
             </p>
+            {STEP_TOOLTIPS[step] && (
+              <StepTooltip tooltip={STEP_TOOLTIPS[step]!} />
+            )}
 
             {/* ── Step 1: Personal ── */}
             {step === "personal" && (
