@@ -7,6 +7,7 @@ import {
   User, Building2, Landmark,
   CheckCircle, ChevronDown, ArrowRight,
 } from "lucide-react"
+import { IrisSection } from "@/components/ai/iris-section"
 
 export const metadata: Metadata = {
   title: "Demo Presentatie — Vrijwilligersmatch",
@@ -500,7 +501,12 @@ export default function PitchPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════
-            5. CTA
+            5. IRIS AI ASSISTANT
+        ═══════════════════════════════════════════════════════ */}
+        <IrisSection />
+
+        {/* ═══════════════════════════════════════════════════════
+            6. CTA
         ═══════════════════════════════════════════════════════ */}
         <section className="py-20 sm:py-24 bg-orange-500">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
