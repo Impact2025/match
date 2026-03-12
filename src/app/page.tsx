@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { AiAssistant } from "@/components/ai/ai-assistant"
+import { IrisSection } from "@/components/ai/iris-section"
 import { TourLauncher } from "@/components/onboarding/tour/TourLauncher"
 
 export default function HomePage() {
@@ -180,6 +181,9 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* ─── IRIS ─── */}
+        <IrisSection />
 
         {/* ─── FOR ORGANISATIONS ─── */}
         <section data-tour-id="website-organisaties" className="py-16 sm:py-24 bg-gray-50 border-y border-gray-100" id="organisaties">

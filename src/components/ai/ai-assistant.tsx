@@ -4,6 +4,11 @@ import { useRef, useState, useEffect, useCallback } from "react"
 
 export type NovaMode = "presale" | "dashboard"
 
+const ASSISTANT_NAME: Record<NovaMode, string> = {
+  presale: "Iris",
+  dashboard: "Nova",
+}
+
 interface Message {
   id: string
   role: "user" | "assistant"
@@ -71,7 +76,14 @@ function TypingCursor() {
   )
 }
 
+// Expose a way to open the assistant programmatically (e.g. from the Iris section)
+const openCallbacks: Set<() => void> = new Set()
+export function openAiAssistant() {
+  openCallbacks.forEach((cb) => cb())
+}
+
 export function AiAssistant({ mode }: AiAssistantProps) {
+  const name = ASSISTANT_NAME[mode]
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
@@ -82,6 +94,13 @@ export function AiAssistant({ mode }: AiAssistantProps) {
   const abortRef = useRef<AbortController | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Register open callback so external code can open the panel
+  useEffect(() => {
+    const cb = () => setOpen(true)
+    openCallbacks.add(cb)
+    return () => { openCallbacks.delete(cb) }
+  }, [])
 
   const suggestions = SUGGESTIONS[mode]
 
@@ -261,7 +280,7 @@ export function AiAssistant({ mode }: AiAssistantProps) {
                 <IconSparkles className="w-4 h-4 text-white" />
               </div>
               <div>
-                <p className="text-sm font-bold text-white leading-none">Nova</p>
+                <p className="text-sm font-bold text-white leading-none">{name}</p>
                 <p className="text-[10px] text-orange-100 leading-tight mt-0.5">
                   {mode === "dashboard" ? "Jouw vrijwilligerscoach" : "AI-assistent"}
                 </p>
@@ -283,7 +302,7 @@ export function AiAssistant({ mode }: AiAssistantProps) {
                 <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center mx-auto mb-3">
                   <IconSparkles className="w-6 h-6 text-orange-500" />
                 </div>
-                <p className="text-sm font-semibold text-gray-800 mb-1">Hoi! Ik ben Nova 👋</p>
+                <p className="text-sm font-semibold text-gray-800 mb-1">Hoi! Ik ben {name} 👋</p>
                 <p className="text-xs text-gray-500 max-w-[220px] mx-auto">
                   {mode === "dashboard"
                     ? "Jouw persoonlijke vrijwilligerscoach. Hoe kan ik je helpen?"
@@ -367,7 +386,7 @@ export function AiAssistant({ mode }: AiAssistantProps) {
         <button
           onClick={() => setOpen((o) => !o)}
           className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 flex items-center justify-center transition-all"
-          aria-label={open ? "Nova sluiten" : "Chat met Nova"}
+          aria-label={open ? `${name} sluiten` : `Chat met ${name}`}
         >
           {open ? (
             <IconX className="w-5 h-5 text-white" />
