@@ -258,7 +258,8 @@ function scoreMotivation(
  *
  * - Remote vacancy            → 100 (always accessible)
  * - No coordinates available  → 55  (neutral, not penalised)
- * - Within radius             → 40–100 (linear, with 20-point near-bonus ≤5km)
+ * - 0 km                      → 100
+ * - maxDistance km            → 40  (smooth linear, no hard kinks)
  * - Beyond radius             → 0   (hard cut-off maintained by pre-filter)
  */
 function scoreDistance(
@@ -278,23 +279,67 @@ function scoreDistance(
   }
 
   const km = haversineKm(vLat, vLon, oLat, oLon)
+  const kmRounded = Math.round(km * 10) / 10
+
+  // Smooth linear: 100 at 0 km → 40 at maxDistance km
+  const score = Math.max(40, 100 - (km / Math.max(maxDistance, 1)) * 60)
 
   if (km <= 2) {
-    return { score: 100, highlights: [`Vlakbij (${Math.round(km * 10) / 10} km)`] }
+    return { score, highlights: [`Vlakbij (${kmRounded} km)`] }
   }
-
-  if (km <= 5) {
-    return { score: 90, highlights: [`Dichtbij (${Math.round(km)} km)`] }
+  if (km <= 7) {
+    return { score, highlights: [`Dichtbij (${Math.round(km)} km)`] }
   }
-
-  // Linear scale from 40 (at maxDistance) to 85 (at 5km)
-  const score = Math.max(0, 85 - ((km - 5) / (maxDistance - 5)) * 45)
   return { score, highlights: [] }
+}
+
+// ─── Skill normalisation helpers ──────────────────────────────────────────────
+
+/** Strip all non-alphanumeric characters and lowercase for fuzzy comparison. */
+function normalizeSkill(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, "")
+}
+
+/**
+ * Common synonyms/aliases → canonical normalised key.
+ * Add entries as new skills appear in the platform.
+ */
+const SKILL_ALIASES: Record<string, string> = {
+  js:                     "javascript",
+  ts:                     "typescript",
+  node:                   "nodejs",
+  reactjs:                "react",
+  vuejs:                  "vue",
+  angularjs:              "angular",
+  py:                     "python",
+  css3:                   "css",
+  html5:                  "html",
+  postgres:               "postgresql",
+  msoffice:               "microsoftoffice",
+  office:                 "microsoftoffice",
+  word:                   "microsoftword",
+  excel:                  "microsoftexcel",
+  powerpoint:             "microsoftpowerpoint",
+  socialmediamarketing:   "socialmedia",
+  projectmanager:         "projectmanagement",
+  pm:                     "projectmanagement",
+  communicatie:           "communication",
+  communiceren:           "communication",
+  organisatie:            "organiseren",
+  organiseren:            "organiseren",
+}
+
+function canonicalSkill(s: string): string {
+  const norm = normalizeSkill(s)
+  return SKILL_ALIASES[norm] ?? norm
 }
 
 /**
  * Skill score: what percentage of the vacancy's required skills does
  * the volunteer have?
+ *
+ * Uses normalised + aliased comparison so "JS" matches "JavaScript",
+ * "Postgres" matches "PostgreSQL", etc.
  *
  * - No skills required on the vacancy → 70 (neutral; anyone qualifies)
  * - Volunteer has no skills recorded  → 50 (unknown; no info)
@@ -312,8 +357,8 @@ function scoreSkills(
     return { score: 50, highlights: [] }
   }
 
-  const volunteerSet = new Set(volunteerSkills.map((s) => s.toLowerCase()))
-  const matchedSkills = vacancySkills.filter((s) => volunteerSet.has(s.toLowerCase()))
+  const volunteerSet = new Set(volunteerSkills.map(canonicalSkill))
+  const matchedSkills = vacancySkills.filter((s) => volunteerSet.has(canonicalSkill(s)))
   const overlap = matchedSkills.length / vacancySkills.length
   const score = overlap * 100
 
@@ -328,13 +373,19 @@ function scoreSkills(
 }
 
 /**
- * Freshness score: linear decay from 100 (published today) to 0
- * (published windowDays or more ago).
+ * Freshness score: exponential half-life decay.
+ *
+ * Half-life = windowDays / 2, so:
+ *   - today              → 100
+ *   - windowDays/2 days  → ~50
+ *   - windowDays days    → ~25
+ *   - never reaches 0    (no hard cliff)
  */
 function scoreFreshness(createdAt: Date, windowDays = FRESHNESS_WINDOW_DAYS): number {
   const ageMs = Date.now() - createdAt.getTime()
   const ageDays = ageMs / (1000 * 60 * 60 * 24)
-  return Math.max(0, 100 - (ageDays / windowDays) * 100)
+  const halfLife = Math.max(1, windowDays / 2)
+  return Math.max(5, 100 * Math.pow(0.5, ageDays / halfLife))
 }
 
 /**

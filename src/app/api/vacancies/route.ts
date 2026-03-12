@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 import { vacancySchema } from "@/validators"
 import { geocodePostcode, haversineDistance } from "@/lib/geocoding"
 import { calculateMatchScore } from "@/lib/matching/scoring-engine"
@@ -82,35 +83,32 @@ export async function GET(req: Request) {
           // Generate + store embedding for this user
           const embedding = await embedText(profileText)
           vectorLiteral = toVectorLiteral(embedding)
-          await prisma.$executeRawUnsafe(
-            `UPDATE users SET embedding = '${vectorLiteral}'::vector WHERE id = '${session.user.id}'`
-          )
+          await prisma.$executeRaw`UPDATE users SET embedding = ${vectorLiteral}::vector WHERE id = ${session.user.id}`
         }
 
         if (vectorLiteral) {
-          const excludeClause = swipedIds.length > 0
-            ? `AND v.id NOT IN (${swipedIds.map((id) => `'${id}'`).join(",")})`
-            : ""
+          // Build safe parameterized query fragments
+          const gemeenteJoinSql = gemeenteSlug
+            ? Prisma.sql`LEFT JOIN gemeenten g ON o.gemeente_id = g.id`
+            : Prisma.empty
+          const gemeenteWhereSql = gemeenteSlug
+            ? Prisma.sql`AND g.slug = ${gemeenteSlug}`
+            : Prisma.empty
+          const excludeSql = swipedIds.length > 0
+            ? Prisma.sql`AND v.id NOT IN (${Prisma.join(swipedIds)})`
+            : Prisma.empty
 
-          // gemeente filter: JOIN gemeenten and filter by slug when in tenant mode
-          const gemeenteJoin = gemeenteSlug
-            ? `LEFT JOIN gemeenten g ON o.gemeente_id = g.id`
-            : ""
-          const gemeenteClause = gemeenteSlug
-            ? `AND g.slug = '${gemeenteSlug.replace(/'/g, "''")}'`
-            : ""
-
-          const candidates = await prisma.$queryRawUnsafe<{ id: string }[]>(
-            `SELECT v.id FROM vacancies v
-             INNER JOIN organisations o ON v.organisation_id = o.id
-             ${gemeenteJoin}
-             WHERE v.status = 'ACTIVE' AND o.status = 'APPROVED'
-             AND v.embedding IS NOT NULL
-             ${gemeenteClause}
-             ${excludeClause}
-             ORDER BY v.embedding <=> '${vectorLiteral}'::vector
-             LIMIT ${take * 8}`
-          )
+          const candidates = await prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
+            SELECT v.id FROM vacancies v
+            INNER JOIN organisations o ON v.organisation_id = o.id
+            ${gemeenteJoinSql}
+            WHERE v.status = 'ACTIVE' AND o.status = 'APPROVED'
+            AND v.embedding IS NOT NULL
+            ${gemeenteWhereSql}
+            ${excludeSql}
+            ORDER BY v.embedding <=> ${vectorLiteral}::vector
+            LIMIT ${take * 8}
+          `)
 
           if (candidates.length > 0) {
             annCandidateIds = candidates.map((r) => r.id)
@@ -292,6 +290,7 @@ export async function POST(req: Request) {
     })
 
     // Generate and store embedding asynchronously (non-blocking)
+    const vacancyId = vacancy.id
     embedText(vacancyToText({
       title: vacancy.title,
       description: vacancy.description,
@@ -304,9 +303,7 @@ export async function POST(req: Request) {
     }))
       .then((embedding) => {
         const vectorLiteral = toVectorLiteral(embedding)
-        return prisma.$executeRawUnsafe(
-          `UPDATE vacancies SET embedding = '${vectorLiteral}'::vector WHERE id = '${vacancy.id}'`
-        )
+        return prisma.$executeRaw`UPDATE vacancies SET embedding = ${vectorLiteral}::vector WHERE id = ${vacancyId}`
       })
       .catch((err) => console.error("[VACANCY_EMBED_ERROR]", err))
 
