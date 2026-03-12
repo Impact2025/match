@@ -1013,7 +1013,313 @@ async function main() {
 
   console.log("✅  Handprint data aangemaakt voor 5 organisaties")
 
-  // ── 11. Summary ───────────────────────────────────────────────────────────
+  // ── 11. WIJ Eten Samen — volledige demo voor beheerder ─────────────────────
+
+  const wijEtenOrgId   = "org-wij-eten-heemstede-demo"
+  const wijEtenAdminId = "org-wij-eten-heemstede-demo-admin"
+
+  // ── 11a. Extra vacatures ──────────────────────────────────────────────────
+  const wijEtenExtraVacancies = [
+    {
+      id: "vac-kok-wij-eten-heemstede-demo",
+      title: "Keukenassistent voor onze wekelijkse maaltijd",
+      description:
+        "Hou jij van koken en mensen blij maken met lekker eten? WIJ Eten Samen zoekt een " +
+        "enthousiaste keukenassistent die elke maandagmiddag helpt bij de voorbereiding en " +
+        "uitgifte van onze warme maaltijd.\n\n" +
+        "Wat ga jij doen:\n" +
+        "• Groenten schillen, snijden en de maaltijd helpen bereiden\n" +
+        "• Bordjes aanvullen en serveren aan circa 30 gasten\n" +
+        "• Afwas en schoonmaak na afloop\n\n" +
+        "Tijdsinvestering: elke maandag van 15:00 tot 20:00 uur (5 uur). " +
+        "Kookervaring is een pre maar niet verplicht — enthousiasme en hygiëne wel!",
+      location: "Buurtcentrum Raadhuisstraat 22, Heemstede",
+      city: "Heemstede",
+      postcode: "2101",
+      lat: 52.359,
+      lon: 4.617,
+      hours: 5,
+      duration: "Doorlopend",
+      categories: ["Ouderen", "Buurt & Gemeenschap"],
+      skills: ["Teamwork", "Communicatie"],
+    },
+    {
+      id: "vac-inkoop-wij-eten-heemstede-demo",
+      title: "Vrijwilliger inkoop & boodschappen voor WIJ Eten Samen",
+      description:
+        "Elke week verzorgt WIJ Eten Samen een warme maaltijd voor tientallen gasten. " +
+        "Daarvoor zijn we op zoek naar iemand die de wekelijkse boodschappen regelt.\n\n" +
+        "Jouw taken:\n" +
+        "• Inkopen doen bij lokale supermarkt op basis van ons weekmenu\n" +
+        "• Rekeningen bijhouden en kassabonnen inleveren bij de penningmeester\n" +
+        "• Incidenteel contact met leveranciers voor grotere bestellingen\n\n" +
+        "Tijdsinvestering: circa 2 uur op maandagochtend. " +
+        "Rijbewijs en auto zijn een must (kilometervergoeding beschikbaar).",
+      location: "Heemstede",
+      city: "Heemstede",
+      postcode: "2101",
+      lat: 52.359,
+      lon: 4.617,
+      hours: 2,
+      duration: "Doorlopend",
+      categories: ["Ouderen", "Buurt & Gemeenschap"],
+      skills: ["Organisatie", "Administratie", "Vervoer / Rijbewijs"],
+    },
+    {
+      id: "vac-sociaal-wij-eten-heemstede-demo",
+      title: "Maatje voor eenzame gasten bij WIJ Eten Samen",
+      description:
+        "Sommige gasten van WIJ Eten Samen hebben buiten de maaltijd weinig sociaal contact. " +
+        "We zoeken vrijwilligers die af en toe een extra gesprek of een wandeling inplannen " +
+        "met deze gasten — gewoon als vriend.\n\n" +
+        "Wat dit inhoudt:\n" +
+        "• 1 à 2 uur per week buiten de maaltijdavond om\n" +
+        "• Koffie drinken, wandelen of een activiteit ondernemen\n" +
+        "• Verslag doen aan coördinator (kort, via WhatsApp)\n\n" +
+        "Geen speciale opleiding nodig — alleen een open hart en geduld.",
+      location: "Heemstede",
+      city: "Heemstede",
+      postcode: "2101",
+      lat: 52.359,
+      lon: 4.617,
+      hours: 2,
+      duration: "Minimaal 6 maanden",
+      categories: ["Ouderen", "Zorg & Welzijn", "Buurt & Gemeenschap"],
+      skills: ["Communicatie", "Coaching / Begeleiding"],
+    },
+  ]
+
+  for (const vac of wijEtenExtraVacancies) {
+    const skillRecords = await Promise.all(
+      vac.skills.map((n) => prisma.skill.upsert({ where: { name: n }, update: {}, create: { name: n } })),
+    )
+    const categoryRecords = await Promise.all(
+      vac.categories.map((n) => prisma.category.upsert({ where: { name: n }, update: {}, create: { name: n } })),
+    )
+    await prisma.vacancy.deleteMany({ where: { id: vac.id } })
+    await prisma.vacancy.create({
+      data: {
+        id: vac.id,
+        title: vac.title,
+        description: vac.description,
+        location: vac.location,
+        city: vac.city,
+        postcode: vac.postcode,
+        lat: vac.lat,
+        lon: vac.lon,
+        hours: vac.hours,
+        duration: vac.duration,
+        status: "ACTIVE",
+        organisationId: wijEtenOrgId,
+        skills: { create: skillRecords.map((s) => ({ skillId: s.id })) },
+        categories: { create: categoryRecords.map((c) => ({ categoryId: c.id })) },
+      },
+    })
+    console.log(`✅  Vacature WIJ Eten Samen: ${vac.title.slice(0, 55)}...`)
+  }
+
+  // ── 11b. Demo vrijwilligers voor WIJ Eten Samen ───────────────────────────
+  const wijEtenVolunteers = [
+    {
+      id: "vol-linda-wij-eten-demo",
+      name: "Linda van den Berg",
+      email: "linda.vandenberg@heemstede-demo.nl",
+      age: 52,
+      bio: "Ik werk parttime als verpleegkundige en wil in mijn vrije tijd iets betekenen voor de buurt. Eten is voor mij een manier om mensen samen te brengen.",
+      availability: JSON.stringify(["monday", "wednesday", "evening"]),
+    },
+    {
+      id: "vol-jaap-wij-eten-demo",
+      name: "Jaap Martens",
+      email: "jaap.martens@heemstede-demo.nl",
+      age: 61,
+      bio: "Gepensioneerd leraar, woon al 30 jaar in Heemstede. Ik hou van koken en gezelligheid en zoek zinvol vrijwilligerswerk in de buurt.",
+      availability: JSON.stringify(["monday", "tuesday", "friday", "afternoon"]),
+    },
+    {
+      id: "vol-maria-wij-eten-demo",
+      name: "Maria Oosterbeek",
+      email: "maria.oosterbeek@heemstede-demo.nl",
+      age: 44,
+      bio: "Ik ben moeder van twee kinderen en werk als administratief medewerker. Graag wil ik me inzetten voor mijn omgeving.",
+      availability: JSON.stringify(["monday", "thursday", "morning"]),
+    },
+    {
+      id: "vol-thomas-wij-eten-demo",
+      name: "Thomas Blom",
+      email: "thomas.blom@heemstede-demo.nl",
+      age: 38,
+      bio: "Ik woon in Heemstede en ben kok van beroep. Vrijwilligerswerk bij een maaltijdproject past perfect bij mijn passie voor eten en mensen.",
+      availability: JSON.stringify(["monday", "weekend", "evening"]),
+    },
+  ]
+
+  const pw = await hashPassword("demo1234")
+  for (const vol of wijEtenVolunteers) {
+    await prisma.user.upsert({
+      where: { email: vol.email },
+      update: {},
+      create: {
+        id: vol.id,
+        name: vol.name,
+        email: vol.email,
+        password: pw,
+        role: "VOLUNTEER",
+        status: "ACTIVE",
+        onboarded: true,
+        bio: vol.bio,
+        age: vol.age,
+        location: "Heemstede",
+        postcode: "2101",
+        lat: 52.359,
+        lon: 4.617,
+        maxDistance: 10,
+        availability: vol.availability,
+      },
+    })
+  }
+  console.log("✅  4 demo vrijwilligers aangemaakt voor WIJ Eten Samen")
+
+  // ── 11c. Matches in alle statussen ────────────────────────────────────────
+  // Linda → gastheer — PENDING (2 dagen geleden)
+  const mLindaId = "match-linda-gastheer-wij-eten-demo"
+  await prisma.match.deleteMany({ where: { id: mLindaId } })
+  await prisma.swipe.deleteMany({ where: { fromId: "vol-linda-wij-eten-demo", vacancyId: cuid("vac-gastheer") } })
+  await prisma.swipe.create({ data: { fromId: "vol-linda-wij-eten-demo", vacancyId: cuid("vac-gastheer"), direction: "LIKE", matchReason: "Goede zaak" } })
+  await prisma.match.create({
+    data: {
+      id: mLindaId,
+      volunteerId: "vol-linda-wij-eten-demo",
+      vacancyId: cuid("vac-gastheer"),
+      status: "PENDING",
+      createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    },
+  })
+
+  // Thomas → kok — PENDING (1 dag geleden)
+  const mThomasId = "match-thomas-kok-wij-eten-demo"
+  await prisma.match.deleteMany({ where: { id: mThomasId } })
+  await prisma.swipe.deleteMany({ where: { fromId: "vol-thomas-wij-eten-demo", vacancyId: "vac-kok-wij-eten-heemstede-demo" } })
+  await prisma.swipe.create({ data: { fromId: "vol-thomas-wij-eten-demo", vacancyId: "vac-kok-wij-eten-heemstede-demo", direction: "SUPER_LIKE", matchReason: "Past bij mijn skills" } })
+  await prisma.match.create({
+    data: {
+      id: mThomasId,
+      volunteerId: "vol-thomas-wij-eten-demo",
+      vacancyId: "vac-kok-wij-eten-heemstede-demo",
+      status: "PENDING",
+      createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+    },
+  })
+
+  // Jaap → gastheer — ACCEPTED (14 dagen geleden) + gesprek
+  const mJaapId = "match-jaap-gastheer-wij-eten-demo"
+  await prisma.match.deleteMany({ where: { id: mJaapId } })
+  await prisma.swipe.deleteMany({ where: { fromId: "vol-jaap-wij-eten-demo", vacancyId: cuid("vac-gastheer") } })
+  await prisma.swipe.create({ data: { fromId: "vol-jaap-wij-eten-demo", vacancyId: cuid("vac-gastheer"), direction: "LIKE", matchReason: "Dichtbij mij" } })
+  const matchJaap = await prisma.match.create({
+    data: {
+      id: mJaapId,
+      volunteerId: "vol-jaap-wij-eten-demo",
+      vacancyId: cuid("vac-gastheer"),
+      status: "ACCEPTED",
+      startedAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+      createdAt: new Date(Date.now() - 16 * 24 * 60 * 60 * 1000),
+    },
+  })
+
+  // Maria → telefonisch — REJECTED (10 dagen geleden)
+  const mMariaId = "match-maria-telefonisch-wij-eten-demo"
+  await prisma.match.deleteMany({ where: { id: mMariaId } })
+  await prisma.swipe.deleteMany({ where: { fromId: "vol-maria-wij-eten-demo", vacancyId: cuid("vac-telefonisch") } })
+  await prisma.swipe.create({ data: { fromId: "vol-maria-wij-eten-demo", vacancyId: cuid("vac-telefonisch"), direction: "LIKE", matchReason: "Flexibele tijden" } })
+  await prisma.match.create({
+    data: {
+      id: mMariaId,
+      volunteerId: "vol-maria-wij-eten-demo",
+      vacancyId: cuid("vac-telefonisch"),
+      status: "REJECTED",
+      createdAt: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000),
+    },
+  })
+
+  console.log("✅  4 matches aangemaakt (2× PENDING, 1× ACCEPTED, 1× REJECTED)")
+
+  // ── 11d. Gesprek Jaap & WIJ Eten Samen ────────────────────────────────────
+  const convJaapId = "conv-jaap-gastheer-wij-eten-demo"
+  await prisma.message.deleteMany({ where: { conversationId: convJaapId } })
+  await prisma.conversationParticipant.deleteMany({ where: { conversationId: convJaapId } })
+  await prisma.conversation.deleteMany({ where: { id: convJaapId } })
+
+  await prisma.conversation.create({
+    data: {
+      id: convJaapId,
+      matchId: matchJaap.id,
+      participants: {
+        create: [
+          { userId: "vol-jaap-wij-eten-demo" },
+          { userId: wijEtenAdminId },
+        ],
+      },
+    },
+  })
+
+  const jaapMessages = [
+    { sender: wijEtenAdminId, content: "Hallo Jaap! Wat leuk dat je interesse hebt in de gastheer functie bij WIJ Eten Samen. Ik ben Petra, de coördinator. Kun je me iets meer over jezelf vertellen?", daysAgo: 13 },
+    { sender: "vol-jaap-wij-eten-demo", content: "Hoi Petra! Ik ben Jaap, 61 jaar en gepensioneerd leraar. Ik woon al 30 jaar in Heemstede en wil me graag inzetten voor mijn buurt. Maandagavond past me uitstekend.", daysAgo: 13, hoursOffset: 3 },
+    { sender: wijEtenAdminId, content: "Wat geweldig! Een leraar die sociaal is — perfect voor onze avonden. Heb je al eerder vrijwilligerswerk gedaan?", daysAgo: 12 },
+    { sender: "vol-jaap-wij-eten-demo", content: "Ja, ik heb een paar jaar geholpen bij de voedselbank in Haarlem. Maar nu wil ik iets dichter bij huis doen. Hoeveel gasten komen er gemiddeld per avond?", daysAgo: 12, hoursOffset: 2 },
+    { sender: wijEtenAdminId, content: "Gemiddeld 28 à 35 gasten. Het is een hechte groep! We beginnen altijd met een korte briefing om 16:30. Kun jij maandag 3 maart langskomen voor een kennismaking?", daysAgo: 11 },
+    { sender: "vol-jaap-wij-eten-demo", content: "Dat kan ik! Ik ben er om 16:30. Moet ik iets meebrengen of dragen?", daysAgo: 10 },
+    { sender: wijEtenAdminId, content: "Nee hoor, gewoon comfortabele kleding. We hebben schorten voor iedereen. Fijn dat je erbij bent — we hebben er zin in! 😊", daysAgo: 10, hoursOffset: 1 },
+    { sender: "vol-jaap-wij-eten-demo", content: "Top! Ik kijk er naar uit. Tot dan!", daysAgo: 10, hoursOffset: 2 },
+    { sender: wijEtenAdminId, content: "Nog even een herinnering: morgen is onze kennismakingsavond! Parkeren kan gratis op het plein aan de Raadhuisstraat. Tot morgen!", daysAgo: 1 },
+    { sender: "vol-jaap-wij-eten-demo", content: "Dank je! Ik ben er. Tot morgen 🙂", daysAgo: 1, hoursOffset: 1 },
+  ]
+
+  for (const msg of jaapMessages) {
+    const createdAt = new Date(Date.now() - msg.daysAgo * 24 * 60 * 60 * 1000 + (msg.hoursOffset ?? 0) * 60 * 60 * 1000)
+    await prisma.message.create({
+      data: { conversationId: convJaapId, senderId: msg.sender, content: msg.content, createdAt, updatedAt: createdAt },
+    })
+  }
+  console.log("✅  Gesprek Jaap & WIJ Eten Samen aangemaakt (10 berichten)")
+
+  // ── 11e. WIJ Eten Samen SLA + handprint update ────────────────────────────
+  await prisma.organisation.update({
+    where: { id: wijEtenOrgId },
+    data: { avgResponseHours: 18.4, slaScore: 95 },
+  })
+
+  await prisma.orgHandprint.upsert({
+    where: { organisationId: wijEtenOrgId },
+    update: {
+      totaalUrenJaarlijks: 1820,
+      maatschappelijkeWaarde: 27992,
+      sroiWaarde: 117565,
+      retentieScore: 82,
+      aantalActieveMatches: 24,
+      aantalAfgerondMatches: 9,
+      gemLooptijdMaanden: 16.8,
+      sdgScores: { "2": 0.9, "3": 0.75, "10": 0.85, "11": 0.7 },
+      dominantMotivatie: "sociaal",
+      laasteBerekening: new Date(),
+    },
+    create: {
+      organisationId: wijEtenOrgId,
+      totaalUrenJaarlijks: 1820,
+      maatschappelijkeWaarde: 27992,
+      sroiWaarde: 117565,
+      retentieScore: 82,
+      aantalActieveMatches: 24,
+      aantalAfgerondMatches: 9,
+      gemLooptijdMaanden: 16.8,
+      sdgScores: { "2": 0.9, "3": 0.75, "10": 0.85, "11": 0.7 },
+      dominantMotivatie: "sociaal",
+      isPubliek: true,
+      laasteBerekening: new Date(),
+    },
+  })
+  console.log("✅  WIJ Eten Samen SLA & impact bijgewerkt")
 
   console.log(`
 ╔════════════════════════════════════════════════════════════╗
