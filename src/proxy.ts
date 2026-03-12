@@ -26,7 +26,7 @@ export default auth((req) => {
 
   // ─────────────────────────────────────────────────────────────────────────
 
-  const publicPaths = ["/", "/login", "/register"]
+  const publicPaths = ["/", "/login", "/register", "/pitch", "/over-ons", "/faq", "/impact", "/kaart", "/privacy", "/voorwaarden", "/organisaties"]
   const isPublic = publicPaths.some(
     (p) => pathname === p || pathname.startsWith(p + "?"),
   )
