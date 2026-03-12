@@ -42,13 +42,13 @@ const CAT_EMOJI: Record<string, string> = {
 
 const GRADIENT_PAIRS = [
   ["#f97316", "#f59e0b"],
-  ["#06b6d4", "#3b82f6"],
-  ["#a855f7", "#ec4899"],
-  ["#22c55e", "#14b8a6"],
-  ["#f43f5e", "#f97316"],
-  ["#6366f1", "#06b6d4"],
-  ["#84cc16", "#22c55e"],
-  ["#f59e0b", "#f43f5e"],
+  ["#f59e0b", "#fbbf24"],
+  ["#fb923c", "#f97316"],
+  ["#ea580c", "#f97316"],
+  ["#f97316", "#fb923c"],
+  ["#f59e0b", "#f97316"],
+  ["#fbbf24", "#f59e0b"],
+  ["#f97316", "#ea580c"],
 ]
 
 function orgGradient(name: string): [string, string] {
@@ -93,9 +93,9 @@ function DescriptionBody({ text }: { text: string }) {
 // ─── Match score breakdown panel ───────────────────────────────────────────
 
 function scoreColor(score: number): string {
-  if (score >= 75) return "#22c55e"
-  if (score >= 55) return "#f97316"
-  return "#ef4444"
+  if (score >= 75) return "#f97316"
+  if (score >= 50) return "#f59e0b"
+  return "#fbbf24"
 }
 
 const SCORE_DIMS: { key: keyof MatchScore; label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
@@ -106,7 +106,7 @@ const SCORE_DIMS: { key: keyof MatchScore; label: string; Icon: React.ComponentT
 ]
 
 function MatchScorePanel({ matchScore }: { matchScore: MatchScore }) {
-  const total = Math.round(matchScore.total)
+  const total = Math.round(matchScore.rawTotal ?? matchScore.total)
   const totalColor = scoreColor(total)
 
   return (
@@ -156,7 +156,7 @@ function MatchScorePanel({ matchScore }: { matchScore: MatchScore }) {
           {matchScore.highlights.map((h) => (
             <span
               key={h}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-[11px] font-semibold border border-green-100"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 text-[11px] font-semibold border border-orange-100"
             >
               <Check className="w-2.5 h-2.5 flex-shrink-0" />
               {h}
@@ -251,7 +251,7 @@ export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailShee
               </span>
             )}
             {vacancy.remote && (
-              <span className="flex items-center gap-1.5 text-sm text-green-600 bg-green-50 rounded-full px-3 py-1">
+              <span className="flex items-center gap-1.5 text-sm text-orange-600 bg-orange-50 rounded-full px-3 py-1">
                 <Wifi className="w-3.5 h-3.5" /> Op afstand
               </span>
             )}

@@ -12,9 +12,9 @@ const RADIUS = 13
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
 function ringColor(score: number): string {
-  if (score >= 75) return "#22c55e" // green-500
-  if (score >= 55) return "#f97316" // orange-500
-  return "#ef4444"                   // red-500
+  if (score >= 75) return "#f97316" // orange-500
+  if (score >= 50) return "#f59e0b" // amber-400
+  return "#fbbf24"                   // amber-300
 }
 
 interface AiScoreBadgeProps {

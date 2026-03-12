@@ -88,8 +88,10 @@ export interface MatchInput {
 }
 
 export interface MatchScore {
-  /** Weighted total score [0–100] */
+  /** Weighted total score including fairness boost — used for ranking [0–100] */
   total: number
+  /** Raw weighted total without fairness boost — shown to the user [0–100] */
+  rawTotal: number
   /** Motivational alignment [0–100] — VFI cosine + interest overlap */
   motivation: number
   /** Geographic accessibility [0–100] */
@@ -150,10 +152,12 @@ export function calculateMatchScore(input: MatchInput, weights?: Partial<Scoring
     skill      * w.skill +
     freshness  * w.freshness
 
-  const total = Math.min(100, Math.round(raw * fairnessWeight * 10) / 10)
+  const rawTotal = Math.min(100, Math.round(raw * 10) / 10)
+  const total    = Math.min(100, Math.round(raw * fairnessWeight * 10) / 10)
 
   return {
     total,
+    rawTotal,
     motivation: Math.round(motivation * 10) / 10,
     distance: Math.round(distance * 10) / 10,
     skill: Math.round(skill * 10) / 10,

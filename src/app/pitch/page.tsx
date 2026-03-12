@@ -242,113 +242,181 @@ export default function PitchPage() {
         </section>
 
         {/* ═══════════════════════════════════════════════════════
-            3. DE OPLOSSING + LIVE DEMO
+            3. DE OPLOSSING — DRIE PERSPECTIEVEN
         ═══════════════════════════════════════════════════════ */}
         <section id="oplossing" className="py-20 sm:py-28 bg-gray-50 border-b border-gray-100">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
-            <div className="mb-14">
+            <div className="mb-16">
               <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-4">De oplossing</p>
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter mb-3">
-                Live demo — 10 minuten
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter">
+                Drie perspectieven
               </h2>
-              <p className="text-gray-500 max-w-lg">
-                Drie perspectieven. Eén platform. Klik op een rol om direct in de app te springen.
-              </p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-5">
-
-              {/* A. Vrijwilliger */}
-              <div className="bg-white border border-gray-100 rounded-3xl p-7 flex flex-col shadow-sm">
-                <div className="w-10 h-10 bg-orange-100 rounded-2xl flex items-center justify-center mb-6">
+            {/* Perspectief 1 — Vrijwilliger */}
+            <div className="grid md:grid-cols-[1fr_2fr] gap-10 py-12 border-t border-gray-200 items-start">
+              <div>
+                <div className="w-10 h-10 bg-orange-100 rounded-2xl flex items-center justify-center mb-4">
                   <User className="w-5 h-5 text-orange-500" />
                 </div>
-                <p className="text-[10px] uppercase tracking-widest text-orange-500 font-bold mb-1.5">A. Vrijwilliger</p>
-                <h3 className="text-base font-bold mb-4 leading-snug text-gray-900">
-                  Journey van aanmelden tot match
+                <p className="text-[10px] uppercase tracking-widest text-orange-500 font-bold mb-1">Vrijwilliger</p>
+                <h3 className="text-xl font-bold text-gray-900 leading-snug">
+                  Eindelijk een match die klopt
                 </h3>
-                <ul className="space-y-3 text-sm text-gray-500 flex-1 mb-7">
-                  {[
-                    "Onboarding op motivatie — niet skills/keywords",
-                    "Slimme matches met score + uitleg waarom",
-                    "\"Deze organisatie past bij jou omdat...\"",
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2.5">
-                      <CheckCircle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/swipe"
-                  className="w-full py-3 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-xl text-center transition-colors inline-flex items-center justify-center gap-2"
-                >
-                  Open vrijwilligers-app
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
               </div>
+              <div>
+                <p className="text-gray-500 text-sm leading-relaxed mb-5">
+                  Het huidige systeem werkt als een vacaturebank. Je zoekt op trefwoord, ziet een lijst, en kiest blind.
+                  Vrijwilligersmatch brengt de motivatie van de vrijwilliger in kaart — op basis van{" "}
+                  <span className="text-gray-900 font-medium">VFI</span> en{" "}
+                  <span className="text-gray-900 font-medium">Schwartz-waarden</span> — en matcht op die drijfveren.
+                  Iemand die eenzaamheid bij ouderen wil doorbreken, belandt niet bij een klussendienst.
+                  Iemand die wil leren en groeien, niet in een repetitieve rol.
+                </p>
+                <div className="flex items-start gap-2.5 p-4 bg-white border border-gray-100 rounded-xl">
+                  <CheckCircle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">Wat het oplost:</span>{" "}
+                    motivatiemismatch, snelle uitval, het gevoel van "dit past toch niet bij me."
+                  </p>
+                </div>
+                <div className="mt-4">
+                  <Link href="/swipe" className="inline-flex items-center gap-1.5 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors">
+                    Zie de vrijwilligers-app <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+            </div>
 
-              {/* B. Organisatie */}
-              <div className="bg-white border border-gray-100 rounded-3xl p-7 flex flex-col shadow-sm">
-                <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center mb-6">
+            {/* Perspectief 2 — Coördinator */}
+            <div className="grid md:grid-cols-[1fr_2fr] gap-10 py-12 border-t border-gray-200 items-start">
+              <div>
+                <div className="w-10 h-10 bg-blue-50 rounded-2xl flex items-center justify-center mb-4">
                   <Building2 className="w-5 h-5 text-blue-500" />
                 </div>
-                <p className="text-[10px] uppercase tracking-widest text-blue-500 font-bold mb-1.5">B. Organisatie</p>
-                <h3 className="text-base font-bold mb-4 leading-snug text-gray-900">
-                  Dashboard met AI-ondersteuning
+                <p className="text-[10px] uppercase tracking-widest text-blue-500 font-bold mb-1">Coördinator</p>
+                <h3 className="text-xl font-bold text-gray-900 leading-snug">
+                  Minder handwerk, betere uitkomsten
                 </h3>
-                <ul className="space-y-3 text-sm text-gray-500 flex-1 mb-7">
-                  {[
-                    "Vacature aanmaken met AI-hulp (schrijft tekst)",
-                    "Inkomende matches met motivatie-inzicht",
-                    "\"Deze vrijwilliger zoekt betekenis en groei\"",
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2.5">
-                      <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/organisation/dashboard"
-                  className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-xl text-center transition-colors inline-flex items-center justify-center gap-2"
-                >
-                  Open organisatie-dashboard
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
               </div>
+              <div>
+                <p className="text-gray-500 text-sm leading-relaxed mb-5">
+                  Een coördinator doet nu enorm veel handmatig: vacatureteksten schrijven, vrijwilligers benaderen,
+                  afspraken inplannen — zonder systeem dat waarschuwt als iemand dreigt af te haken.
+                  Vrijwilligersmatch neemt dat grotendeels over. Het platform genereert automatisch vacatureteksten,
+                  matcht zelfstandig op profiel en locatie, en signaleert via AI wanneer betrokkenheid afneemt.
+                  Zo kan de coördinator zich richten op de relatie, niet de administratie.
+                </p>
+                <div className="flex items-start gap-2.5 p-4 bg-white border border-gray-100 rounded-xl">
+                  <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">Wat het oplost:</span>{" "}
+                    onhoudbare werkdruk, trage plaatsingen, blinde vlekken in retentie.
+                  </p>
+                </div>
+                <div className="mt-4">
+                  <Link href="/organisation/dashboard" className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-500 hover:text-blue-600 transition-colors">
+                    Zie het organisatie-dashboard <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+            </div>
 
-              {/* C. Gemeente / coördinator */}
-              <div className="bg-white border border-gray-100 rounded-3xl p-7 flex flex-col shadow-sm">
-                <div className="w-10 h-10 bg-violet-50 rounded-2xl flex items-center justify-center mb-6">
+            {/* Perspectief 3 — Gemeente */}
+            <div className="grid md:grid-cols-[1fr_2fr] gap-10 py-12 border-t border-gray-200 items-start">
+              <div>
+                <div className="w-10 h-10 bg-violet-50 rounded-2xl flex items-center justify-center mb-4">
                   <Landmark className="w-5 h-5 text-violet-500" />
                 </div>
-                <p className="text-[10px] uppercase tracking-widest text-violet-500 font-bold mb-1.5">C. Coördinator</p>
-                <h3 className="text-base font-bold mb-4 leading-snug text-gray-900">
-                  Rapportage &amp; overzicht voor gemeente
+                <p className="text-[10px] uppercase tracking-widest text-violet-500 font-bold mb-1">Gemeente</p>
+                <h3 className="text-xl font-bold text-gray-900 leading-snug">
+                  Sturen op impact
                 </h3>
-                <ul className="space-y-3 text-sm text-gray-500 flex-1 mb-7">
-                  {[
-                    "Overzicht van alle matches in de gemeente",
-                    "Welke matches leiden tot plaatsingen?",
-                    "Rapportage met KPI's voor gemeente",
-                    "Tijdsbesparing inzichtelijk",
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2.5">
-                      <CheckCircle className="w-4 h-4 text-violet-500 shrink-0 mt-0.5" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/admin/dashboard"
-                  className="w-full py-3 bg-violet-500 hover:bg-violet-600 text-white text-sm font-semibold rounded-xl text-center transition-colors inline-flex items-center justify-center gap-2"
-                >
-                  Open coördinator-panel
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
               </div>
+              <div>
+                <p className="text-gray-500 text-sm leading-relaxed mb-5">
+                  Een gemeente financiert welzijnswerk, maar heeft weinig inzicht in wat dat oplevert.
+                  Hoeveel vrijwilligers zijn actief? Hoe lang blijven ze? Welke organisaties hebben urgent tekort?
+                  Vrijwilligersmatch biedt een rapportagedashboard dat al die vragen beantwoordt in real-time —
+                  zodat beleidsmakers vrijwilligersbeleid kunnen onderbouwen, subsidies verantwoorden
+                  en bijsturen waar het misgaat.
+                </p>
+                <div className="flex items-start gap-2.5 p-4 bg-white border border-gray-100 rounded-xl">
+                  <CheckCircle className="w-4 h-4 text-violet-500 shrink-0 mt-0.5" />
+                  <p className="text-sm text-gray-700">
+                    <span className="font-semibold">Wat het oplost:</span>{" "}
+                    de kloof tussen vrijwilligersinzet en beleidsverantwoording, gebrek aan sturingsdata.
+                  </p>
+                </div>
+                <div className="mt-4">
+                  <Link href="/admin/dashboard" className="inline-flex items-center gap-1.5 text-sm font-semibold text-violet-500 hover:text-violet-600 transition-colors">
+                    Zie het gemeentedashboard <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Vergelijking — NLvoorelkaar */}
+            <div className="mt-6 border-t border-gray-200 pt-12">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-8">Waarom fundamenteel anders?</p>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="p-6 bg-white border border-gray-200 rounded-2xl">
+                  <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-3">NLvoorelkaar &amp; bestaande platforms</p>
+                  <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                    Logistieke infrastructuur — brengt vraag en aanbod bij elkaar op basis van trefwoorden en locatie.
+                    Nuttig, maar agnostisch over motivatie. Het platform weet niet <em>waarom</em> iemand zich aanmeldt.
+                  </p>
+                  <p className="text-sm font-semibold text-gray-900">Lost het vinden-probleem op.</p>
+                </div>
+                <div className="p-6 bg-orange-50 border border-orange-100 rounded-2xl">
+                  <p className="text-[10px] uppercase tracking-widest text-orange-500 font-bold mb-3">Vrijwilligersmatch</p>
+                  <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                    Psychologische infrastructuur — de kern van het systeem is motivatie-gedreven matching,
+                    gebaseerd op VFI en Schwartz-waarden. Daardoor voorspelbaar betere retentie en meer impact.
+                  </p>
+                  <p className="text-sm font-semibold text-orange-600">Lost het blijven-probleem op.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* ═══════════════════════════════════════════════════════
+            3B. LIVE DEMO KNOPPEN
+        ═══════════════════════════════════════════════════════ */}
+        <section className="py-16 border-b border-gray-100">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-8">Live demo — 10 minuten</p>
+            <div className="grid md:grid-cols-3 gap-5">
+              {[
+                { label: "A. Vrijwilliger", desc: "Journey van aanmelden tot match", href: "/swipe", color: "orange" },
+                { label: "B. Organisatie", desc: "Dashboard met AI-ondersteuning", href: "/organisation/dashboard", color: "blue" },
+                { label: "C. Coördinator", desc: "Rapportage & overzicht gemeente", href: "/admin/dashboard", color: "violet" },
+              ].map((item) => {
+                const colors: Record<string, { bg: string; text: string; btn: string }> = {
+                  orange: { bg: "bg-orange-100", text: "text-orange-500", btn: "bg-orange-500 hover:bg-orange-600" },
+                  blue:   { bg: "bg-blue-50",   text: "text-blue-500",   btn: "bg-blue-500 hover:bg-blue-600" },
+                  violet: { bg: "bg-violet-50", text: "text-violet-500", btn: "bg-violet-500 hover:bg-violet-600" },
+                }
+                const c = colors[item.color]
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="flex items-center justify-between p-5 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow group"
+                  >
+                    <div>
+                      <p className={`text-[10px] uppercase tracking-widest font-bold mb-1 ${c.text}`}>{item.label}</p>
+                      <p className="text-sm font-semibold text-gray-900">{item.desc}</p>
+                    </div>
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ml-4 ${c.btn} transition-colors`}>
+                      <ArrowRight className="w-4 h-4 text-white" />
+                    </div>
+                  </Link>
+                )
+              })}
             </div>
           </div>
         </section>

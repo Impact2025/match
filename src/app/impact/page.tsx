@@ -224,13 +224,9 @@ export default async function ImpactPage() {
   )
 
   const { gemeente, overview: d, sdgImpact, categoryBreakdown, monthlyTrend } = data
-  const accent = gemeente.primaryColor
-  const isOrange = accent === "#f97316" || !accent.includes("#6d") // use orange gradient when no gemeente
-
-  // Gradient string
-  const heroGradient = isOrange
-    ? "linear-gradient(135deg, #f97316, #f59e0b)"
-    : `linear-gradient(135deg, ${accent}, ${accent}cc)`
+  // Altijd de app-huisstijl: oranje/amber gradient
+  const heroGradient = "linear-gradient(135deg, #f97316, #f59e0b)"
+  const accent = "#f97316"
 
   const maxMonthTotal = Math.max(...monthlyTrend.map((m) => m.total), 1)
   const maxCatHours   = categoryBreakdown[0]?.hours ?? 1

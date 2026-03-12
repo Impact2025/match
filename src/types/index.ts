@@ -17,8 +17,10 @@ export type VacancyWithOrg = Vacancy & {
 }
 
 export type MatchScore = {
-  /** Weighted total [0–100] */
+  /** Weighted total including fairness boost — for ranking [0–100] */
   total: number
+  /** Raw weighted total without fairness boost — shown to user [0–100] */
+  rawTotal?: number
   /** VFI cosine + interest overlap [0–100] */
   motivation: number
   /** Haversine distance score [0–100] */

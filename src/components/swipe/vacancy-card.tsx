@@ -49,13 +49,13 @@ const CAT_EMOJI: Record<string, string> = {
 
 const GRADIENT_PAIRS = [
   ["#f97316", "#f59e0b"],
-  ["#06b6d4", "#3b82f6"],
-  ["#a855f7", "#ec4899"],
-  ["#22c55e", "#14b8a6"],
-  ["#f43f5e", "#f97316"],
-  ["#6366f1", "#06b6d4"],
-  ["#84cc16", "#22c55e"],
-  ["#f59e0b", "#f43f5e"],
+  ["#f59e0b", "#fbbf24"],
+  ["#fb923c", "#f97316"],
+  ["#ea580c", "#f97316"],
+  ["#f97316", "#fb923c"],
+  ["#f59e0b", "#f97316"],
+  ["#fbbf24", "#f59e0b"],
+  ["#f97316", "#ea580c"],
 ]
 
 function orgGradient(name: string): [string, string] {
@@ -183,7 +183,7 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
 
           {/* Match score ring – top right */}
           <div className="absolute top-3 right-3 z-10">
-            <AiScoreBadge score={matchScore?.total} />
+            <AiScoreBadge score={matchScore?.rawTotal ?? matchScore?.total} />
           </div>
 
           {/* Org avatar – top left */}
@@ -236,7 +236,7 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
               <span className="text-[12px] text-orange-600 font-semibold">· {distanceKm} km</span>
             )}
             {vacancy.remote && (
-              <span className="flex items-center gap-1 text-[12px] text-green-600 font-semibold">
+              <span className="flex items-center gap-1 text-[12px] text-orange-600 font-semibold">
                 <Wifi className="w-3.5 h-3.5" /> Op afstand
               </span>
             )}
@@ -263,7 +263,7 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
               {highlights.map((h) => (
                 <span
                   key={h}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 text-green-700 text-[11px] font-semibold border border-green-100"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 text-[11px] font-semibold border border-orange-100"
                 >
                   <Check className="w-2.5 h-2.5 flex-shrink-0" />
                   {h}
