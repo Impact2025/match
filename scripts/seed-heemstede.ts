@@ -338,6 +338,7 @@ async function main() {
     // ── Fietsmaatjes Zuid-Kennemerland ───────────────────────────────────
     {
       id: cuid("vac-fiets-locatie"),
+      imageUrl: "/Fietsmaatjes.png",
       orgSlug: "fietsmaatjes-zuid-kennemerland",
       title: "Fietsmaatjes ZK zoekt een Locatie-contactpersoon voor Plein 1",
       description:
@@ -459,6 +460,7 @@ async function main() {
         remote: vac.remote ?? false,
         hours: vac.hours,
         duration: vac.duration,
+        imageUrl: (vac as { imageUrl?: string }).imageUrl ?? null,
         status: "ACTIVE",
         organisationId: orgId,
         skills: { create: skillRecords.map((s) => ({ skillId: s.id })) },
