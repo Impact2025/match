@@ -48,6 +48,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }),
   ],
   callbacks: {
+    async signIn({ user }) {
+      // Reset swipes + matches for the demo account on every login
+      if (user?.email === "vrijwilliger@heemstede-demo.nl") {
+        await prisma.match.deleteMany({ where: { volunteerId: user.id } })
+        await prisma.swipe.deleteMany({ where: { fromId: user.id } })
+      }
+      return true
+    },
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as any).role
