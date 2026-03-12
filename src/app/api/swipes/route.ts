@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { sendMatchNotificationOrgEmail } from "@/lib/email"
+import { createNotification } from "@/lib/notifications"
 import { MATCH_REASONS } from "@/validators"
 
 export async function GET(req: Request) {
@@ -113,15 +114,27 @@ export async function POST(req: Request) {
           include: { organisation: { include: { admin: true } } },
         })
         .then((vacancy) => {
-          if (!vacancy?.organisation?.admin?.email) return
+          if (!vacancy?.organisation?.admin) return
           const volunteer = session.user as { name?: string | null }
-          sendMatchNotificationOrgEmail(
-            vacancy.organisation.admin.email,
-            vacancy.organisation.name,
-            volunteer.name ?? "Een vrijwilliger",
-            vacancy.title,
-            match.id
-          ).catch((err) => console.error("[MATCH_ORG_EMAIL_ERROR]", err))
+          const volunteerName = volunteer.name ?? "Een vrijwilliger"
+          // Email
+          if (vacancy.organisation.admin.email) {
+            sendMatchNotificationOrgEmail(
+              vacancy.organisation.admin.email,
+              vacancy.organisation.name,
+              volunteerName,
+              vacancy.title,
+              match.id
+            ).catch((err) => console.error("[MATCH_ORG_EMAIL_ERROR]", err))
+          }
+          // In-app notification
+          createNotification({
+            userId: vacancy.organisation.adminId,
+            type: "NEW_MATCH",
+            title: "Nieuwe match!",
+            body: `${volunteerName} heeft interesse in "${vacancy.title}"`,
+            link: "/organisation/dashboard",
+          }).catch((err) => console.error("[NOTIFICATION_ERROR]", err))
         })
         .catch((err) => console.error("[SWIPE_ORG_LOOKUP_ERROR]", err))
     }

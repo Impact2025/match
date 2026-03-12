@@ -19,13 +19,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Ongeldige parameters" }, { status: 400 })
     }
 
-    // Extract conversationId from channel name: "private-conversation-{id}"
-    const match = channelName.match(/^private-conversation-(.+)$/)
-    if (!match) {
+    // private-user-{userId}: personal notification channel
+    const userMatch = channelName.match(/^private-user-(.+)$/)
+    if (userMatch) {
+      if (userMatch[1] !== session.user.id) {
+        return NextResponse.json({ error: "Geen toegang" }, { status: 403 })
+      }
+      const authResponse = pusherServer.authorizeChannel(socketId, channelName)
+      return NextResponse.json(authResponse)
+    }
+
+    // private-conversation-{id}: chat channel
+    const convMatch = channelName.match(/^private-conversation-(.+)$/)
+    if (!convMatch) {
       return NextResponse.json({ error: "Ongeldig kanaal" }, { status: 403 })
     }
 
-    const conversationId = match[1]
+    const conversationId = convMatch[1]
 
     // Verify the user is a participant
     const participant = await prisma.conversationParticipant.findUnique({

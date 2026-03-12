@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { AiAssistant } from "@/components/ai/ai-assistant"
 import { getCurrentGemeente } from "@/lib/gemeente"
 import { TourLauncher } from "@/components/onboarding/tour/TourLauncher"
+import { NotificationBell } from "@/components/layout/notification-bell"
 
 export default async function DashboardLayout({
   children,
@@ -78,7 +79,9 @@ export default async function DashboardLayout({
             )}
           </Link>
 
-          {/* Avatar */}
+          {/* Notification bell + Avatar */}
+          <div className="flex items-center gap-1">
+          <NotificationBell userId={session.user.id!} />
           <Link href="/profile">
             <Avatar className="w-8 h-8">
               <AvatarImage
@@ -100,6 +103,7 @@ export default async function DashboardLayout({
               </AvatarFallback>
             </Avatar>
           </Link>
+          </div>
         </div>
       </header>
 

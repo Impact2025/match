@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { generateIcebreaker } from "@/lib/ai"
 import { pusherServer } from "@/lib/pusher"
 import { sendMatchAcceptedEmail, sendMatchRejectedEmail } from "@/lib/email"
+import { createNotification } from "@/lib/notifications"
 
 async function updateOrgSla(orgId: string) {
   const resolvedMatches = await prisma.match.findMany({
@@ -138,6 +139,14 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         ).catch((err) => console.error("[MATCH_ACCEPTED_EMAIL_ERROR]", err))
       }
 
+      createNotification({
+        userId: match.volunteerId,
+        type: "MATCH_ACCEPTED",
+        title: "Match geaccepteerd!",
+        body: `${org.name} wil je ontmoeten voor "${match.vacancy.title}". Bekijk het gesprek.`,
+        link: `/chat`,
+      }).catch((err) => console.error("[NOTIFICATION_ERROR]", err))
+
       // Non-blocking SLA update
       updateOrgSla(org.id).catch((err) => console.error("[SLA_UPDATE_ERROR]", err))
 
@@ -145,13 +154,22 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 
     // Notify volunteer on rejection (non-blocking)
-    if (status === "REJECTED" && match.volunteer.email) {
-      sendMatchRejectedEmail(
-        match.volunteer.email,
-        match.volunteer.name ?? "Vrijwilliger",
-        match.vacancy.title,
-        org.name
-      ).catch((err) => console.error("[MATCH_REJECTED_EMAIL_ERROR]", err))
+    if (status === "REJECTED") {
+      if (match.volunteer.email) {
+        sendMatchRejectedEmail(
+          match.volunteer.email,
+          match.volunteer.name ?? "Vrijwilliger",
+          match.vacancy.title,
+          org.name
+        ).catch((err) => console.error("[MATCH_REJECTED_EMAIL_ERROR]", err))
+      }
+      createNotification({
+        userId: match.volunteerId,
+        type: "MATCH_REJECTED",
+        title: "Match helaas niet doorgegaan",
+        body: `${org.name} heeft je aanmelding voor "${match.vacancy.title}" niet kunnen accepteren.`,
+        link: "/swipe",
+      }).catch((err) => console.error("[NOTIFICATION_ERROR]", err))
     }
 
     // Non-blocking SLA update

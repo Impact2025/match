@@ -28,7 +28,7 @@ export default async function OrganisationLayout({
 
   return (
     <QueryProvider>
-      <OrgHeader />
+      <OrgHeader userId={session.user.id!} />
       <main className="pt-14 pb-[calc(5rem+env(safe-area-inset-bottom))]">{children}</main>
       <OrgBottomNav />
       <TourLauncher tourId="organisation" />
