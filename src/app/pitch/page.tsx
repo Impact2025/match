@@ -141,9 +141,9 @@ export default function PitchPage() {
                 </div>
                 <ul className="space-y-5">
                   {[
-                    { icon: <Clock className="w-4 h-4" />, text: "Handmatige matching kost uren per week" },
-                    { icon: <XCircle className="w-4 h-4" />, text: "Veel mismatches → vrijwilligers haken af" },
-                    { icon: <Scale className="w-4 h-4" />, text: "Kleine organisaties krijgen minder aandacht" },
+                    { icon: <Clock className="w-4 h-4" />, text: "Uren per week kwijt aan matching die toch niet werkt" },
+                    { icon: <XCircle className="w-4 h-4" />, text: "Het gevoel van zinloos werk: matches die na drie maanden afvallen" },
+                    { icon: <Scale className="w-4 h-4" />, text: "Kleine organisaties vissen steeds achter het net" },
                     { icon: <BarChart2 className="w-4 h-4" />, text: "Geen inzicht in wat werkt en wat niet" },
                   ].map((item) => (
                     <li key={item.text} className="flex items-start gap-3">
@@ -169,9 +169,9 @@ export default function PitchPage() {
                 </div>
                 <ul className="space-y-5">
                   {[
-                    { icon: <Key className="w-4 h-4" />, text: "Keywords matchen niet met échte motivatie" },
-                    { icon: <Frown className="w-4 h-4" />, text: "Frustratie: \"dit is niet wat ik zocht\"" },
-                    { icon: <LogOut className="w-4 h-4" />, text: "Hoge drop-out na eerste contact" },
+                    { icon: <Frown className="w-4 h-4" />, text: "Je meldt je aan, maar hoort nooit meer iets" },
+                    { icon: <XCircle className="w-4 h-4" />, text: "Je komt ergens terecht — en het klopt gewoon niet" },
+                    { icon: <LogOut className="w-4 h-4" />, text: "Teleurstelling → afhaken, soms voor altijd" },
                   ].map((item) => (
                     <li key={item.text} className="flex items-start gap-3">
                       <div className="w-6 h-6 bg-white border border-gray-200 rounded-lg flex items-center justify-center shrink-0 mt-0.5 text-gray-400">
@@ -181,13 +181,19 @@ export default function PitchPage() {
                     </li>
                   ))}
                 </ul>
+              </div>
+            </div>
 
-                <div className="mt-8 p-4 bg-white border border-gray-200 rounded-2xl">
-                  <p className="text-sm text-gray-500 leading-relaxed">
-                    <span className="text-gray-900 font-bold">1 op de 3</span> vrijwilligers stopt binnen
-                    3 maanden omdat de match niet klopte.
-                  </p>
-                </div>
+            {/* Gedeelde stat — brug tussen beide perspectieven */}
+            <div className="mt-6 p-6 bg-gray-50 border border-gray-100 rounded-2xl flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+              <div className="shrink-0 w-14 h-14 bg-white border border-gray-200 rounded-2xl flex items-center justify-center">
+                <BarChart2 className="w-6 h-6 text-gray-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900 mb-0.5">1 op de 3 vrijwilligers stopt binnen 3 maanden</p>
+                <p className="text-sm text-gray-500">
+                  Omdat de match niet klopte. Verlies voor de vrijwilliger — en al dat matchwerk voor niets.
+                </p>
               </div>
             </div>
 
