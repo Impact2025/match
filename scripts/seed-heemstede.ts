@@ -598,6 +598,7 @@ async function main() {
     },
     {
       id: "vac-welzijn-tuinteam-heemstede-demo",
+      imageUrl: "/tuinman.png",
       title: "Vrijwilliger gezocht voor ons Tuinteam Heemstede",
       description:
         "Welzijn Heemstede beheert samen met bewoners een aantal gemeenschappelijke tuinen " +
@@ -621,6 +622,7 @@ async function main() {
     },
     {
       id: "vac-welzijn-admin-heemstede-demo",
+      imageUrl: "/Administratief.png",
       title: "Administratief ondersteuner voor Welzijn Heemstede (thuiswerk mogelijk)",
       description:
         "Welzijn Heemstede zoekt een vrijwilliger die ons kleine kantoorteam ondersteunt " +
@@ -673,6 +675,7 @@ async function main() {
         remote: vac.remote ?? false,
         hours: vac.hours,
         duration: vac.duration,
+        imageUrl: (vac as { imageUrl?: string }).imageUrl ?? null,
         status: "ACTIVE",
         organisationId: welzijnOrg.id,
         skills: { create: skillRecords.map((s) => ({ skillId: s.id })) },
