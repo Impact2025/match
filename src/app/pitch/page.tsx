@@ -64,16 +64,48 @@ export default function PitchPage() {
                 <span className="text-orange-500">Vincent</span>
               </h1>
 
-              <p className="text-lg text-gray-500 leading-relaxed mb-6 max-w-xl">
+              <p className="text-lg text-gray-500 leading-relaxed mb-10 max-w-xl">
                 Oprichter van <span className="text-gray-900 font-medium">WeAreImpact</span> en maker van
                 Vrijwilligersmatch.nl — een AI-platform dat vrijwilligers en organisaties slim koppelt
-                op basis van motivatie.
-              </p>
-              <p className="text-lg text-gray-500 leading-relaxed mb-12 max-w-xl">
-                Sinds 2012 werk ik als sociaal ondernemer — met eigen projecten en als directeur van{" "}
+                op basis van motivatie. Sinds 2012 werk ik als sociaal ondernemer — met eigen projecten
+                en als directeur van{" "}
                 <span className="text-gray-900 font-medium">Stichting de Baan</span> — altijd met en voor
                 vrijwilligers. Zij zijn het goud van elke vrijwilligersorganisatie.
               </p>
+
+              {/* Tijdlijn */}
+              <div className="flex flex-col gap-0 mb-12 max-w-lg">
+                {[
+                  {
+                    year: "2009",
+                    text: "Eerste datingsite voor mensen met een beperking — matchen op basis van wie je bent, niet wat je kunt.",
+                  },
+                  {
+                    year: "2016",
+                    text: "Idee voor slimme vrijwilligersmatching bedacht tijdens het groeiprogramma van het Oranje Fonds. Toen nog te duur om te bouwen.",
+                  },
+                  {
+                    year: "2026",
+                    text: "AI maakt het eindelijk toegankelijk voor iedereen. Vrijwilligersmatch.nl is live.",
+                  },
+                ].map((item, i, arr) => (
+                  <div key={item.year} className="flex gap-4">
+                    {/* Lijn + dot */}
+                    <div className="flex flex-col items-center">
+                      <div className="w-8 h-8 rounded-full bg-orange-100 border-2 border-orange-300 flex items-center justify-center shrink-0">
+                        <span className="text-[9px] font-bold text-orange-600">{item.year}</span>
+                      </div>
+                      {i < arr.length - 1 && (
+                        <div className="w-px flex-1 bg-gray-200 my-1" />
+                      )}
+                    </div>
+                    {/* Tekst */}
+                    <div className={i < arr.length - 1 ? "pb-6 pt-1" : "pt-1"}>
+                      <p className="text-sm text-gray-600 leading-relaxed">{item.text}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
 
               <div className="grid sm:grid-cols-3 gap-4">
                 {[
