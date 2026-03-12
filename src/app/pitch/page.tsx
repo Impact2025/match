@@ -64,10 +64,15 @@ export default function PitchPage() {
                 <span className="text-orange-500">Vincent</span>
               </h1>
 
-              <p className="text-lg text-gray-500 leading-relaxed mb-12 max-w-xl">
+              <p className="text-lg text-gray-500 leading-relaxed mb-6 max-w-xl">
                 Oprichter van <span className="text-gray-900 font-medium">WeAreImpact</span> en maker van
                 Vrijwilligersmatch.nl — een AI-platform dat vrijwilligers en organisaties slim koppelt
                 op basis van motivatie.
+              </p>
+              <p className="text-lg text-gray-500 leading-relaxed mb-12 max-w-xl">
+                Sinds 2012 werk ik als sociaal ondernemer — met eigen projecten en als directeur van{" "}
+                <span className="text-gray-900 font-medium">Stichting de Baan</span> — altijd met en voor
+                vrijwilligers. Zij zijn het goud van elke vrijwilligersorganisatie.
               </p>
 
               <div className="grid sm:grid-cols-3 gap-4">
