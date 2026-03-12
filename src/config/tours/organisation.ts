@@ -45,11 +45,11 @@ export const organisationTour: TourConfig = {
       spotlightPadding: 10,
     },
     {
-      id: "nav-org-matches",
-      target: "nav-org-matches",
-      title: "Matches beoordelen",
+      id: "nav-org-chat",
+      target: "nav-org-chat",
+      title: "Berichten met vrijwilligers",
       content:
-        "Beoordeel voorstellen: accepteer, wijs af of markeer als voltooid. Snel reageren vergroot je zichtbaarheid.",
+        "Zodra een match is gemaakt, open je hier de chat. Snel en persoonlijk contact verhoogt je kans op een succesvolle samenwerking.",
       placement: "top",
       spotlightPadding: 10,
     },

@@ -201,13 +201,11 @@ export function TourLauncher({ tourId, accentColor }: TourLauncherProps) {
 
   const key = storageKey(tourId)
 
-  // Mount + first-visit check
+  // Mount + always show (demo mode — remove localStorage guard to restore normal behaviour)
   useEffect(() => {
     setMounted(true)
-    if (!localStorage.getItem(key)) {
-      const t = setTimeout(() => setPhase("welcome"), 750)
-      return () => clearTimeout(t)
-    }
+    const t = setTimeout(() => setPhase("welcome"), 750)
+    return () => clearTimeout(t)
   }, [key])
 
   // Re-position spotlight whenever step changes
