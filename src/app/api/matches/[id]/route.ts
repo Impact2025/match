@@ -3,14 +3,18 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { generateIcebreaker } from "@/lib/ai"
 import { pusherServer } from "@/lib/pusher"
-import { sendMatchAcceptedEmail, sendMatchRejectedEmail } from "@/lib/email"
+import {
+  sendMatchAcceptedEmail,
+  sendMatchRejectedEmail,
+  sendPlacementConfirmedEmail,
+} from "@/lib/email"
 import { createNotification } from "@/lib/notifications"
 
 async function updateOrgSla(orgId: string) {
   const resolvedMatches = await prisma.match.findMany({
     where: {
       vacancy: { organisationId: orgId },
-      status: { in: ["ACCEPTED", "REJECTED"] },
+      status: { in: ["ACCEPTED", "REJECTED", "CONFIRMED", "COMPLETED"] },
       startedAt: { not: null },
     },
     select: { createdAt: true, startedAt: true },
@@ -19,7 +23,7 @@ async function updateOrgSla(orgId: string) {
   if (resolvedMatches.length === 0) return
 
   const totalHours = resolvedMatches.reduce((sum, m) => {
-    const diffMs = (m.startedAt!.getTime() - m.createdAt.getTime())
+    const diffMs = m.startedAt!.getTime() - m.createdAt.getTime()
     return sum + diffMs / (1000 * 60 * 60)
   }, 0)
 
@@ -49,7 +53,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const body = await req.json()
     const { status } = body
 
-    if (!["ACCEPTED", "REJECTED"].includes(status)) {
+    if (!["ACCEPTED", "CONFIRMED", "REJECTED"].includes(status)) {
       return NextResponse.json({ error: "Ongeldige status" }, { status: 400 })
     }
 
@@ -67,6 +71,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       include: {
         volunteer: true,
         vacancy: { include: { organisation: true } },
+        conversation: true,
       },
     })
 
@@ -78,15 +83,24 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: "Geen toegang" }, { status: 403 })
     }
 
+    // State transition guards
+    if (status === "CONFIRMED" && match.status !== "ACCEPTED") {
+      return NextResponse.json(
+        { error: "Alleen geaccepteerde matches kunnen worden bevestigd" },
+        { status: 400 }
+      )
+    }
+
     const updated = await prisma.match.update({
       where: { id },
       data: {
         status,
         ...(status === "ACCEPTED" ? { startedAt: new Date() } : {}),
+        ...(status === "CONFIRMED" ? { confirmedAt: new Date() } : {}),
       },
     })
 
-    // On ACCEPTED: create conversation + icebreaker
+    // ── ACCEPTED: open conversation + icebreaker ──────────────────────────
     if (status === "ACCEPTED") {
       const conversation = await prisma.conversation.create({
         data: {
@@ -100,15 +114,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         },
       })
 
-      // Generate icebreaker
       try {
         const icebreakerText = await generateIcebreaker(
           match.volunteer.name ?? "Vrijwilliger",
           match.vacancy.title,
           org.name
         )
-
-        // Find a system user or use the org admin as sender
         await prisma.message.create({
           data: {
             content: `✨ ${icebreakerText}`,
@@ -117,8 +128,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
             senderId: session.user.id,
           },
         })
-
-        // Trigger Pusher
         await pusherServer.trigger(
           `private-conversation-${conversation.id}`,
           "new-message",
@@ -128,7 +137,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         console.error("[ICEBREAKER_ERROR]", err)
       }
 
-      // Notify volunteer (non-blocking)
       if (match.volunteer.email) {
         sendMatchAcceptedEmail(
           match.volunteer.email,
@@ -147,13 +155,34 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         link: `/chat`,
       }).catch((err) => console.error("[NOTIFICATION_ERROR]", err))
 
-      // Non-blocking SLA update
       updateOrgSla(org.id).catch((err) => console.error("[SLA_UPDATE_ERROR]", err))
 
       return NextResponse.json({ ...updated, conversationId: conversation.id })
     }
 
-    // Notify volunteer on rejection (non-blocking)
+    // ── CONFIRMED: placement confirmed, volunteer is active ───────────────
+    if (status === "CONFIRMED") {
+      if (match.volunteer.email) {
+        sendPlacementConfirmedEmail(
+          match.volunteer.email,
+          match.volunteer.name ?? "Vrijwilliger",
+          match.vacancy.title,
+          org.name
+        ).catch((err) => console.error("[PLACEMENT_CONFIRMED_EMAIL_ERROR]", err))
+      }
+
+      createNotification({
+        userId: match.volunteerId,
+        type: "MATCH_ACCEPTED",
+        title: "Je bent officieel geplaatst! 🎉",
+        body: `${org.name} heeft bevestigd dat jij van start gaat bij "${match.vacancy.title}".`,
+        link: `/matches`,
+      }).catch((err) => console.error("[NOTIFICATION_ERROR]", err))
+
+      return NextResponse.json(updated)
+    }
+
+    // ── REJECTED ──────────────────────────────────────────────────────────
     if (status === "REJECTED") {
       if (match.volunteer.email) {
         sendMatchRejectedEmail(
@@ -170,10 +199,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         body: `${org.name} heeft je aanmelding voor "${match.vacancy.title}" niet kunnen accepteren.`,
         link: "/swipe",
       }).catch((err) => console.error("[NOTIFICATION_ERROR]", err))
-    }
 
-    // Non-blocking SLA update
-    updateOrgSla(org.id).catch((err) => console.error("[SLA_UPDATE_ERROR]", err))
+      updateOrgSla(org.id).catch((err) => console.error("[SLA_UPDATE_ERROR]", err))
+    }
 
     return NextResponse.json(updated)
   } catch (error) {

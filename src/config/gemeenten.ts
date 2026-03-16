@@ -1,3 +1,10 @@
+export interface SocialLinks {
+  facebook?: string
+  instagram?: string
+  linkedin?: string
+  twitter?: string
+}
+
 export interface GemeenteBranding {
   slug: string
   /** Platform-branded name shown in UI, e.g. "WijHeemstede" */
@@ -11,11 +18,22 @@ export interface GemeenteBranding {
   accentColor: string
   logoUrl: string | null
   website: string
+
+  // ── Extended branding (populated from DB, optional) ──────────
+  contactEmail?: string | null
+  heroImageUrl?: string | null
+  welcomeTitle?: string | null
+  welcomeMessage?: string | null
+  contactPhone?: string | null
+  contactAddress?: string | null
+  socialLinks?: SocialLinks | null
+  emailSignature?: string | null
+  faviconUrl?: string | null
 }
 
 /**
  * Registry of all whitelabel gemeente tenants.
- * Add a new entry here when onboarding a municipality.
+ * Used for subdomain detection — branding details are loaded from DB at runtime.
  */
 export const GEMEENTEN: Record<string, GemeenteBranding> = {
   heemstede: {

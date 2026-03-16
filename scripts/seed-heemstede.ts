@@ -1124,7 +1124,7 @@ async function main() {
       id: "vol-linda-wij-eten-demo",
       name: "Linda van den Berg",
       email: "linda.vandenberg@heemstede-demo.nl",
-      age: 52,
+      birthYear: 1972,
       bio: "Ik werk parttime als verpleegkundige en wil in mijn vrije tijd iets betekenen voor de buurt. Eten is voor mij een manier om mensen samen te brengen.",
       availability: JSON.stringify(["monday", "wednesday", "evening"]),
     },
@@ -1132,7 +1132,7 @@ async function main() {
       id: "vol-jaap-wij-eten-demo",
       name: "Jaap Martens",
       email: "jaap.martens@heemstede-demo.nl",
-      age: 61,
+      birthYear: 1963,
       bio: "Gepensioneerd leraar, woon al 30 jaar in Heemstede. Ik hou van koken en gezelligheid en zoek zinvol vrijwilligerswerk in de buurt.",
       availability: JSON.stringify(["monday", "tuesday", "friday", "afternoon"]),
     },
@@ -1140,7 +1140,7 @@ async function main() {
       id: "vol-maria-wij-eten-demo",
       name: "Maria Oosterbeek",
       email: "maria.oosterbeek@heemstede-demo.nl",
-      age: 44,
+      birthYear: 1980,
       bio: "Ik ben moeder van twee kinderen en werk als administratief medewerker. Graag wil ik me inzetten voor mijn omgeving.",
       availability: JSON.stringify(["monday", "thursday", "morning"]),
     },
@@ -1148,7 +1148,7 @@ async function main() {
       id: "vol-thomas-wij-eten-demo",
       name: "Thomas Blom",
       email: "thomas.blom@heemstede-demo.nl",
-      age: 38,
+      birthYear: 1986,
       bio: "Ik woon in Heemstede en ben kok van beroep. Vrijwilligerswerk bij een maaltijdproject past perfect bij mijn passie voor eten en mensen.",
       availability: JSON.stringify(["monday", "weekend", "evening"]),
     },
@@ -1168,7 +1168,7 @@ async function main() {
         status: "ACTIVE",
         onboarded: true,
         bio: vol.bio,
-        age: vol.age,
+        birthYear: vol.birthYear,
         location: "Heemstede",
         postcode: "2101",
         lat: 52.359,
@@ -1321,13 +1321,35 @@ async function main() {
   })
   console.log("✅  WIJ Eten Samen SLA & impact bijgewerkt")
 
+  // ── 12. Vrijwilligerspunt beheerder (GEMEENTE_ADMIN) ─────────────────────
+  await prisma.user.upsert({
+    where: { email: "vrijwilligerspunt@heemstede-demo.nl" },
+    update: {},
+    create: {
+      id: "gemeente-admin-heemstede-demo",
+      name: "Vrijwilligerspunt WIJ Heemstede",
+      email: "vrijwilligerspunt@heemstede-demo.nl",
+      password: await hashPassword("demo1234"),
+      role: "GEMEENTE_ADMIN",
+      status: "ACTIVE",
+      onboarded: true,
+      gemeenteSlug: "heemstede",
+    } as any,
+  })
+  console.log("✅  Gemeente admin: vrijwilligerspunt@heemstede-demo.nl  (wachtwoord: demo1234)")
+
   console.log(`
 ╔════════════════════════════════════════════════════════════╗
 ║         WijHeemstede × Vrijwilligersmatch — Klaar!         ║
 ╠════════════════════════════════════════════════════════════╣
 ║  Demo vrijwilliger:                                        ║
 ║    e-mail:    vrijwilliger@heemstede-demo.nl               ║
+║    wachtwoord: demo1234                                     ║
+╠════════════════════════════════════════════════════════════╣
+║  Vrijwilligerspunt (gemeente beheer):                      ║
+║    e-mail:    vrijwilligerspunt@heemstede-demo.nl          ║
 ║    wachtwoord: demo1234                                    ║
+║    → /admin (uitstraling, organisaties, groepsbericht)     ║
 ╠════════════════════════════════════════════════════════════╣
 ║  Org beheerders (wachtwoord: demo1234):                    ║
 ║    beheerder.wij-eten@heemstede-demo.nl                    ║

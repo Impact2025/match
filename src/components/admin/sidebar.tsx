@@ -16,6 +16,9 @@ import {
   BarChart2,
   Sliders,
   Leaf,
+  Mail,
+  MapPin,
+  Palette,
 } from "lucide-react"
 import { signOut } from "next-auth/react"
 
@@ -26,8 +29,9 @@ interface NavItem {
   badge?: number
 }
 
-const BASE_NAV_ITEMS: (Omit<NavItem, "badge"> & { tourId?: string })[] = [
+const ADMIN_NAV: (Omit<NavItem, "badge"> & { tourId?: string })[] = [
   { href: "/admin/dashboard",     icon: LayoutDashboard, label: "Dashboard",     tourId: "sidebar-dashboard" },
+  { href: "/admin/gemeenten",     icon: MapPin,           label: "Gemeenten" },
   { href: "/admin/organisations", icon: Building2,        label: "Organisaties",  tourId: "sidebar-organisaties" },
   { href: "/admin/users",         icon: Users,            label: "Gebruikers" },
   { href: "/admin/vacancies",     icon: Briefcase,        label: "Vacatures" },
@@ -35,21 +39,39 @@ const BASE_NAV_ITEMS: (Omit<NavItem, "badge"> & { tourId?: string })[] = [
   { href: "/admin/analytics",     icon: BarChart2,        label: "AI Analytics" },
   { href: "/admin/impact",        icon: Leaf,             label: "Impactmeting",  tourId: "sidebar-impact" },
   { href: "/admin/scoring",       icon: Sliders,          label: "Scoring",       tourId: "sidebar-scoring" },
+  { href: "/admin/bulk-email",    icon: Mail,             label: "Groepsbericht" },
   { href: "/admin/logs",          icon: ScrollText,        label: "Audit Log" },
   { href: "/admin/settings",      icon: Settings,         label: "Instellingen",  tourId: "sidebar-settings" },
 ]
 
+function gemeenteNav(slug: string): (Omit<NavItem, "badge"> & { tourId?: string })[] {
+  return [
+    { href: `/admin/gemeenten/${slug}`, icon: Palette,   label: "Mijn uitstraling" },
+    { href: "/admin/organisations",     icon: Building2,  label: "Organisaties" },
+    { href: "/admin/users",             icon: Users,      label: "Vrijwilligers" },
+    { href: "/admin/vacancies",         icon: Briefcase,  label: "Vacatures" },
+    { href: "/admin/bulk-email",        icon: Mail,       label: "Groepsbericht" },
+  ]
+}
+
 interface AdminSidebarProps {
   adminName: string
   pendingCount?: number
+  role?: string
+  gemeenteSlug?: string | null
 }
 
-export function AdminSidebar({ adminName, pendingCount = 0 }: AdminSidebarProps) {
+export function AdminSidebar({ adminName, pendingCount = 0, role = "ADMIN", gemeenteSlug }: AdminSidebarProps) {
   const pathname = usePathname()
+  const isGemeenteAdmin = role === "GEMEENTE_ADMIN"
 
-  const navItems: (NavItem & { tourId?: string })[] = BASE_NAV_ITEMS.map((item) => ({
+  const baseItems = isGemeenteAdmin && gemeenteSlug
+    ? gemeenteNav(gemeenteSlug)
+    : ADMIN_NAV
+
+  const navItems: (NavItem & { tourId?: string })[] = baseItems.map((item) => ({
     ...item,
-    badge: item.href === "/admin/organisations" && pendingCount > 0 ? pendingCount : undefined,
+    badge: item.href === "/admin/organisations" && !isGemeenteAdmin && pendingCount > 0 ? pendingCount : undefined,
   }))
 
   return (
@@ -61,7 +83,9 @@ export function AdminSidebar({ adminName, pendingCount = 0 }: AdminSidebarProps)
         </div>
         <div className="leading-none">
           <p className="text-gray-900 text-sm font-semibold tracking-tight">Vrijwilligers</p>
-          <p className="text-orange-500 text-[10px] font-bold uppercase tracking-widest">Admin</p>
+          <p className="text-orange-500 text-[10px] font-bold uppercase tracking-widest">
+            {isGemeenteAdmin ? "Beheer" : "Admin"}
+          </p>
         </div>
       </div>
 
@@ -111,7 +135,9 @@ export function AdminSidebar({ adminName, pendingCount = 0 }: AdminSidebarProps)
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-gray-600 text-xs font-medium truncate">{adminName}</p>
-            <p className="text-gray-300 text-[10px] uppercase tracking-widest">Admin</p>
+            <p className="text-gray-300 text-[10px] uppercase tracking-widest">
+              {isGemeenteAdmin ? gemeenteSlug ?? "Gemeente" : "Admin"}
+            </p>
           </div>
         </div>
         <button

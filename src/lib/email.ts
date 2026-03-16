@@ -249,6 +249,66 @@ export async function sendInvitationEmail(
   })
 }
 
+export async function sendPlacementConfirmedEmail(
+  to: string,
+  volunteerName: string,
+  vacancyTitle: string,
+  orgName: string
+) {
+  const body = `
+    ${h1("Je bent officieel geplaatst! 🎉")}
+    ${p(`Geweldig nieuws, ${highlight(volunteerName)}! ${highlight(orgName)} heeft bevestigd dat jij van start gaat als vrijwilliger voor ${highlight(`"${vacancyTitle}"`)}.`)}
+    ${p(`Dit is het moment waarop jouw bijdrage echt begint. We zijn trots op je inzet en kijken uit naar de impact die je gaat maken.`)}
+    ${btn(`${BASE_URL}/matches`, "Bekijk mijn matches →")}
+    ${p(`<span style="font-size:13px;color:#9ca3af;">We sturen je over een week een check-in om te horen hoe het gaat.<br/>Veel succes en plezier!<br/>Het Vrijwilligersmatch-team</span>`)}
+    ${gdprFooter()}
+  `
+  return getResend().emails.send({
+    from: FROM,
+    to,
+    subject: `Je bent geplaatst bij ${orgName}!`,
+    html: layout("Geplaatst als vrijwilliger", body),
+  })
+}
+
+export async function sendConfirmationReminderEmail(
+  to: string,
+  orgName: string,
+  volunteerName: string,
+  vacancyTitle: string,
+  matchId: string,
+  daysSinceAccepted: number
+) {
+  const body = `
+    ${h1("Vergeet niet te bevestigen")}
+    ${p(`Hoi ${highlight(orgName)}! ${highlight(volunteerName)} is al ${daysSinceAccepted} dagen geleden gekoppeld aan jullie vacature ${highlight(`"${vacancyTitle}"`)}.`)}
+    ${p(`Is ${volunteerName} inmiddels gestart als vrijwilliger? Bevestig de plaatsing zodat we de voortgang kunnen bijhouden en de juiste check-ins kunnen sturen.`)}
+    ${btn(`${BASE_URL}/organisation/matches`, "Bevestig plaatsing →")}
+    ${p(`Is de samenwerking toch niet doorgegaan? Dan kun je de match ook sluiten vanuit het overzicht.`)}
+    ${p(`<span style="font-size:13px;color:#9ca3af;">Groeten,<br/>Het Vrijwilligersmatch-team</span>`)}
+    ${gdprFooter()}
+  `
+  return getResend().emails.send({
+    from: FROM,
+    to,
+    subject: `Vergeet niet: bevestig de plaatsing van ${volunteerName}`,
+    html: layout("Bevestiging nog open", body),
+  })
+}
+
+export function buildBulkEmailHtml(subject: string, message: string): string {
+  const paragraphs = message
+    .split(/\n{2,}/)
+    .map((para) => p(para.replace(/\n/g, "<br/>")))
+    .join("")
+  const body = `
+    ${h1(subject)}
+    ${paragraphs}
+    ${gdprFooter()}
+  `
+  return layout(subject, body)
+}
+
 export async function sendPasswordResetEmail(to: string, name: string, token: string) {
   const resetUrl = `${BASE_URL}/reset-password?token=${token}`
   const body = `

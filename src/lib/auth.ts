@@ -60,6 +60,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (user) {
         token.role = (user as any).role
         token.onboarded = (user as any).onboarded
+        token.gemeenteSlug = (user as any).gemeenteSlug ?? null
       }
       // Herlaad onboarded-status uit DB zolang de gebruiker nog niet onboarded is.
       // Zo werkt de redirect naar dashboard na onboarding meteen correct.
@@ -77,6 +78,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.id = token.sub!
         ;(session.user as any).role = token.role
         ;(session.user as any).onboarded = token.onboarded
+        ;(session.user as any).gemeenteSlug = token.gemeenteSlug ?? null
       }
       return session
     },

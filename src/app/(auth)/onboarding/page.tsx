@@ -38,34 +38,34 @@ const STEP_TITLES: Record<Step, string> = {
 }
 
 const STEP_SUBTITLES: Record<Step, string> = {
-  personal:     "We gebruiken dit om de beste matches voor je te vinden op Vrijwilligersmatch.nl",
+  personal:     "We gebruiken dit om de beste vrijwilligersplek voor jou te vinden.",
   skills:       "Selecteer de vaardigheden die je wilt inzetten.",
   interests:    "Kies één of meer doelgroepen die je aanspreken.",
   availability: "Geef aan wanneer je beschikbaar bent voor vrijwilligerswerk.",
-  vfi:          "Geef aan hoeveel elke reden voor jou telt. Dit helpt ons jou beter te matchen.",
-  schwartz:     "Hoe erg lijkt deze persoon op jou? Dit verfijnt jouw matches.",
+  vfi:          "Geef aan hoeveel elke reden voor jou telt. Zo vinden we een plek die echt bij jou past.",
+  schwartz:     "Hoe erg lijkt deze persoon op jou? Dit helpt ons een plek te vinden die bij jou past.",
 }
 
 const STEP_TOOLTIPS: Partial<Record<Step, { title: string; body: string }>> = {
   personal: {
     title: "Waarom je locatie?",
-    body: "Je postcode gebruiken we om de reisafstand tot vacatures te berekenen. Afstand telt voor 30% in je matchscore. Je exacte adres wordt nooit gedeeld met organisaties.",
+    body: "Je postcode gebruiken we om de reisafstand tot vrijwilligersplekken te berekenen. Je exacte adres wordt nooit gedeeld met organisaties.",
   },
   skills: {
-    title: "Hoe werkt skillmatching?",
-    body: "Vaardigheidsmatch telt voor 20% in je totaalscore. Ons systeem herkent ook synoniemen — 'JS' en 'JavaScript' worden automatisch als hetzelfde gezien.",
+    title: "Waarom vaardigheden?",
+    body: "Jouw vaardigheden helpen ons om organisaties te vinden die goed bij je passen. Ons systeem herkent ook synoniemen — 'rijbewijs' en 'autorijden' worden als hetzelfde gezien.",
   },
   interests: {
     title: "Waarom interesses?",
-    body: "Interesses vormen de basis van je motivatieprofiel, dat voor 40% meetelt in je score. Hoe meer overlap met een vacature, hoe relevanter de match.",
+    body: "Jouw interesses helpen ons begrijpen wie je wilt helpen. Zo stellen we je voor aan organisaties die bij jou passen.",
   },
   vfi: {
-    title: "Wat is het VFI-model?",
-    body: "VFI staat voor Volunteer Functions Inventory — een wetenschappelijk model (Clary et al., 1998) dat in 50+ landen wordt gebruikt. Je antwoorden worden omgezet in een motivatievector die we vergelijken met het profiel van elke vacature. Dit maakt onze matching uniek.",
+    title: "Waarom deze vragen?",
+    body: "Vrijwilligers die werken vanuit hun eigen motivatie blijven langer actief en zijn gelukkiger. We gebruiken je antwoorden om je voor te stellen aan organisaties die bij jouw reden voor vrijwilligerswerk passen.",
   },
   schwartz: {
     title: "Waarom kernwaarden?",
-    body: "Het Schwartz-waardenmodel (1992) is gevalideerd in 80+ landen en meet diepere drijfveren zoals zorgzaamheid, autonomie of stabiliteit. Dit voegt 25% extra precisie toe bovenop je motivatieprofiel — en onderscheidt ons van gewone vrijwilligersplatforms.",
+    body: "Iedereen heeft andere drijfveren — zorgzaamheid, avontuur, eerlijkheid. We vergelijken jouw waarden met die van een organisatie, zodat je op een plek terechtkomt waar je je echt thuis voelt.",
   },
 }
 
@@ -205,8 +205,8 @@ export default function OnboardingPage() {
   const [showCelebration, setShowCelebration] = useState(false)
   const [currentStep,     setCurrentStep]     = useState(0)
 
-  const [name,     setName]     = useState("")
-  const [age,      setAge]      = useState("")
+  const [name,       setName]       = useState("")
+  const [birthYear,  setBirthYear]  = useState("")
   const [location, setLocation] = useState("")
   const [postcode, setPostcode] = useState("")
 
@@ -304,7 +304,7 @@ export default function OnboardingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name:              name || undefined,
-          age:               age ? Number(age) : undefined,
+          birthYear:         birthYear ? Number(birthYear) : undefined,
           skills:            selectedSkills,
           interests:         selectedInterests,
           availability:      selectedAvailability,
@@ -360,7 +360,7 @@ export default function OnboardingPage() {
           transition={{ delay: 0.42 }}
           className="text-white/80 text-center leading-relaxed mb-10"
         >
-          Je profiel is aangemaakt. We gaan nu de beste matches voor je zoeken!
+          Je profiel is aangemaakt. We gaan nu de beste vrijwilligersplekken voor je zoeken!
         </motion.p>
         <motion.div
           initial={{ opacity: 0 }}
@@ -382,8 +382,8 @@ export default function OnboardingPage() {
       { icon: <Zap className="w-4 h-4 text-gray-400" />,       text: "Kies jouw vaardigheden" },
       { icon: <Heart className="w-4 h-4 text-gray-400" />,     text: "Selecteer je interesses" },
       { icon: <Calendar className="w-4 h-4 text-gray-400" />,  text: "Geef je beschikbaarheid aan" },
-      { icon: <Lightbulb className="w-4 h-4 text-gray-400" />, text: "Deel je motivatie (VFI)" },
-      { icon: <Sparkles className="w-4 h-4 text-gray-400" />,  text: "Jouw kernwaarden (Schwartz)" },
+      { icon: <Lightbulb className="w-4 h-4 text-gray-400" />, text: "Wat motiveert jou?" },
+      { icon: <Sparkles className="w-4 h-4 text-gray-400" />,  text: "Jouw kernwaarden" },
     ]
 
     return (
@@ -524,15 +524,17 @@ export default function OnboardingPage() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="age" className="text-sm font-medium text-gray-700">Leeftijd</Label>
+                  <Label htmlFor="birthYear" className="text-sm font-medium text-gray-700">Geboortejaar</Label>
                   <div className="relative">
                     <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
-                      id="age"
+                      id="birthYear"
                       type="number"
-                      value={age}
-                      onChange={(e) => setAge(e.target.value)}
-                      placeholder="Bijv. 25"
+                      value={birthYear}
+                      onChange={(e) => setBirthYear(e.target.value)}
+                      placeholder="Bijv. 1985"
+                      min={1924}
+                      max={new Date().getFullYear() - 16}
                       className="pl-10 h-12 rounded-xl border-gray-200 bg-white"
                     />
                   </div>

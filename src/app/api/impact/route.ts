@@ -5,7 +5,7 @@
  * Query-param: ?gemeente=heemstede  (valt terug op x-gemeente-slug header)
  *
  * Berekeningen:
- *  - Vrijwilligersuren: accepted/completed matches × vacancy.hours × weken
+ *  - Vrijwilligersuren: confirmed/completed matches × vacancy.hours × weken
  *  - Maatschappelijke waarde: uren × €15,38 (CBS 2024)
  *  - SROI: waarde × 4,2 (Movisie/SVI methodiek)
  *  - SDG-bijdrage: matches via vacancy_categories → CATEGORY_SDG_MAP
@@ -50,17 +50,17 @@ interface CategoryRow {
 function estimateHours(
   hoursPerWeek: number | null,
   status: string,
-  startedAt: Date | null,
+  confirmedAt: Date | null,
 ): number {
   const h = hoursPerWeek ?? 2
   if (status === "COMPLETED") {
     return h * IMPACT_CONSTANTS.AVG_COMPLETED_WEEKS
   }
-  if (!startedAt) {
+  if (!confirmedAt) {
     return h * IMPACT_CONSTANTS.DEFAULT_ACCEPTED_WEEKS
   }
   const weeksActive = Math.min(
-    (Date.now() - startedAt.getTime()) / (7 * 24 * 60 * 60 * 1000),
+    (Date.now() - confirmedAt.getTime()) / (7 * 24 * 60 * 60 * 1000),
     IMPACT_CONSTANTS.MAX_ACTIVE_WEEKS,
   )
   return h * Math.max(weeksActive, 1)
@@ -104,6 +104,7 @@ export async function GET(req: NextRequest) {
     totalMatches,
     pendingMatches,
     acceptedMatches,
+    confirmedMatches,
     completedMatches,
     totalConversations,
     totalSwipes,
@@ -125,6 +126,9 @@ export async function GET(req: NextRequest) {
       where: { status: "ACCEPTED", vacancy: { organisation: orgWhere } },
     }),
     prisma.match.count({
+      where: { status: "CONFIRMED", vacancy: { organisation: orgWhere } },
+    }),
+    prisma.match.count({
       where: { status: "COMPLETED", vacancy: { organisation: orgWhere } },
     }),
     prisma.conversation.count(),
@@ -142,31 +146,31 @@ export async function GET(req: NextRequest) {
         JOIN vacancies v ON m.vacancy_id = v.id
         JOIN organisations o ON v.organisation_id = o.id
         WHERE u.role = 'VOLUNTEER' AND u.status = 'ACTIVE'
-          AND m.status IN ('ACCEPTED','COMPLETED')
-          AND m.started_at >= NOW() - INTERVAL '90 days'
+          AND m.status IN ('CONFIRMED','COMPLETED')
+          AND m.confirmed_at >= NOW() - INTERVAL '90 days'
           AND o.gemeente_id = ${gid}
       `.then((r) => Number(r[0]?.cnt ?? 0)).catch(() => 0)
     : prisma.$queryRaw<[{ cnt: bigint }]>`
         SELECT COUNT(DISTINCT u.id)::bigint as cnt
         FROM users u JOIN matches m ON m.volunteer_id = u.id
         WHERE u.role = 'VOLUNTEER' AND u.status = 'ACTIVE'
-          AND m.status IN ('ACCEPTED','COMPLETED')
-          AND m.started_at >= NOW() - INTERVAL '90 days'
+          AND m.status IN ('CONFIRMED','COMPLETED')
+          AND m.confirmed_at >= NOW() - INTERVAL '90 days'
       `.then((r) => Number(r[0]?.cnt ?? 0)).catch(() => 0)
   )
 
   // ── Volunteer hours & economic value ────────────────────────────────────
   const activeFulfilledMatches = await prisma.match.findMany({
     where: {
-      status: { in: ["ACCEPTED", "COMPLETED"] },
+      status: { in: ["CONFIRMED", "COMPLETED"] },
       vacancy: { organisation: orgWhere },
     },
-    select: { status: true, startedAt: true, vacancy: { select: { hours: true } } },
+    select: { status: true, confirmedAt: true, vacancy: { select: { hours: true } } },
   })
 
   let totalHours = 0
   for (const m of activeFulfilledMatches) {
-    totalHours += estimateHours(m.vacancy.hours, m.status, m.startedAt)
+    totalHours += estimateHours(m.vacancy.hours, m.status, m.confirmedAt)
   }
 
   const economicValue = totalHours * IMPACT_CONSTANTS.HOURLY_VALUE_EUR
@@ -185,17 +189,18 @@ export async function GET(req: NextRequest) {
     }),
   ])
 
-  const retentionWeek1  = acceptedMatches > 0 ? (checkIn1Count  / acceptedMatches) * 100 : 0
-  const retentionWeek4  = acceptedMatches > 0 ? (checkIn4Count  / acceptedMatches) * 100 : 0
-  const retentionWeek12 = acceptedMatches > 0 ? (checkIn12Count / acceptedMatches) * 100 : 0
-  const matchAcceptanceRate = totalMatches > 0 ? ((acceptedMatches + completedMatches) / totalMatches) * 100 : 0
+  const placedMatches = confirmedMatches + completedMatches
+  const retentionWeek1  = placedMatches > 0 ? (checkIn1Count  / placedMatches) * 100 : 0
+  const retentionWeek4  = placedMatches > 0 ? (checkIn4Count  / placedMatches) * 100 : 0
+  const retentionWeek12 = placedMatches > 0 ? (checkIn12Count / placedMatches) * 100 : 0
+  const matchAcceptanceRate = totalMatches > 0 ? (placedMatches / totalMatches) * 100 : 0
   const likeRate = totalSwipes > 0 ? ((likeSwipes + superLikeSwipes) / totalSwipes) * 100 : 0
 
   // ── SDG impact (via vacancy categories) ─────────────────────────────────
   type MatchWithCats = {
     id: string
     status: string
-    startedAt: Date | null
+    confirmedAt: Date | null
     vacancy: {
       hours: number | null
       categories: { category: { name: string } }[]
@@ -204,13 +209,13 @@ export async function GET(req: NextRequest) {
 
   const matchesWithCategories: MatchWithCats[] = await prisma.match.findMany({
     where: {
-      status: { in: ["ACCEPTED", "COMPLETED"] },
+      status: { in: ["CONFIRMED", "COMPLETED"] },
       vacancy: { organisation: orgWhere },
     },
     select: {
       id: true,
       status: true,
-      startedAt: true,
+      confirmedAt: true,
       vacancy: {
         select: {
           hours: true,
@@ -225,7 +230,7 @@ export async function GET(req: NextRequest) {
   const sdgMatches = new Map<number, number>()
 
   for (const m of matchesWithCategories) {
-    const h = estimateHours(m.vacancy.hours, m.status, m.startedAt)
+    const h = estimateHours(m.vacancy.hours, m.status, m.confirmedAt)
     const catNames = m.vacancy.categories.map((c) => c.category.name)
     const sdgNums = new Set<number>()
     for (const cat of catNames) {
@@ -261,7 +266,7 @@ export async function GET(req: NextRequest) {
   const categoryMatches = new Map<string, number>()
 
   for (const m of matchesWithCategories) {
-    const h = estimateHours(m.vacancy.hours, m.status, m.startedAt)
+    const h = estimateHours(m.vacancy.hours, m.status, m.confirmedAt)
     const catNames = m.vacancy.categories.map((c) => c.category.name)
     const share = catNames.length > 0 ? h / catNames.length : 0
     for (const cat of catNames) {
@@ -299,19 +304,19 @@ export async function GET(req: NextRequest) {
           GROUP BY month ORDER BY month`,
     gid
       ? prisma.$queryRaw<MonthRow[]>`
-          SELECT TO_CHAR(m.started_at, 'YYYY-MM') as month, COUNT(*)::bigint as cnt
+          SELECT TO_CHAR(m.confirmed_at, 'YYYY-MM') as month, COUNT(*)::bigint as cnt
           FROM matches m
           JOIN vacancies v ON m.vacancy_id = v.id
           JOIN organisations o ON v.organisation_id = o.id
           WHERE o.gemeente_id = ${gid}
-            AND m.started_at >= NOW() - INTERVAL '12 months'
-            AND m.status IN ('ACCEPTED','COMPLETED')
+            AND m.confirmed_at >= NOW() - INTERVAL '12 months'
+            AND m.status IN ('CONFIRMED','COMPLETED')
           GROUP BY month ORDER BY month`
       : prisma.$queryRaw<MonthRow[]>`
-          SELECT TO_CHAR(started_at, 'YYYY-MM') as month, COUNT(*)::bigint as cnt
+          SELECT TO_CHAR(confirmed_at, 'YYYY-MM') as month, COUNT(*)::bigint as cnt
           FROM matches
-          WHERE started_at >= NOW() - INTERVAL '12 months'
-            AND status IN ('ACCEPTED','COMPLETED')
+          WHERE confirmed_at >= NOW() - INTERVAL '12 months'
+            AND status IN ('CONFIRMED','COMPLETED')
           GROUP BY month ORDER BY month`,
     prisma.$queryRaw<MonthRow[]>`
       SELECT TO_CHAR(created_at, 'YYYY-MM') as month, COUNT(*)::bigint as cnt
@@ -354,6 +359,7 @@ export async function GET(req: NextRequest) {
       totalMatches,
       pendingMatches,
       acceptedMatches,
+      confirmedMatches,
       completedMatches,
       totalConversations,
       totalSwipes,

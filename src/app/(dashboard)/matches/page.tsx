@@ -10,10 +10,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "sonner"
 
 const MATCH_STATUS: Record<string, { label: string; className: string }> = {
-  PENDING: { label: "In afwachting", className: "bg-amber-100 text-amber-700 border-amber-200" },
-  ACCEPTED: { label: "Geaccepteerd", className: "bg-green-100 text-green-700 border-green-200" },
-  REJECTED: { label: "Afgewezen", className: "bg-gray-100 text-gray-600 border-gray-200" },
-  COMPLETED: { label: "Afgerond", className: "bg-blue-100 text-blue-700 border-blue-200" },
+  PENDING:   { label: "In afwachting", className: "bg-amber-100 text-amber-700 border-amber-200" },
+  ACCEPTED:  { label: "In gesprek",    className: "bg-blue-100 text-blue-700 border-blue-200" },
+  CONFIRMED: { label: "Actief! 🎉",    className: "bg-green-100 text-green-700 border-green-200" },
+  REJECTED:  { label: "Afgewezen",     className: "bg-gray-100 text-gray-600 border-gray-200" },
+  COMPLETED: { label: "Afgerond",      className: "bg-purple-100 text-purple-700 border-purple-200" },
 }
 
 const INV_STATUS: Record<string, { label: string; className: string }> = {
@@ -285,7 +286,7 @@ export default function MatchesPage() {
                           {new Date(match.createdAt).toLocaleDateString("nl-NL")}
                         </div>
                       </div>
-                      {match.status === "ACCEPTED" && conversationId && (
+                      {(match.status === "ACCEPTED" || match.status === "CONFIRMED") && conversationId && (
                         <div className="mt-3">
                           <Button asChild size="sm" className="gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:from-orange-600 hover:to-amber-600">
                             <Link href={`/chat?conversationId=${conversationId}`}>

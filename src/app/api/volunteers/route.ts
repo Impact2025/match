@@ -54,7 +54,7 @@ export async function GET(req: Request) {
       bio: true,
       location: true,
       postcode: true,
-      age: true,
+      birthYear: true,
       availability: true,
       maxDistance: true,
       lat: true,

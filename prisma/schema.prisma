@@ -37,7 +37,7 @@ model User {
   availability  String?   // JSON string: ["monday", "weekend", ...]
   maxDistance   Int?      @default(25) // km
 
-  age                 Int?
+  birthYear           Int?      // geboortejaar (bijv. 1985)
 
   motivationProfile   String?   @db.Text   // JSON: {waarden,begrip,sociaal,loopbaan,bescherming,verbetering}
   schwartzProfile     String?   @db.Text   // JSON: {zorg,universalisme,zelfrichting,stimulatie,hedonisme,prestatie,macht,veiligheid,conformiteit,traditie}
@@ -46,6 +46,9 @@ model User {
 
   openToInvitations Boolean   @default(true)
   commitmentType    String?   // "wekelijks" | "projectmatig" | "incidenteel" | "alles"
+
+  // Gemeente admin link
+  gemeenteSlug      String?   // set when role = GEMEENTE_ADMIN
 
   // Password reset
   resetToken        String?   @unique
@@ -343,10 +346,13 @@ model Match {
 
   conversation   Conversation?
 
-  startedAt        DateTime?   // set on ACCEPTED
-  checkIn1SentAt   DateTime?   // week 1 (7d)
-  checkIn4SentAt   DateTime?   // week 4 (28d)
-  checkIn12SentAt  DateTime?   // week 12 (84d)
+  startedAt        DateTime?   // set on ACCEPTED (for SLA measurement)
+  confirmedAt      DateTime?   // set on CONFIRMED (vrijwilliger actief — check-ins starten hier)
+  checkIn1SentAt   DateTime?   // week 1 (7d after confirmedAt)
+  checkIn4SentAt   DateTime?   // week 4 (28d after confirmedAt)
+  checkIn12SentAt  DateTime?   // week 12 (84d after confirmedAt)
+  reminder14SentAt DateTime?   // reminder to org after 14d ACCEPTED without CONFIRMED
+  reminder28SentAt DateTime?   // reminder to org after 28d ACCEPTED without CONFIRMED
 
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -357,7 +363,8 @@ model Match {
 
 enum MatchStatus {
   PENDING
-  ACCEPTED
+  ACCEPTED    // org wil contact maken — chat geopend, telt NIET als plaatsing
+  CONFIRMED   // org heeft bevestigd dat vrijwilliger actief is — telt als plaatsing
   REJECTED
   COMPLETED
 }
@@ -462,6 +469,17 @@ model Gemeente {
   tagline      String?                  // "Vrijwilligerswerk in Heemstede & omgeving"
   website      String?
   contactEmail String?
+
+  // ── Extended branding ─────────────────────────────────────────
+  accentColor    String?                // lighter accent for gradients/hover
+  heroImageUrl   String?                // background image on homepage/swipe
+  welcomeTitle   String?                // "Welkom bij WijHeemstede"
+  welcomeMessage String?   @db.Text    // onboarding welcome body text
+  contactPhone   String?                // "023-547 8900"
+  contactAddress String?   @db.Text    // street + city
+  socialLinks    Json?                  // { facebook?, instagram?, linkedin?, twitter? }
+  emailSignature String?   @db.Text    // appended to system emails
+  faviconUrl     String?                // custom favicon URL
 
   organisations Organisation[]
   dashboard     GemeenteDashboard?
