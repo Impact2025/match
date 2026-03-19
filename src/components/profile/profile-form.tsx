@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Slider } from "@/components/ui/slider"
 import { profileSchema, type ProfileFormData } from "@/validators"
-import { SKILLS, CATEGORIES, AVAILABILITY_OPTIONS } from "@/config"
+import { SKILLS, CATEGORIES } from "@/config"
+import { AvailabilityGrid, migrateLegacyAvailability } from "@/components/profile/availability-grid"
 
 interface ProfileFormProps {
   defaultValues: ProfileFormData & { image?: string | null; openToInvitations?: boolean }
@@ -24,7 +25,7 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
     defaultValues.interests ?? []
   )
   const [selectedAvailability, setSelectedAvailability] = useState<string[]>(
-    defaultValues.availability ?? []
+    migrateLegacyAvailability(defaultValues.availability ?? [])
   )
   const [maxDistance, setMaxDistance] = useState(defaultValues.maxDistance ?? 25)
   const [openToInvitations, setOpenToInvitations] = useState(defaultValues.openToInvitations ?? false)
@@ -300,22 +301,10 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
       {/* Availability */}
       <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
         <h2 className="text-lg font-semibold text-gray-900">Beschikbaarheid</h2>
-        <div className="flex flex-wrap gap-2">
-          {AVAILABILITY_OPTIONS.map((opt) => (
-            <button
-              key={opt.value}
-              type="button"
-              onClick={() => toggle(selectedAvailability, opt.value, setSelectedAvailability)}
-              className={`px-3 py-1.5 rounded-full text-sm border-2 transition-all ${
-                selectedAvailability.includes(opt.value)
-                  ? "border-orange-500 bg-orange-50 text-orange-700 font-medium"
-                  : "border-gray-200 text-gray-600 hover:border-gray-300"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
+        <AvailabilityGrid
+          selected={selectedAvailability}
+          onChange={setSelectedAvailability}
+        />
       </section>
 
       {/* Max distance */}

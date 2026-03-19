@@ -21,8 +21,9 @@ import {
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { CATEGORIES, SKILLS, AVAILABILITY_OPTIONS } from "@/config"
+import { CATEGORIES, SKILLS } from "@/config"
 import { OrgOnboardingFlow } from "@/components/onboarding/org-onboarding-flow"
+import { AvailabilityGrid, migrateLegacyAvailability } from "@/components/profile/availability-grid"
 
 type Step = "personal" | "skills" | "interests" | "availability" | "vfi" | "schwartz"
 const STEPS: Step[] = ["personal", "skills", "interests", "availability", "vfi", "schwartz"]
@@ -192,8 +193,6 @@ const SCHWARTZ_SCALE = [
   { value: 5, label: "Heel erg" },
 ]
 
-const DAYS     = ["monday","tuesday","wednesday","thursday","friday","saturday","sunday"]
-const DAYDELEN = ["morning","afternoon","evening"]
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -668,51 +667,10 @@ export default function OnboardingPage() {
             {/* ── Step 4: Availability ── */}
             {step === "availability" && (
               <div className="space-y-5">
-                <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2.5">Dag</p>
-                  <div className="flex flex-wrap gap-2">
-                    {AVAILABILITY_OPTIONS.filter((o) => DAYS.includes(o.value)).map((opt) => {
-                      const selected = selectedAvailability.includes(opt.value)
-                      return (
-                        <motion.button
-                          key={opt.value}
-                          whileTap={{ scale: 0.91 }}
-                          onClick={() => toggleAvailability(opt.value)}
-                          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                            selected ? "bg-orange-500 text-white border-orange-500 shadow-sm" : "bg-white text-gray-600 border-gray-200 hover:border-orange-300"
-                          }`}
-                        >
-                          {opt.label}
-                          {selected && <Check className="w-3 h-3" />}
-                        </motion.button>
-                      )
-                    })}
-                  </div>
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2.5">Dagdeel</p>
-                  <div className="flex flex-wrap gap-2">
-                    {AVAILABILITY_OPTIONS.filter((o) => DAYDELEN.includes(o.value)).map((opt) => {
-                      const selected = selectedAvailability.includes(opt.value)
-                      return (
-                        <motion.button
-                          key={opt.value}
-                          whileTap={{ scale: 0.91 }}
-                          onClick={() => toggleAvailability(opt.value)}
-                          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                            selected ? "bg-orange-500 text-white border-orange-500 shadow-sm" : "bg-white text-gray-600 border-gray-200 hover:border-orange-300"
-                          }`}
-                        >
-                          {opt.label}
-                          {selected && <Check className="w-3 h-3" />}
-                        </motion.button>
-                      )
-                    })}
-                  </div>
-                </div>
-                <p className="text-xs text-gray-400 mt-1">
-                  {selectedAvailability.length === 0 ? "Selecteer jouw beschikbaarheid" : `${selectedAvailability.length} opties geselecteerd`}
-                </p>
+                <AvailabilityGrid
+                  selected={selectedAvailability}
+                  onChange={setSelectedAvailability}
+                />
 
                 {/* Inzetvoorkeur */}
                 <div className="pt-1">
