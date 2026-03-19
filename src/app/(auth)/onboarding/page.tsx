@@ -720,6 +720,7 @@ export default function OnboardingPage() {
                   <div className="flex flex-col gap-2">
                     {[
                       { value: "wekelijks",    label: "Vaste wekelijkse inzet",   desc: "Ik wil structureel betrokken zijn" },
+                      { value: "tweewekelijks", label: "Om de week",              desc: "Regelmatig, maar niet elke week" },
                       { value: "projectmatig", label: "Projectmatig",              desc: "Per project of periode" },
                       { value: "incidenteel",  label: "Incidenteel / eenmalig",   desc: "Losse klussen of events" },
                       { value: "alles",        label: "Maakt me niet uit",        desc: "Ik sta overal voor open" },

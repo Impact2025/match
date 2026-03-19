@@ -66,9 +66,10 @@ const ORG_SIZES = [
 ]
 
 const INZET_TYPES = [
-  { value: "wekelijks",    label: "Wekelijkse vaste inzet",  desc: "Vrijwilligers die structureel terugkomen" },
-  { value: "projectmatig", label: "Projectmatig",            desc: "Per project of tijdelijke periode" },
-  { value: "incidenteel",  label: "Incidenteel / eenmalig",  desc: "Losse klussen of evenementen" },
+  { value: "wekelijks",     label: "Wekelijkse vaste inzet",  desc: "Vrijwilligers die structureel terugkomen" },
+  { value: "tweewekelijks", label: "Om de week",              desc: "Regelmatig, maar niet elke week" },
+  { value: "projectmatig",  label: "Projectmatig",            desc: "Per project of tijdelijke periode" },
+  { value: "incidenteel",   label: "Incidenteel / eenmalig",  desc: "Losse klussen of evenementen" },
 ]
 
 const VOLUNTEER_BENEFITS = [
