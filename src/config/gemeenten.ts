@@ -46,6 +46,16 @@ export const GEMEENTEN: Record<string, GemeenteBranding> = {
     logoUrl: null,
     website: "https://www.wijheemstede.nl",
   },
+  haarlem: {
+    slug: "haarlem",
+    name: "HaarlemHelpt",
+    displayName: "Haarlem",
+    tagline: "Vrijwilligerswerk in Haarlem & omgeving",
+    primaryColor: "#B91C1C",
+    accentColor: "#DC2626",
+    logoUrl: null,
+    website: "https://www.haarlem.nl",
+  },
 }
 
 /** Look up gemeente branding by slug (returns null for unknown/global). */

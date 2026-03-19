@@ -2,7 +2,7 @@
 
 import { signOut } from "next-auth/react"
 import Link from "next/link"
-import { Heart, LogOut } from "lucide-react"
+import { Heart, LogOut, UserCircle } from "lucide-react"
 import { NotificationBell } from "@/components/layout/notification-bell"
 
 export function OrgHeader({ userId }: { userId: string }) {
@@ -17,6 +17,14 @@ export function OrgHeader({ userId }: { userId: string }) {
         </Link>
         <div className="flex items-center gap-1">
           <NotificationBell userId={userId} />
+          <Link
+            href="/organisation/profile"
+            className="flex items-center gap-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-xl px-2.5 py-2 transition-colors text-sm"
+            aria-label="Profiel"
+          >
+            <UserCircle className="w-4 h-4" />
+            <span className="hidden sm:inline">Profiel</span>
+          </Link>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
             className="flex items-center gap-1.5 text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-xl px-2.5 py-2 transition-colors text-sm"
