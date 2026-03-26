@@ -37,11 +37,11 @@ export default auth((req) => {
   // ── Onderhoudsmodus ───────────────────────────────────────────────────────
   const maintenanceMode = process.env.MAINTENANCE_MODE === "1"
   const isMaintenancePage = pathname === "/maintenance"
-  if (maintenanceMode && !isMaintenancePage && !isApi && pathname !== "/login") {
-    const userId = (session?.user as any)?.id as string | undefined
+  if (maintenanceMode && !isMaintenancePage && !isApi) {
+    const bypassCookie = req.cookies.get("maintenance_bypass")?.value
     const userRole = (session?.user as any)?.role as string | undefined
-    const isBypassUser = userId === "1977" || userRole === "ADMIN"
-    if (!isBypassUser) {
+    const hasAccess = bypassCookie === "1977" || userRole === "ADMIN"
+    if (!hasAccess) {
       return NextResponse.redirect(new URL("/maintenance", req.url))
     }
   }
