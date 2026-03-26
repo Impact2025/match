@@ -26,19 +26,6 @@ export default auth((req) => {
 
   // ─────────────────────────────────────────────────────────────────────────
 
-  // ── Onderhoudsmodus ───────────────────────────────────────────────────────
-  const maintenanceMode = process.env.MAINTENANCE_MODE === "1"
-  const isMaintenancePage = pathname === "/maintenance"
-  if (maintenanceMode && !isMaintenancePage) {
-    const userId = (session?.user as any)?.id as string | undefined
-    const userRole = (session?.user as any)?.role as string | undefined
-    const isBypassUser = userId === "1977" || userRole === "ADMIN"
-    if (!isApi && !isBypassUser) {
-      return NextResponse.redirect(new URL("/maintenance", req.url))
-    }
-  }
-  // ─────────────────────────────────────────────────────────────────────────
-
   const publicPaths = ["/", "/login", "/register", "/pitch", "/over-ons", "/faq", "/impact", "/kaart", "/privacy", "/voorwaarden", "/organisaties"]
   const isPublic = publicPaths.some(
     (p) => pathname === p || pathname.startsWith(p + "?"),
@@ -46,6 +33,19 @@ export default auth((req) => {
   const isOnboarding = pathname.startsWith("/onboarding")
   const isApi = pathname.startsWith("/api")
   const isAdmin = pathname.startsWith("/admin")
+
+  // ── Onderhoudsmodus ───────────────────────────────────────────────────────
+  const maintenanceMode = process.env.MAINTENANCE_MODE === "1"
+  const isMaintenancePage = pathname === "/maintenance"
+  if (maintenanceMode && !isMaintenancePage && !isApi) {
+    const userId = (session?.user as any)?.id as string | undefined
+    const userRole = (session?.user as any)?.role as string | undefined
+    const isBypassUser = userId === "1977" || userRole === "ADMIN"
+    if (!isBypassUser) {
+      return NextResponse.redirect(new URL("/maintenance", req.url))
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
   if (isApi) return next()
 
