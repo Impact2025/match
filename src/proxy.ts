@@ -37,7 +37,7 @@ export default auth((req) => {
   // ── Onderhoudsmodus ───────────────────────────────────────────────────────
   const maintenanceMode = process.env.MAINTENANCE_MODE === "1"
   const isMaintenancePage = pathname === "/maintenance"
-  if (maintenanceMode && !isMaintenancePage && !isApi) {
+  if (maintenanceMode && !isMaintenancePage && !isApi && pathname !== "/login") {
     const userId = (session?.user as any)?.id as string | undefined
     const userRole = (session?.user as any)?.role as string | undefined
     const isBypassUser = userId === "1977" || userRole === "ADMIN"
