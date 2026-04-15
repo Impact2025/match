@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { auth } from "@/lib/auth"
 import { ScrollText } from "lucide-react"
 import { AdminAction } from "@prisma/client"
 import Link from "next/link"
@@ -22,6 +23,11 @@ export default async function AdminLogsPage({
 }: {
   searchParams: Promise<{ page?: string; action?: string; from?: string; to?: string }>
 }) {
+  const session = await auth()
+  const currentUser = session?.user as { role?: string; gemeenteSlug?: string | null } | undefined
+  const isGemeenteAdmin = currentUser?.role === "GEMEENTE_ADMIN"
+  const gemeenteSlug = currentUser?.gemeenteSlug ?? null
+
   const { page: pageParam, action: actionParam, from, to } = await searchParams
   const page = Math.max(1, parseInt(pageParam ?? "1"))
   const pageSize = 30
@@ -29,6 +35,7 @@ export default async function AdminLogsPage({
   const activeAction = ALL_ACTIONS.includes(actionParam as AdminAction) ? (actionParam as AdminAction) : null
 
   const where: any = {
+    ...(isGemeenteAdmin && gemeenteSlug ? { admin: { gemeenteSlug } } : {}),
     ...(activeAction ? { action: activeAction } : {}),
     ...(from || to
       ? {
@@ -72,7 +79,14 @@ export default async function AdminLogsPage({
     <div className="p-8 max-w-5xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Audit Log</h1>
-        <p className="text-gray-400 text-sm mt-1">{total} {total !== grandTotal ? "acties gevonden (gefilterd)" : "acties gelogd"}</p>
+        <p className="text-gray-400 text-sm mt-1">
+          {total} {total !== grandTotal || isGemeenteAdmin ? "acties gevonden (gefilterd)" : "acties gelogd"}
+          {isGemeenteAdmin && gemeenteSlug && (
+            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-md bg-orange-50 text-orange-500 text-[11px] font-medium border border-orange-100">
+              {gemeenteSlug}
+            </span>
+          )}
+        </p>
       </div>
 
       {/* Filters */}

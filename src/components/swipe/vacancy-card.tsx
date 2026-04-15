@@ -131,13 +131,11 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
         )}
 
         {/* ── IMAGE AREA (60% of card) ── */}
-        <div className="relative flex-shrink-0" style={{ flex: "0 0 60%" }}>
+        <div className="relative flex-shrink-0 overflow-hidden" style={{ flex: "0 0 60%" }}>
           {vacancy.imageUrl ? (
-            <img
-              src={vacancy.imageUrl}
-              alt={vacancy.title}
-              className="absolute inset-0 w-full h-full object-cover"
-              draggable={false}
+            <div
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: `url('${vacancy.imageUrl}')` }}
             />
           ) : (
             <div

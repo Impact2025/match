@@ -291,6 +291,7 @@ async function main() {
     // ── WIJ Eten Samen ───────────────────────────────────────────────────
     {
       id: cuid("vac-gastheer"),
+      imageUrl: "/eten-samen.jpg",
       orgSlug: "wij-eten-samen-heemstede",
       title: "Hartelijke gastheer of gastvrouw voor WIJ Eten Samen",
       description:
@@ -313,6 +314,7 @@ async function main() {
     },
     {
       id: cuid("vac-telefonisch"),
+      imageUrl: "/telefonisch.jpg",
       orgSlug: "wij-eten-samen-heemstede",
       title: "Help je mee met de telefonische reserveringen voor WIJ Eten Samen?",
       description:
@@ -366,6 +368,7 @@ async function main() {
     // ── WIJ Heemstede ────────────────────────────────────────────────────
     {
       id: cuid("vac-wandelteam"),
+      imageUrl: "/wandelteam.jpg",
       orgSlug: "wij-heemstede",
       title: "Samen bewegen, ontmoeten en natuur beleven — kom jij het WIJ wandelteam versterken?",
       description:
@@ -395,6 +398,7 @@ async function main() {
     // ── Schuldhulpmaatje Zuid-Kennemerland ───────────────────────────────
     {
       id: cuid("vac-secretaris"),
+      imageUrl: "/secretaris.jpg",
       orgSlug: "schuldhulpmaatje-zk",
       title: "Secretaris bij Schuldhulpmaatje Zuid-Kennemerland",
       description:
@@ -532,6 +536,7 @@ async function main() {
   const welzijnVacancies = [
     {
       id: "vac-welzijn-activiteiten-heemstede-demo",
+      imageUrl: "/activiteiten-ouderen.jpg",
       title: "Activiteitenbegeleider voor ouderen bij Welzijn Heemstede",
       description:
         "Stichting Welzijn Heemstede organiseert wekelijkse activiteiten voor ouderen in onze " +
@@ -555,6 +560,7 @@ async function main() {
     },
     {
       id: "vac-welzijn-transport-heemstede-demo",
+      imageUrl: "/taxichauffeur.jpg",
       title: "Vrijwillig taxichauffeur voor mensen met een beperking",
       description:
         "Heb jij een rijbewijs en een auto, en wil jij mensen met een beperking of ouderen " +
@@ -579,6 +585,7 @@ async function main() {
     },
     {
       id: "vac-welzijn-leesmaatje-heemstede-demo",
+      imageUrl: "/leesmaatje.jpg",
       title: "Leesmaatje voor laaggeletterden in Heemstede",
       description:
         "In Nederland hebben meer dan 2,5 miljoen volwassenen moeite met lezen en schrijven. " +
@@ -1022,6 +1029,7 @@ async function main() {
   const wijEtenExtraVacancies = [
     {
       id: "vac-kok-wij-eten-heemstede-demo",
+      imageUrl: "/keukenassistent.jpg",
       title: "Keukenassistent voor onze wekelijkse maaltijd",
       description:
         "Hou jij van koken en mensen blij maken met lekker eten? WIJ Eten Samen zoekt een " +
@@ -1045,6 +1053,7 @@ async function main() {
     },
     {
       id: "vac-inkoop-wij-eten-heemstede-demo",
+      imageUrl: "/boodschappen.jpg",
       title: "Vrijwilliger inkoop & boodschappen voor WIJ Eten Samen",
       description:
         "Elke week verzorgt WIJ Eten Samen een warme maaltijd voor tientallen gasten. " +
@@ -1067,6 +1076,7 @@ async function main() {
     },
     {
       id: "vac-sociaal-wij-eten-heemstede-demo",
+      imageUrl: "/maatje.jpg",
       title: "Maatje voor eenzame gasten bij WIJ Eten Samen",
       description:
         "Sommige gasten van WIJ Eten Samen hebben buiten de maaltijd weinig sociaal contact. " +
@@ -1109,6 +1119,7 @@ async function main() {
         lon: vac.lon,
         hours: vac.hours,
         duration: vac.duration,
+        imageUrl: (vac as { imageUrl?: string }).imageUrl ?? null,
         status: "ACTIVE",
         organisationId: wijEtenOrgId,
         skills: { create: skillRecords.map((s) => ({ skillId: s.id })) },

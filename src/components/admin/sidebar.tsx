@@ -1,5 +1,6 @@
 "use client"
 
+import { Fragment } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
@@ -27,6 +28,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>
   label: string
   badge?: number
+  divider?: string
 }
 
 const ADMIN_NAV: (Omit<NavItem, "badge"> & { tourId?: string })[] = [
@@ -46,12 +48,16 @@ const ADMIN_NAV: (Omit<NavItem, "badge"> & { tourId?: string })[] = [
 
 function gemeenteNav(slug: string): (Omit<NavItem, "badge"> & { tourId?: string })[] {
   return [
-    { href: "/admin/dashboard",         icon: LayoutDashboard, label: "Overzicht" },
+    { href: "/admin/dashboard",         icon: LayoutDashboard, label: "Overzicht",        divider: "Beheer" },
     { href: `/admin/gemeenten/${slug}`, icon: Palette,         label: "Mijn uitstraling" },
-    { href: "/admin/organisations",     icon: Building2,       label: "Organisaties" },
+    { href: "/admin/settings",          icon: Settings,        label: "Instellingen" },
+    { href: "/admin/organisations",     icon: Building2,       label: "Organisaties",     divider: "Vrijwilligerswerk" },
     { href: "/admin/users",             icon: Users,           label: "Vrijwilligers" },
     { href: "/admin/vacancies",         icon: Briefcase,       label: "Vacatures" },
-    { href: "/admin/bulk-email",        icon: Mail,            label: "Groepsbericht" },
+    { href: "/admin/categories",        icon: Tag,             label: "Categorieën" },
+    { href: "/admin/bulk-email",        icon: Mail,            label: "Groepsbericht",    divider: "Communicatie & Data" },
+    { href: "/admin/impact",            icon: Leaf,            label: "Impactmeting" },
+    { href: "/admin/logs",              icon: ScrollText,      label: "Audit Log" },
   ]
 }
 
@@ -91,37 +97,43 @@ export function AdminSidebar({ adminName, pendingCount = 0, role = "ADMIN", geme
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 py-4 px-3 space-y-0.5">
-        {navItems.map(({ href, icon: Icon, label, badge, tourId }) => {
+      <nav className="flex-1 py-3 px-3 overflow-y-auto">
+        {navItems.map(({ href, icon: Icon, label, badge, tourId, divider }) => {
           const isActive = pathname === href || pathname.startsWith(href + "/")
           return (
-            <Link
-              key={href}
-              href={href}
-              {...(tourId ? { "data-tour-id": tourId } : {})}
-              className={`
-                group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
-                ${isActive
-                  ? "bg-orange-50 text-orange-500"
-                  : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
-                }
-              `}
-            >
-              <Icon
-                className={`w-4 h-4 flex-shrink-0 transition-colors ${
-                  isActive ? "text-orange-500" : "text-gray-400 group-hover:text-gray-500"
-                }`}
-              />
-              <span className="flex-1">{label}</span>
-              {badge !== undefined && badge > 0 && (
-                <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-orange-500 text-white text-[10px] font-bold">
-                  {badge > 99 ? "99+" : badge}
-                </span>
+            <Fragment key={href}>
+              {divider && (
+                <div className="pt-4 pb-1 px-3">
+                  <p className="text-[9px] font-bold uppercase tracking-widest text-gray-300 select-none">{divider}</p>
+                </div>
               )}
-              {isActive && !badge && (
-                <ChevronRight className="w-3.5 h-3.5 text-orange-500/50" />
-              )}
-            </Link>
+              <Link
+                href={href}
+                {...(tourId ? { "data-tour-id": tourId } : {})}
+                className={`
+                  group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
+                  ${isActive
+                    ? "bg-orange-50 text-orange-500"
+                    : "text-gray-400 hover:text-gray-700 hover:bg-gray-100"
+                  }
+                `}
+              >
+                <Icon
+                  className={`w-4 h-4 flex-shrink-0 transition-colors ${
+                    isActive ? "text-orange-500" : "text-gray-400 group-hover:text-gray-500"
+                  }`}
+                />
+                <span className="flex-1">{label}</span>
+                {badge !== undefined && badge > 0 && (
+                  <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-orange-500 text-white text-[10px] font-bold">
+                    {badge > 99 ? "99+" : badge}
+                  </span>
+                )}
+                {isActive && !badge && (
+                  <ChevronRight className="w-3.5 h-3.5 text-orange-500/50" />
+                )}
+              </Link>
+            </Fragment>
           )
         })}
       </nav>

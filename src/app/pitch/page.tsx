@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic"
+
 import Link from "next/link"
 import type { Metadata } from "next"
 import {
@@ -8,6 +10,7 @@ import {
   CheckCircle, ChevronDown, ArrowRight,
 } from "lucide-react"
 import { IrisSection } from "@/components/ai/iris-section"
+import { getCurrentGemeente } from "@/lib/gemeente"
 
 export const metadata: Metadata = {
   title: "Demo Presentatie — Vrijwilligersmatch",
@@ -15,7 +18,15 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default function PitchPage() {
+export default async function PitchPage() {
+  const gemeente = await getCurrentGemeente()
+  const brand = gemeente?.primaryColor ?? "#f97316"
+
+  // Derived brand tints
+  const brandLight  = brand + "22"   // ~13% opacity — used for light backgrounds
+  const brandXLight = brand + "12"   // ~7% opacity  — used for very light backgrounds
+  const brandBorder = brand + "44"   // ~27% opacity — used for borders
+
   return (
     <div className="bg-white text-gray-900 antialiased overflow-x-hidden">
 
@@ -23,7 +34,10 @@ export default function PitchPage() {
       <header className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 min-w-0">
-            <div className="w-7 h-7 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: brand }}
+            >
               <Heart className="w-3.5 h-3.5 text-white fill-white" />
             </div>
             <span className="text-sm sm:text-base font-semibold tracking-tight text-gray-900 truncate">
@@ -39,7 +53,8 @@ export default function PitchPage() {
 
           <Link
             href="/login"
-            className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors"
+            className="px-4 py-2 text-white text-sm font-medium rounded-lg transition-colors"
+            style={{ backgroundColor: brand }}
           >
             Start demo
           </Link>
@@ -54,15 +69,18 @@ export default function PitchPage() {
         <section className="relative pt-16 min-h-screen flex items-center overflow-hidden border-b border-gray-100">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 w-full py-20">
             <div className="max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-8 bg-orange-50 border border-orange-100 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
-                <span className="text-xs font-medium text-orange-600">WeAreImpact · Hoofddorp</span>
+              <div
+                className="inline-flex items-center gap-2 px-3 py-1.5 mb-8 rounded-full border"
+                style={{ backgroundColor: brandXLight, borderColor: brandBorder }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: brand }} />
+                <span className="text-xs font-medium" style={{ color: brand }}>WeAreImpact · Hoofddorp</span>
               </div>
 
               <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold tracking-tighter leading-[1.05] mb-6">
                 Hoi, ik ben
                 <br />
-                <span className="text-orange-500">Vincent</span>
+                <span style={{ color: brand }}>Vincent</span>
               </h1>
 
               <p className="text-lg text-gray-500 leading-relaxed mb-10 max-w-xl">
@@ -93,16 +111,18 @@ export default function PitchPage() {
                   <div key={item.year} className="flex gap-4">
                     {/* Lijn + dot */}
                     <div className="flex flex-col items-center">
-                      <div className="w-8 h-8 rounded-full bg-orange-100 border-2 border-orange-300 flex items-center justify-center shrink-0">
-                        <span className="text-[9px] font-bold text-orange-600">{item.year}</span>
-                      </div>
+                      <div
+                        className="w-3 h-3 rounded-full border-2 shrink-0 mt-2"
+                        style={{ backgroundColor: brandLight, borderColor: brand }}
+                      />
                       {i < arr.length - 1 && (
                         <div className="w-px flex-1 bg-gray-200 my-1" />
                       )}
                     </div>
                     {/* Tekst */}
-                    <div className={i < arr.length - 1 ? "pb-6 pt-1" : "pt-1"}>
-                      <p className="text-sm text-gray-600 leading-relaxed">{item.text}</p>
+                    <div className={i < arr.length - 1 ? "pb-6" : ""}>
+                      <span className="text-base font-bold" style={{ color: brand }}>{item.year}</span>
+                      <p className="text-sm text-gray-600 leading-relaxed mt-0.5">{item.text}</p>
                     </div>
                   </div>
                 ))}
@@ -111,23 +131,26 @@ export default function PitchPage() {
               <div className="grid sm:grid-cols-3 gap-4">
                 {[
                   {
-                    icon: <Target className="w-4 h-4 text-orange-500" />,
+                    icon: <Target className="w-4 h-4" style={{ color: brand }} />,
                     label: "Missie",
                     value: "Vrijwilligerswerk toegankelijker maken door slimme technologie",
                   },
                   {
-                    icon: <MapPin className="w-4 h-4 text-orange-500" />,
+                    icon: <MapPin className="w-4 h-4" style={{ color: brand }} />,
                     label: "Achtergrond",
                     value: "Ondernemer, product builder, impact-first denker vanuit Hoofddorp",
                   },
                   {
-                    icon: <Lightbulb className="w-4 h-4 text-orange-500" />,
+                    icon: <Lightbulb className="w-4 h-4" style={{ color: brand }} />,
                     label: "Aanpak",
                     value: "Motivatie centraal — niet keywords, maar échte drijfveren als basis",
                   },
                 ].map((card) => (
                   <div key={card.label} className="p-5 bg-gray-50 border border-gray-100 rounded-2xl">
-                    <div className="w-7 h-7 bg-orange-100 rounded-lg flex items-center justify-center mb-3">
+                    <div
+                      className="w-7 h-7 rounded-lg flex items-center justify-center mb-3"
+                      style={{ backgroundColor: brandLight }}
+                    >
                       {card.icon}
                     </div>
                     <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">{card.label}</p>
@@ -153,7 +176,7 @@ export default function PitchPage() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
             <div className="mb-14">
-              <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-4">Het probleem</p>
+              <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: brand }}>Het probleem</p>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter max-w-xl">
                 Het huidige systeem werkt niet
               </h2>
@@ -217,7 +240,7 @@ export default function PitchPage() {
               </div>
             </div>
 
-            {/* Gedeelde stat — brug tussen beide perspectieven */}
+            {/* Gedeelde stat */}
             <div className="mt-6 p-6 bg-gray-50 border border-gray-100 rounded-2xl flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
               <div className="shrink-0 w-14 h-14 bg-white border border-gray-200 rounded-2xl flex items-center justify-center">
                 <BarChart2 className="w-6 h-6 text-gray-400" />
@@ -233,7 +256,8 @@ export default function PitchPage() {
             <div className="mt-12">
               <a
                 href="#oplossing"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors"
+                className="inline-flex items-center gap-2 text-sm font-semibold transition-colors"
+                style={{ color: brand }}
               >
                 Bekijk de oplossing
                 <ArrowRight className="w-4 h-4" />
@@ -249,7 +273,7 @@ export default function PitchPage() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
             <div className="mb-16">
-              <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-4">De oplossing</p>
+              <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: brand }}>De oplossing</p>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter">
                 Drie perspectieven
               </h2>
@@ -258,10 +282,13 @@ export default function PitchPage() {
             {/* Perspectief 1 — Vrijwilliger */}
             <div className="grid md:grid-cols-[1fr_2fr] gap-10 py-12 border-t border-gray-200 items-start">
               <div>
-                <div className="w-10 h-10 bg-orange-100 rounded-2xl flex items-center justify-center mb-4">
-                  <User className="w-5 h-5 text-orange-500" />
+                <div
+                  className="w-10 h-10 rounded-2xl flex items-center justify-center mb-4"
+                  style={{ backgroundColor: brandLight }}
+                >
+                  <User className="w-5 h-5" style={{ color: brand }} />
                 </div>
-                <p className="text-[10px] uppercase tracking-widest text-orange-500 font-bold mb-1">Vrijwilliger</p>
+                <p className="text-[10px] uppercase tracking-widest font-bold mb-1" style={{ color: brand }}>Vrijwilliger</p>
                 <h3 className="text-xl font-bold text-gray-900 leading-snug">
                   Eindelijk een match die klopt
                 </h3>
@@ -276,14 +303,14 @@ export default function PitchPage() {
                   Iemand die wil leren en groeien, niet in een repetitieve rol.
                 </p>
                 <div className="flex items-start gap-2.5 p-4 bg-white border border-gray-100 rounded-xl">
-                  <CheckCircle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+                  <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: brand }} />
                   <p className="text-sm text-gray-700">
                     <span className="font-semibold">Wat het oplost:</span>{" "}
                     motivatiemismatch, snelle uitval, het gevoel van "dit past toch niet bij me."
                   </p>
                 </div>
                 <div className="mt-4">
-                  <Link href="/swipe" className="inline-flex items-center gap-1.5 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors">
+                  <Link href="/swipe" className="inline-flex items-center gap-1.5 text-sm font-semibold transition-colors" style={{ color: brand }}>
                     Zie de vrijwilligers-app <ArrowRight className="w-3.5 h-3.5" />
                   </Link>
                 </div>
@@ -370,13 +397,13 @@ export default function PitchPage() {
                   </p>
                   <p className="text-sm font-semibold text-gray-900">Lost het vinden-probleem op.</p>
                 </div>
-                <div className="p-6 bg-orange-50 border border-orange-100 rounded-2xl">
-                  <p className="text-[10px] uppercase tracking-widest text-orange-500 font-bold mb-3">Vrijwilligersmatch</p>
+                <div className="p-6 rounded-2xl border" style={{ backgroundColor: brandXLight, borderColor: brandBorder }}>
+                  <p className="text-[10px] uppercase tracking-widest font-bold mb-3" style={{ color: brand }}>Vrijwilligersmatch</p>
                   <p className="text-sm text-gray-600 leading-relaxed mb-3">
                     Psychologische infrastructuur — de kern van het systeem is motivatie-gedreven matching,
                     gebaseerd op VFI en Schwartz-waarden. Daardoor voorspelbaar betere retentie en meer impact.
                   </p>
-                  <p className="text-sm font-semibold text-orange-600">Lost het blijven-probleem op.</p>
+                  <p className="text-sm font-semibold" style={{ color: brand }}>Lost het blijven-probleem op.</p>
                 </div>
               </div>
             </div>
@@ -392,16 +419,15 @@ export default function PitchPage() {
             <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-8">Live demo — 10 minuten</p>
             <div className="grid md:grid-cols-3 gap-5">
               {[
-                { label: "A. Vrijwilliger", desc: "Journey van aanmelden tot match", href: "/swipe", color: "orange" },
-                { label: "B. Organisatie", desc: "Dashboard met AI-ondersteuning", href: "/organisation/dashboard", color: "blue" },
-                { label: "C. Coördinator", desc: "Rapportage & overzicht gemeente", href: "/admin/dashboard", color: "violet" },
+                { label: "A. Vrijwilliger", desc: "Journey van aanmelden tot match", href: "/swipe", color: "brand" as const },
+                { label: "B. Organisatie", desc: "Dashboard met AI-ondersteuning", href: "/organisation/dashboard", color: "blue" as const },
+                { label: "C. Coördinator", desc: "Rapportage & overzicht gemeente", href: "/admin/dashboard", color: "violet" as const },
               ].map((item) => {
-                const colors: Record<string, { bg: string; text: string; btn: string }> = {
-                  orange: { bg: "bg-orange-100", text: "text-orange-500", btn: "bg-orange-500 hover:bg-orange-600" },
-                  blue:   { bg: "bg-blue-50",   text: "text-blue-500",   btn: "bg-blue-500 hover:bg-blue-600" },
-                  violet: { bg: "bg-violet-50", text: "text-violet-500", btn: "bg-violet-500 hover:bg-violet-600" },
+                const isBrand = item.color === "brand"
+                const colors = {
+                  blue:   { text: "text-blue-500",   btn: "bg-blue-500 hover:bg-blue-600" },
+                  violet: { text: "text-violet-500", btn: "bg-violet-500 hover:bg-violet-600" },
                 }
-                const c = colors[item.color]
                 return (
                   <Link
                     key={item.href}
@@ -409,10 +435,18 @@ export default function PitchPage() {
                     className="flex items-center justify-between p-5 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow group"
                   >
                     <div>
-                      <p className={`text-[10px] uppercase tracking-widest font-bold mb-1 ${c.text}`}>{item.label}</p>
+                      <p
+                        className={`text-[10px] uppercase tracking-widest font-bold mb-1 ${isBrand ? "" : colors[item.color].text}`}
+                        style={isBrand ? { color: brand } : undefined}
+                      >
+                        {item.label}
+                      </p>
                       <p className="text-sm font-semibold text-gray-900">{item.desc}</p>
                     </div>
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ml-4 ${c.btn} transition-colors`}>
+                    <div
+                      className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ml-4 transition-colors ${isBrand ? "" : colors[item.color].btn}`}
+                      style={isBrand ? { backgroundColor: brand } : undefined}
+                    >
                       <ArrowRight className="w-4 h-4 text-white" />
                     </div>
                   </Link>
@@ -429,7 +463,7 @@ export default function PitchPage() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
 
             <div className="mb-14">
-              <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-4">Drievoudig voordeel</p>
+              <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: brand }}>Drievoudig voordeel</p>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tighter">
                 Iedereen wint
               </h2>
@@ -439,8 +473,11 @@ export default function PitchPage() {
 
               {/* Vrijwilligers */}
               <div className="p-7 border border-gray-100 rounded-3xl">
-                <div className="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center mb-6">
-                  <User className="w-4 h-4 text-orange-500" />
+                <div
+                  className="w-9 h-9 rounded-xl flex items-center justify-center mb-6"
+                  style={{ backgroundColor: brandLight }}
+                >
+                  <User className="w-4 h-4" style={{ color: brand }} />
                 </div>
                 <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-5">Vrijwilligers</h3>
                 <ul className="space-y-3.5">
@@ -449,7 +486,7 @@ export default function PitchPage() {
                     "Minder zoeken, betere fit vanaf dag 1",
                   ].map((item) => (
                     <li key={item} className="flex items-start gap-2.5 text-sm text-gray-600">
-                      <CheckCircle className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
+                      <CheckCircle className="w-4 h-4 shrink-0 mt-0.5" style={{ color: brand }} />
                       <span>{item}</span>
                     </li>
                   ))}
@@ -508,18 +545,19 @@ export default function PitchPage() {
         {/* ═══════════════════════════════════════════════════════
             6. CTA
         ═══════════════════════════════════════════════════════ */}
-        <section className="py-20 sm:py-24 bg-orange-500">
+        <section className="py-20 sm:py-24" style={{ backgroundColor: brand }}>
           <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tighter text-white mb-4">
               Klaar voor de live demo?
             </h2>
-            <p className="text-orange-100 mb-10 max-w-md mx-auto">
+            <p className="text-white/80 mb-10 max-w-md mx-auto">
               Log in met het demo-account en zie het platform in actie. Alle data is gesimuleerd voor Heemstede.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
               <Link
                 href="/login"
-                className="px-8 py-3.5 bg-white text-orange-600 font-semibold rounded-xl hover:bg-orange-50 transition-colors"
+                className="px-8 py-3.5 bg-white font-semibold rounded-xl hover:bg-gray-50 transition-colors"
+                style={{ color: brand }}
               >
                 Inloggen als demo-gebruiker
               </Link>
@@ -530,7 +568,7 @@ export default function PitchPage() {
                 Bekijk de homepage
               </Link>
             </div>
-            <p className="text-orange-200/70 text-xs">
+            <p className="text-white/50 text-xs">
               vrijwilliger@heemstede-demo.nl · demo1234
             </p>
           </div>

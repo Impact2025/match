@@ -1,9 +1,161 @@
 export const dynamic = "force-dynamic"
 
 import { prisma } from "@/lib/prisma"
-import { Settings, Mail, Globe, ShieldCheck, Clock, Database } from "lucide-react"
+import { auth } from "@/lib/auth"
+import { Mail, Globe, ShieldCheck, Clock, Database, Palette, Building2, Briefcase, Heart, LifeBuoy } from "lucide-react"
 
 export default async function AdminSettingsPage() {
+  const session = await auth()
+  const currentUser = session?.user as { role?: string; gemeenteSlug?: string | null } | undefined
+  const isGemeenteAdmin = currentUser?.role === "GEMEENTE_ADMIN"
+  const gemeenteSlug = currentUser?.gemeenteSlug ?? null
+
+  // ── Gemeente admin view ──────────────────────────────────────────────────────
+  if (isGemeenteAdmin && gemeenteSlug) {
+    const [gemeente, orgCount, approvedOrgCount, pendingOrgCount, vacancyCount, activeMatchCount, completedMatchCount] = await Promise.all([
+      prisma.gemeente.findUnique({ where: { slug: gemeenteSlug } }),
+      prisma.organisation.count({ where: { gemeente: { slug: gemeenteSlug } } }),
+      prisma.organisation.count({ where: { gemeente: { slug: gemeenteSlug }, status: "APPROVED" } }),
+      prisma.organisation.count({ where: { gemeente: { slug: gemeenteSlug }, status: "PENDING_APPROVAL" } }),
+      prisma.vacancy.count({ where: { organisation: { gemeente: { slug: gemeenteSlug } }, status: "ACTIVE" } }),
+      prisma.match.count({ where: { status: "ACCEPTED", vacancy: { organisation: { gemeente: { slug: gemeenteSlug } } } } }),
+      prisma.match.count({ where: { status: "COMPLETED", vacancy: { organisation: { gemeente: { slug: gemeenteSlug } } } } }),
+    ])
+
+    return (
+      <div className="p-8 max-w-4xl mx-auto space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Instellingen</h1>
+          <p className="text-gray-400 text-sm mt-1">Overzicht van uw gemeente-configuratie en statistieken</p>
+        </div>
+
+        {/* Gemeente configuratie */}
+        <div className="bg-white border border-gray-100 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <Palette className="w-4 h-4 text-orange-500" />
+            <h2 className="text-gray-900 font-semibold text-sm">Gemeente-configuratie</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[
+              { label: "Naam", value: gemeente?.name ?? "—" },
+              { label: "Weergavenaam", value: gemeente?.displayName ?? "—" },
+              { label: "Slug (subdomain)", value: gemeente?.slug ?? "—", mono: true },
+              { label: "Tagline", value: gemeente?.tagline ?? "—" },
+            ].map((row) => (
+              <div key={row.label} className="flex flex-col gap-0.5">
+                <p className="text-[11px] text-gray-400 uppercase tracking-widest font-semibold">{row.label}</p>
+                <p className={`text-sm text-gray-700 ${row.mono ? "font-mono" : ""}`}>{row.value}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-5 flex items-center gap-3">
+            <div
+              className="w-8 h-8 rounded-lg border border-gray-200 shrink-0"
+              style={{ background: gemeente?.primaryColor ?? "#7c3aed" }}
+            />
+            <div>
+              <p className="text-sm text-gray-600">Brandkleur</p>
+              <p className="text-xs text-gray-400 font-mono">{gemeente?.primaryColor ?? "—"}</p>
+            </div>
+            <a
+              href={`/admin/gemeenten/${gemeenteSlug}`}
+              className="ml-auto text-xs text-orange-500 hover:text-orange-600 border border-orange-200 hover:border-orange-300 rounded-lg px-3 py-1.5 transition-colors"
+            >
+              Uitstraling bewerken →
+            </a>
+          </div>
+        </div>
+
+        {/* Statistieken */}
+        <div className="bg-white border border-gray-100 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <Database className="w-4 h-4 text-orange-500" />
+            <h2 className="text-gray-900 font-semibold text-sm">Gemeente statistieken</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {[
+              { label: "Organisaties", value: orgCount, sub: `${approvedOrgCount} goedgekeurd${pendingOrgCount > 0 ? ` · ${pendingOrgCount} wacht` : ""}`, icon: Building2 },
+              { label: "Actieve vacatures", value: vacancyCount, icon: Briefcase },
+              { label: "Actieve matches", value: activeMatchCount, sub: `${completedMatchCount} afgerond`, icon: Heart },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-gray-50 rounded-xl p-4 flex flex-col gap-3">
+                <stat.icon className="w-4 h-4 text-gray-300" />
+                <div>
+                  <p className="text-2xl font-bold text-gray-900 tabular-nums">{stat.value}</p>
+                  <p className="text-gray-400 text-xs mt-0.5">{stat.label}</p>
+                  {stat.sub && <p className="text-gray-300 text-[11px] mt-1">{stat.sub}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Automatische e-mails */}
+        <div className="bg-white border border-gray-100 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-5">
+            <Clock className="w-4 h-4 text-orange-500" />
+            <h2 className="text-gray-900 font-semibold text-sm">Automatische check-in e-mails</h2>
+          </div>
+          <div className="space-y-3">
+            {[
+              { week: "Week 1", desc: "Welkom-check: hoe verloopt de eerste kennismaking?" },
+              { week: "Week 4", desc: "Tussentijdse check: loopt alles naar wens?" },
+              { week: "Week 12", desc: "Kwartaal-check: is de match nog steeds actief?" },
+            ].map((item) => (
+              <div key={item.week} className="flex items-center gap-4 py-2.5 border-b border-gray-50 last:border-0">
+                <span className="w-14 shrink-0 text-xs font-bold text-orange-500 bg-orange-50 border border-orange-100 rounded-md px-2 py-1 text-center">
+                  {item.week}
+                </span>
+                <p className="text-sm text-gray-500">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-300 mt-4">Check-ins worden automatisch verstuurd aan vrijwilligers met een actieve match, dagelijks om 09:00 UTC.</p>
+        </div>
+
+        {/* E-mail templates */}
+        <div className="bg-white border border-gray-100 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Mail className="w-4 h-4 text-orange-500" />
+            <h2 className="text-gray-900 font-semibold text-sm">Transactionele e-mails</h2>
+          </div>
+          <p className="text-gray-400 text-sm mb-4 leading-relaxed">
+            Alle e-mails worden verstuurd met de huisstijl van <strong className="text-gray-600">{gemeente?.displayName ?? gemeenteSlug}</strong> — de brandkleur en naam worden automatisch verwerkt in elke e-mail.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {[
+              "Welkom (registratie)",
+              "Match ontvangen (organisatie)",
+              "Match geaccepteerd (vrijwilliger)",
+              "Match afgewezen (vrijwilliger)",
+              "Check-in week 1 / 4 / 12",
+              "Organisatie goedgekeurd",
+              "Organisatie afgewezen",
+              "Wachtwoord resetten",
+            ].map((t) => (
+              <div key={t} className="flex items-center gap-2 text-sm text-gray-400">
+                <span className="text-green-500 text-xs">✓</span>
+                {t}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Support */}
+        <div className="bg-white border border-gray-100 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <LifeBuoy className="w-4 h-4 text-orange-500" />
+            <h2 className="text-gray-900 font-semibold text-sm">Platform support</h2>
+          </div>
+          <p className="text-gray-400 text-sm leading-relaxed">
+            Voor technische vragen, nieuwe functies of uitbreidingen kunt u contact opnemen met het Vrijwilligersmatch-platform via <a href="mailto:support@vrijwilligersmatch.nl" className="text-orange-500 hover:underline">support@vrijwilligersmatch.nl</a>.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Platform admin view (original) ──────────────────────────────────────────
   const [userCount, orgCount, vacancyCount, matchCount, messageCount] = await Promise.all([
     prisma.user.count(),
     prisma.organisation.count(),
