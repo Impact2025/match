@@ -134,8 +134,14 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
         <div className="relative flex-shrink-0 overflow-hidden" style={{ flex: "0 0 60%" }}>
           {vacancy.imageUrl ? (
             <div
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: `url('${vacancy.imageUrl}')` }}
+              style={{
+                position: "absolute",
+                inset: 0,
+                backgroundImage: `url(${vacancy.imageUrl})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}
             />
           ) : (
             <div
@@ -190,7 +196,14 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
           </div>
 
           {/* Bottom gradient + text overlay */}
-          <div className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent pt-16 pb-3 px-4">
+          <div
+            className="absolute inset-x-0 bottom-0 z-10 pt-16 pb-3 px-4"
+            style={{
+              background: vacancy.imageUrl
+                ? "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)"
+                : "linear-gradient(to top, rgba(0,0,0,0.90) 0%, rgba(0,0,0,0.50) 50%, transparent 100%)",
+            }}
+          >
             {firstCategory && (
               <div className="flex items-center gap-1.5 mb-1.5">
                 <span
