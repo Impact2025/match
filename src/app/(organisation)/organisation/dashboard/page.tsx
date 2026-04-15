@@ -142,7 +142,7 @@ export default async function OrgDashboardPage() {
   }
 
   return (
-    <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-5xl mx-auto px-4 lg:px-8 py-6 lg:py-8 space-y-6">
 
       {/* Pending approval notice */}
       {org.status === "PENDING_APPROVAL" && (
@@ -193,7 +193,7 @@ export default async function OrgDashboardPage() {
       </div>
 
       {/* Stat cards grid */}
-      <div className="grid grid-cols-2 gap-3" data-tour-id="org-stats">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4" data-tour-id="org-stats">
         {stats.map((stat) => {
           const Icon = stat.icon
           return (

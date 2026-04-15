@@ -34,7 +34,7 @@ export function OrgBottomNav({ primaryColor }: OrgBottomNavProps) {
   })
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 shadow-[0_-2px_16px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 shadow-[0_-2px_16px_rgba(0,0,0,0.06)] pb-[env(safe-area-inset-bottom)] lg:hidden">
       <div className="flex items-center justify-around max-w-lg mx-auto">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon
