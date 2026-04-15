@@ -1324,7 +1324,7 @@ async function main() {
   // ── 12. Vrijwilligerspunt beheerder (GEMEENTE_ADMIN) ─────────────────────
   await prisma.user.upsert({
     where: { email: "vrijwilligerspunt@heemstede-demo.nl" },
-    update: {},
+    update: { onboarded: true, status: "ACTIVE" },
     create: {
       id: "gemeente-admin-heemstede-demo",
       name: "Vrijwilligerspunt WIJ Heemstede",

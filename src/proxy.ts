@@ -54,10 +54,10 @@ export default auth((req) => {
     return NextResponse.redirect(new URL("/login", req.url))
   }
 
-  const user = session.user as { role?: string; onboarded?: boolean }
+  const user = session.user as { role?: string; onboarded?: boolean; gemeenteSlug?: string | null }
 
-  // Admin: bypass onboarding, enforce /admin access
-  if (user.role === "ADMIN") {
+  // Admin + Gemeente admin: bypass onboarding, enforce /admin access
+  if (user.role === "ADMIN" || user.role === "GEMEENTE_ADMIN") {
     if (!isAdmin && !isPublic) {
       return NextResponse.redirect(new URL("/admin/dashboard", req.url))
     }
