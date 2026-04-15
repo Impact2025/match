@@ -246,20 +246,24 @@ export default function OrgProfilePage() {
             </span>
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.name}
-                type="button"
-                onClick={() => toggleCategory(cat.name)}
-                className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left ${
-                  selectedCategories.includes(cat.name)
-                    ? "border-orange-500 bg-orange-50"
-                    : "border-gray-200 hover:border-gray-300"
-                }`}
-              >
-                <span className="text-xs font-medium text-gray-700 leading-tight">{cat.name}</span>
-              </button>
-            ))}
+            {CATEGORIES.map((cat) => {
+              const active = selectedCategories.includes(cat.name)
+              return (
+                <button
+                  key={cat.name}
+                  type="button"
+                  onClick={() => toggleCategory(cat.name)}
+                  className="flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left"
+                  style={active
+                    ? { borderColor: cat.color, background: `${cat.color}14` }
+                    : { borderColor: "#e5e7eb" }
+                  }
+                >
+                  <span className="text-base leading-none">{cat.emoji}</span>
+                  <span className="text-xs font-medium text-gray-700 leading-tight">{cat.name}</span>
+                </button>
+              )
+            })}
           </div>
         </section>
 

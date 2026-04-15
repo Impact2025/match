@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
-import { Save, Loader2, MapPin, Bell, Camera } from "lucide-react"
+import { Save, Loader2, MapPin, Bell, Camera, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -91,6 +91,27 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
 
   const bioValue = watch("bio") ?? ""
   const postcodeValue = watch("postcode") ?? ""
+  const locationValue = watch("location") ?? ""
+
+  const profileStrength = useMemo(() => {
+    let score = 0
+    if (bioValue.length >= 20) score += 25
+    if (locationValue || postcodeValue) score += 15
+    if (currentImage) score += 20
+    score += Math.min(selectedSkills.length * 5, 20)
+    score += Math.min(selectedInterests.length * 5, 20)
+    return Math.min(score, 100)
+  }, [bioValue, locationValue, postcodeValue, currentImage, selectedSkills, selectedInterests])
+
+  const strengthLabel =
+    profileStrength >= 90 ? "Uitstekend" :
+    profileStrength >= 70 ? "Goed" :
+    profileStrength >= 40 ? "Gemiddeld" : "Basis"
+
+  const strengthColor =
+    profileStrength >= 90 ? "#22c55e" :
+    profileStrength >= 70 ? "#f97316" :
+    profileStrength >= 40 ? "#f59e0b" : "#ef4444"
 
   useEffect(() => {
     if (geocodeTimer.current) clearTimeout(geocodeTimer.current)
@@ -160,6 +181,40 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+
+      {/* Profielsterkte */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4" style={{ color: strengthColor }} />
+            <span className="text-sm font-semibold text-gray-800">Profielsterkte</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold tabular-nums" style={{ color: strengthColor }}>
+              {profileStrength}%
+            </span>
+            <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={{ background: `${strengthColor}18`, color: strengthColor }}>
+              {strengthLabel}
+            </span>
+          </div>
+        </div>
+        <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all duration-500"
+            style={{ width: `${profileStrength}%`, background: strengthColor }}
+          />
+        </div>
+        {profileStrength < 100 && (
+          <p className="text-xs text-gray-400 mt-2">
+            {!currentImage && "Voeg een foto toe · "}
+            {bioValue.length < 20 && "Schrijf een bio · "}
+            {!locationValue && !postcodeValue && "Vul je locatie in · "}
+            {selectedSkills.length < 4 && `Voeg meer vaardigheden toe · `}
+            {selectedInterests.length < 4 && "Kies meer interesses"}
+          </p>
+        )}
+      </div>
+
       {/* Basic info */}
       <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
         <h2 className="text-lg font-semibold text-gray-900">Persoonlijke informatie</h2>
@@ -278,23 +333,29 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
 
       {/* Interests */}
       <section className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-gray-900">Interesses</h2>
-        <p className="text-sm text-gray-500">{selectedInterests.length} geselecteerd</p>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">Interesses</h2>
+          <span className="text-sm font-medium text-gray-500">{selectedInterests.length} gekozen</span>
+        </div>
         <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.name}
-              type="button"
-              onClick={() => toggle(selectedInterests, cat.name, setSelectedInterests)}
-              className={`px-3 py-1.5 rounded-full text-sm border-2 transition-all ${
-                selectedInterests.includes(cat.name)
-                  ? "border-orange-500 bg-orange-500 text-white font-medium"
-                  : "border-gray-200 text-gray-600 hover:border-gray-300"
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
+          {CATEGORIES.map((cat) => {
+            const active = selectedInterests.includes(cat.name)
+            return (
+              <button
+                key={cat.name}
+                type="button"
+                onClick={() => toggle(selectedInterests, cat.name, setSelectedInterests)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm border-2 transition-all font-medium"
+                style={active
+                  ? { borderColor: cat.color, background: cat.color, color: "#fff" }
+                  : { borderColor: "#e5e7eb", background: "#fff", color: "#4b5563" }
+                }
+              >
+                <span>{cat.emoji}</span>
+                <span>{cat.name}</span>
+              </button>
+            )
+          })}
         </div>
       </section>
 

@@ -41,15 +41,16 @@ export default async function OrgMatchesPage() {
   const swipes = swipeKeys.length > 0
     ? await prisma.swipe.findMany({
         where: { OR: swipeKeys, direction: { in: ["LIKE", "SUPER_LIKE"] } },
-        select: { fromId: true, vacancyId: true, matchReason: true },
+        select: { fromId: true, vacancyId: true, matchReason: true, scoreSnapshot: true },
       })
     : []
 
-  const swipeMap = new Map(swipes.map((s) => [`${s.fromId}:${s.vacancyId}`, s.matchReason]))
+  const swipeMap = new Map(swipes.map((s) => [`${s.fromId}:${s.vacancyId}`, { matchReason: s.matchReason, scoreSnapshot: s.scoreSnapshot }]))
 
   const matchesWithReason = matches.map((m) => ({
     ...m,
-    matchReason: swipeMap.get(`${m.volunteerId}:${m.vacancyId}`) ?? null,
+    matchReason: swipeMap.get(`${m.volunteerId}:${m.vacancyId}`)?.matchReason ?? null,
+    scoreSnapshot: swipeMap.get(`${m.volunteerId}:${m.vacancyId}`)?.scoreSnapshot ?? null,
   }))
 
   const sorted = [...matchesWithReason].sort(

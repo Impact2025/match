@@ -15,6 +15,7 @@ interface MatchReviewCardProps {
     createdAt: string | Date
     confirmedAt?: string | Date | null
     matchReason?: string | null
+    scoreSnapshot?: number | null
     volunteer: {
       id: string
       name: string | null
@@ -28,6 +29,15 @@ interface MatchReviewCardProps {
     }
     conversation?: { id: string } | null
   }
+}
+
+function relativeDate(d: string | Date) {
+  const days = Math.floor((Date.now() - new Date(d).getTime()) / (1000 * 60 * 60 * 24))
+  if (days === 0) return "vandaag"
+  if (days === 1) return "gisteren"
+  if (days < 7) return `${days} dagen geleden`
+  if (days < 30) return `${Math.floor(days / 7)} wk geleden`
+  return new Date(d).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })
 }
 
 const STATUS_BADGE: Record<string, { label: string; className: string }> = {
@@ -108,9 +118,17 @@ export function MatchReviewCard({ match }: MatchReviewCardProps) {
                 </div>
               )}
             </div>
-            <span className={`flex-shrink-0 text-xs font-medium px-2.5 py-0.5 rounded-full border ${badge.className}`}>
-              {badge.label}
-            </span>
+            <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+              <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${badge.className}`}>
+                {badge.label}
+              </span>
+              {typeof match.scoreSnapshot === "number" && match.scoreSnapshot > 0 && (
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  {Math.round(match.scoreSnapshot * 100)}% match
+                </span>
+              )}
+              <span className="text-[10px] text-gray-400">{relativeDate(match.createdAt)}</span>
+            </div>
           </div>
 
           {match.matchReason && (

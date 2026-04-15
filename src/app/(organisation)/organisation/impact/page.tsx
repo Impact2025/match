@@ -9,6 +9,7 @@ import {
   Users, Heart, Clock, TrendingUp, Coins,
   HandHeart, Sprout, Building2,
 } from "lucide-react"
+import { PrintButton } from "@/components/organisation/print-button"
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -194,6 +195,19 @@ export default async function OrgImpactPage() {
 
   const roundHours = Math.round(totalHours)
 
+  // MoM-vergelijking (huidige maand vs vorige maand)
+  const now = new Date()
+  const curMonthKey  = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+  const prevMonthKey = (() => {
+    const d = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+  })()
+  const curMonthData  = monthlyTrend.find((m) => m.month === curMonthKey)  ?? { total: 0, accepted: 0 }
+  const prevMonthData = monthlyTrend.find((m) => m.month === prevMonthKey) ?? { total: 0, accepted: 0 }
+  const momGrowth = prevMonthData.total > 0
+    ? Math.round(((curMonthData.total - prevMonthData.total) / prevMonthData.total) * 100)
+    : null
+
   return (
     <div className="max-w-lg mx-auto px-4 py-6 space-y-5 pb-10">
 
@@ -205,15 +219,25 @@ export default async function OrgImpactPage() {
         <div className="absolute inset-0 opacity-[0.07]"
           style={{ backgroundImage: "repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%)", backgroundSize: "14px 14px" }} />
         <div className="relative">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
-              <Building2 className="w-4 h-4 text-white" strokeWidth={1.5} />
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
+                <Building2 className="w-4 h-4 text-white" strokeWidth={1.5} />
+              </div>
+              <div>
+                <p className="text-white/70 text-[10px] uppercase tracking-widest font-medium">Mijn Impact</p>
+                <p className="text-white font-bold text-sm leading-tight">{org.name}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-white/70 text-[10px] uppercase tracking-widest font-medium">Mijn Impact</p>
-              <p className="text-white font-bold text-sm leading-tight">{org.name}</p>
-            </div>
+            <PrintButton />
           </div>
+          {momGrowth !== null && (
+            <div className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold mb-3 ${
+              momGrowth >= 0 ? "bg-white/20 text-white" : "bg-black/20 text-white/80"
+            }`}>
+              {momGrowth >= 0 ? "↑" : "↓"} {Math.abs(momGrowth)}% t.o.v. vorige maand
+            </div>
+          )}
           <div className="grid grid-cols-3 gap-3 mt-2">
             {[
               { label: "Vrijwilligersuren", value: fHours(roundHours) },
@@ -233,18 +257,27 @@ export default async function OrgImpactPage() {
       <SectionTitle icon={TrendingUp} title="Kerngetallen" sub="Totaaloverzicht in cijfers" color={color} />
       <div className="grid grid-cols-2 gap-3">
         {[
-          { icon: Users,     label: "Actieve vrijwilligers", value: String(activeVolunteers), sub: "laatste 90 dagen" },
-          { icon: Heart,     label: "Matches",               value: String(fulfilledMatches), sub: `${matchAcceptRate}% acceptatie` },
-          { icon: Clock,     label: "Vrijwilligersuren",     value: fHours(roundHours),       sub: "geschat totaal" },
-          { icon: Coins,     label: "SROI-waarde",           value: fEur(Math.round(sroiValue)), sub: `×${IMPACT_CONSTANTS.SROI_MULTIPLIER} multiplier` },
-        ].map(({ icon: Icon, label, value, sub }) => (
+          { icon: Users,  label: "Actieve vrijwilligers", value: String(activeVolunteers), sub: "laatste 90 dagen", mom: null },
+          { icon: Heart,  label: "Matches deze maand",    value: String(curMonthData.total), sub: `${curMonthData.accepted} geaccepteerd`, mom: momGrowth },
+          { icon: Clock,  label: "Vrijwilligersuren",     value: fHours(roundHours),       sub: "geschat totaal", mom: null },
+          { icon: Coins,  label: "SROI-waarde",           value: fEur(Math.round(sroiValue)), sub: `×${IMPACT_CONSTANTS.SROI_MULTIPLIER} multiplier`, mom: null },
+        ].map(({ icon: Icon, label, value, sub, mom }) => (
           <Card key={label} className="p-4">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center mb-3" style={{ background: `${color}18` }}>
               <Icon className="w-4 h-4" style={{ color }} strokeWidth={1.5} />
             </div>
             <p className="text-2xl font-bold text-gray-900 tabular-nums">{value}</p>
             <p className="text-xs font-medium text-gray-600 mt-0.5">{label}</p>
-            <p className="text-[11px] text-gray-400 mt-0.5">{sub}</p>
+            <div className="flex items-center justify-between mt-0.5">
+              <p className="text-[11px] text-gray-400">{sub}</p>
+              {mom !== null && (
+                <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${
+                  mom >= 0 ? "bg-green-50 text-green-600" : "bg-red-50 text-red-500"
+                }`}>
+                  {mom >= 0 ? "+" : ""}{mom}%
+                </span>
+              )}
+            </div>
           </Card>
         ))}
       </div>

@@ -340,7 +340,7 @@ async function main() {
     // ── Fietsmaatjes Zuid-Kennemerland ───────────────────────────────────
     {
       id: cuid("vac-fiets-locatie"),
-      imageUrl: "/Fietsmaatjes.png",
+      imageUrl: "/Fietsmaatjes.jpg",
       orgSlug: "fietsmaatjes-zuid-kennemerland",
       title: "Fietsmaatjes ZK zoekt een Locatie-contactpersoon voor Plein 1",
       description:
@@ -607,7 +607,7 @@ async function main() {
     },
     {
       id: "vac-welzijn-tuinteam-heemstede-demo",
-      imageUrl: "/tuinman.png",
+      imageUrl: "/tuinman.jpg",
       title: "Vrijwilliger gezocht voor ons Tuinteam Heemstede",
       description:
         "Welzijn Heemstede beheert samen met bewoners een aantal gemeenschappelijke tuinen " +
@@ -631,7 +631,7 @@ async function main() {
     },
     {
       id: "vac-welzijn-admin-heemstede-demo",
-      imageUrl: "/Administratief.png",
+      imageUrl: "/Administratief.jpg",
       title: "Administratief ondersteuner voor Welzijn Heemstede (thuiswerk mogelijk)",
       description:
         "Welzijn Heemstede zoekt een vrijwilliger die ons kleine kantoorteam ondersteunt " +
