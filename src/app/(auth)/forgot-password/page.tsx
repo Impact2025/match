@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useBrand } from "@/components/gemeente-brand-provider"
 
 export default function ForgotPasswordPage() {
   const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const { brand, brandAccent, name, tagline } = useBrand()
 
   const {
     register,
@@ -39,14 +41,20 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50 p-4">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: `linear-gradient(135deg, ${brand}18 0%, ${brandAccent}10 100%)` }}
+    >
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 mb-4 shadow-lg">
+          <div
+            className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 shadow-lg"
+            style={{ background: `linear-gradient(135deg, ${brand}, ${brandAccent})` }}
+          >
             <Heart className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Vrijwilligersmatch</h1>
-          <p className="text-gray-500 text-sm mt-1">Maak impact, vind je match</p>
+          <h1 className="text-2xl font-bold text-gray-900">{name}</h1>
+          <p className="text-gray-500 text-sm mt-1">{tagline ?? "Wachtwoord herstellen"}</p>
         </div>
 
         <Card className="shadow-xl border-0">
@@ -66,7 +74,11 @@ export default function ForgotPasswordPage() {
                     Als dit adres bekend is, ontvang je een resetlink. Controleer ook je spammap.
                   </p>
                 </div>
-                <Link href="/login" className="text-sm text-orange-600 hover:underline font-medium">
+                <Link
+                  href="/login"
+                  className="text-sm font-medium hover:underline"
+                  style={{ color: brand }}
+                >
                   Terug naar inloggen
                 </Link>
               </div>
@@ -97,7 +109,8 @@ export default function ForgotPasswordPage() {
 
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white"
+                  className="w-full text-white hover:opacity-90 transition-opacity"
+                  style={{ background: `linear-gradient(to right, ${brand}, ${brandAccent})` }}
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -115,7 +128,8 @@ export default function ForgotPasswordPage() {
         <p className="text-center text-sm text-gray-600">
           <Link
             href="/login"
-            className="text-orange-600 font-medium hover:underline inline-flex items-center gap-1"
+            className="font-medium hover:underline inline-flex items-center gap-1"
+            style={{ color: brand }}
           >
             <ArrowLeft className="w-3.5 h-3.5" />
             Terug naar inloggen

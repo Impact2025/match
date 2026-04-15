@@ -12,11 +12,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { registerSchema, type RegisterFormData } from "@/validators"
+import { useBrand } from "@/components/gemeente-brand-provider"
 
 export default function RegisterPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [selectedRole, setSelectedRole] = useState<"VOLUNTEER" | "ORGANISATION">("VOLUNTEER")
+  const { brand, brandAccent, name, tagline } = useBrand()
 
   const {
     register,
@@ -49,7 +51,6 @@ export default function RegisterPage() {
         return
       }
 
-      // Log automatisch in na registratie zodat de sessie (incl. role) beschikbaar is
       const signInResult = await signIn("credentials", {
         email: data.email,
         password: data.password,
@@ -68,15 +69,21 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-50 to-amber-50 p-4">
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: `linear-gradient(135deg, ${brand}18 0%, ${brandAccent}10 100%)` }}
+    >
       <div className="w-full max-w-md space-y-6">
         {/* Logo */}
         <div className="text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 mb-4 shadow-lg">
+          <div
+            className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 shadow-lg"
+            style={{ background: `linear-gradient(135deg, ${brand}, ${brandAccent})` }}
+          >
             <Heart className="w-7 h-7 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Vrijwilligersmatch</h1>
-          <p className="text-gray-500 text-sm mt-1">Maak impact, vind je match</p>
+          <h1 className="text-2xl font-bold text-gray-900">{name}</h1>
+          <p className="text-gray-500 text-sm mt-1">{tagline ?? "Gratis aanmelden"}</p>
         </div>
 
         <Card className="shadow-xl border-0">
@@ -99,21 +106,19 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => selectRole("VOLUNTEER")}
-                    className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
-                      selectedRole === "VOLUNTEER"
-                        ? "border-orange-500 bg-orange-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    className="flex flex-col items-center p-3 rounded-xl border-2 transition-all"
+                    style={{
+                      borderColor: selectedRole === "VOLUNTEER" ? brand : undefined,
+                      backgroundColor: selectedRole === "VOLUNTEER" ? brand + "12" : undefined,
+                    }}
                   >
                     <User
-                      className={`w-5 h-5 mb-1 ${
-                        selectedRole === "VOLUNTEER" ? "text-orange-600" : "text-gray-400"
-                      }`}
+                      className="w-5 h-5 mb-1"
+                      style={{ color: selectedRole === "VOLUNTEER" ? brand : undefined }}
                     />
                     <span
-                      className={`text-sm font-medium ${
-                        selectedRole === "VOLUNTEER" ? "text-orange-700" : "text-gray-600"
-                      }`}
+                      className="text-sm font-medium"
+                      style={{ color: selectedRole === "VOLUNTEER" ? brand : undefined }}
                     >
                       Vrijwilliger
                     </span>
@@ -121,21 +126,19 @@ export default function RegisterPage() {
                   <button
                     type="button"
                     onClick={() => selectRole("ORGANISATION")}
-                    className={`flex flex-col items-center p-3 rounded-xl border-2 transition-all ${
-                      selectedRole === "ORGANISATION"
-                        ? "border-orange-500 bg-orange-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    className="flex flex-col items-center p-3 rounded-xl border-2 transition-all"
+                    style={{
+                      borderColor: selectedRole === "ORGANISATION" ? brand : undefined,
+                      backgroundColor: selectedRole === "ORGANISATION" ? brand + "12" : undefined,
+                    }}
                   >
                     <Building2
-                      className={`w-5 h-5 mb-1 ${
-                        selectedRole === "ORGANISATION" ? "text-orange-600" : "text-gray-400"
-                      }`}
+                      className="w-5 h-5 mb-1"
+                      style={{ color: selectedRole === "ORGANISATION" ? brand : undefined }}
                     />
                     <span
-                      className={`text-sm font-medium ${
-                        selectedRole === "ORGANISATION" ? "text-orange-700" : "text-gray-600"
-                      }`}
+                      className="text-sm font-medium"
+                      style={{ color: selectedRole === "ORGANISATION" ? brand : undefined }}
                     >
                       Organisatie
                     </span>
@@ -219,7 +222,8 @@ export default function RegisterPage() {
 
               <Button
                 type="submit"
-                className="w-full bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white"
+                className="w-full text-white hover:opacity-90 transition-opacity"
+                style={{ background: `linear-gradient(to right, ${brand}, ${brandAccent})` }}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (
@@ -232,11 +236,11 @@ export default function RegisterPage() {
 
               <p className="text-xs text-center text-gray-500">
                 Door te registreren ga je akkoord met onze{" "}
-                <Link href="/terms" className="text-orange-600 hover:underline">
+                <Link href="/terms" className="hover:underline" style={{ color: brand }}>
                   Gebruiksvoorwaarden
                 </Link>{" "}
                 en{" "}
-                <Link href="/privacy" className="text-orange-600 hover:underline">
+                <Link href="/privacy" className="hover:underline" style={{ color: brand }}>
                   Privacybeleid
                 </Link>
               </p>
@@ -246,7 +250,7 @@ export default function RegisterPage() {
 
         <p className="text-center text-sm text-gray-600">
           Al een account?{" "}
-          <Link href="/login" className="text-orange-600 font-medium hover:underline">
+          <Link href="/login" className="font-medium hover:underline" style={{ color: brand }}>
             Inloggen
           </Link>
         </p>
