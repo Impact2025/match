@@ -39,7 +39,18 @@ export default function LoginPage() {
         return
       }
 
-      router.push("/swipe")
+      // Haal de sessie op om de rol te bepalen voor de juiste redirect
+      const sessionRes = await fetch("/api/auth/session")
+      const session = await sessionRes.json()
+      const role = session?.user?.role
+
+      if (role === "ADMIN" || role === "GEMEENTE_ADMIN") {
+        router.push("/admin/dashboard")
+      } else if (role === "ORGANISATION") {
+        router.push("/organisation/dashboard")
+      } else {
+        router.push("/swipe")
+      }
       router.refresh()
     } catch {
       setError("Er is iets misgegaan. Probeer het opnieuw.")

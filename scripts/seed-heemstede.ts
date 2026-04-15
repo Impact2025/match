@@ -222,7 +222,7 @@ async function main() {
     // Create admin user
     const adminUser = await prisma.user.upsert({
       where: { email: org.adminEmail },
-      update: {},
+      update: { onboarded: true, status: "ACTIVE" },
       create: {
         id: `${org.id}-admin`,
         name: org.adminName,
