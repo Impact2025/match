@@ -82,13 +82,20 @@ export default async function HomePage() {
               {/* Left — Phone mockup — only on large screens */}
               <div className="hidden lg:flex justify-center lg:justify-start">
                 <div className="relative w-[260px] md:w-[290px]">
-                  <div className="rounded-[2.5rem] border-[6px] border-white/15 overflow-hidden shadow-2xl">
+                  <div className="rounded-[2.5rem] border-[6px] border-white/15 overflow-hidden shadow-2xl relative">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src="/match.png"
                       alt="Vrijwilligersmatch app"
                       className="w-full h-auto block"
                     />
+                    {/* Kleur-overlay: verandert oranje naar gemeente-kleur */}
+                    {gemeente && (
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{ backgroundColor: brand, mixBlendMode: "hue", opacity: 0.92 }}
+                      />
+                    )}
                   </div>
 
                   {/* Floating match notification */}
