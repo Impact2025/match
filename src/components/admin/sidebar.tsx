@@ -46,11 +46,12 @@ const ADMIN_NAV: (Omit<NavItem, "badge"> & { tourId?: string })[] = [
 
 function gemeenteNav(slug: string): (Omit<NavItem, "badge"> & { tourId?: string })[] {
   return [
-    { href: `/admin/gemeenten/${slug}`, icon: Palette,   label: "Mijn uitstraling" },
-    { href: "/admin/organisations",     icon: Building2,  label: "Organisaties" },
-    { href: "/admin/users",             icon: Users,      label: "Vrijwilligers" },
-    { href: "/admin/vacancies",         icon: Briefcase,  label: "Vacatures" },
-    { href: "/admin/bulk-email",        icon: Mail,       label: "Groepsbericht" },
+    { href: "/admin/dashboard",         icon: LayoutDashboard, label: "Overzicht" },
+    { href: `/admin/gemeenten/${slug}`, icon: Palette,         label: "Mijn uitstraling" },
+    { href: "/admin/organisations",     icon: Building2,       label: "Organisaties" },
+    { href: "/admin/users",             icon: Users,           label: "Vrijwilligers" },
+    { href: "/admin/vacancies",         icon: Briefcase,       label: "Vacatures" },
+    { href: "/admin/bulk-email",        icon: Mail,            label: "Groepsbericht" },
   ]
 }
 

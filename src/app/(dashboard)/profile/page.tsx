@@ -170,21 +170,15 @@ export default async function ProfilePage() {
         </div>
       )}
 
-      {/* AI Match Inzicht */}
+      {/* Profieloverzicht */}
       <div className="mx-4 mb-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
         <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-orange-500 text-sm font-bold">AI</span>
-            <h3 className="text-sm font-semibold text-gray-900">Match Inzicht</h3>
-          </div>
-          <span className="text-[10px] font-bold text-gray-400 tracking-widest bg-gray-100 px-2 py-0.5 rounded-full">
-            BETA
-          </span>
+          <h3 className="text-sm font-semibold text-gray-900">Mijn profieloverzicht</h3>
         </div>
 
         {[
           {
-            label: "Profiel Volledigheid",
+            label: "Profielvolledigheid",
             value: Math.min(
               100,
               Math.round(
@@ -199,7 +193,7 @@ export default async function ProfilePage() {
             color: "bg-orange-500",
           },
           {
-            label: "Match Accuraatheid",
+            label: "Matchkwaliteit",
             value: Math.min(100, respons + 30),
             color: "bg-orange-400",
           },

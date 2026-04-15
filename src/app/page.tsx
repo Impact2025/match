@@ -84,7 +84,7 @@ export default function HomePage() {
                         </svg>
                       </div>
                       <div>
-                        <p className="text-[11px] font-bold text-gray-900 leading-none mb-0.5">It&apos;s a match!</p>
+                        <p className="text-[11px] font-bold text-gray-900 leading-none mb-0.5">Gelukt, een koppeling!</p>
                         <p className="text-[10px] text-gray-400">Rode Kruis Amsterdam</p>
                       </div>
                     </div>
@@ -106,8 +106,8 @@ export default function HomePage() {
                 </h1>
 
                 <p className="text-base sm:text-lg text-white/70 leading-relaxed mb-8 sm:mb-10 max-w-md mx-auto lg:mx-0">
-                  Swipe door vacatures van geverifieerde organisaties en word
-                  gekoppeld op basis van jouw vaardigheden, interesses en locatie.
+                  Blader door vrijwilligersplekken van organisaties bij jou in de buurt en
+                  word gekoppeld op basis van jouw vaardigheden, interesses en beschikbaarheid.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3 mb-10 sm:mb-14">
@@ -163,13 +163,13 @@ export default function HomePage() {
                 },
                 {
                   step: "02",
-                  title: "Swipe vacatures",
-                  desc: "Blader door vacatures van geverifieerde organisaties bij jou in de buurt. Links voor nee, rechts voor ja.",
+                  title: "Bekijk vrijwilligersplekken",
+                  desc: "Blader door plekken van organisaties bij jou in de buurt. Geef aan wat je aanspreekt — links voor nee, rechts voor ja.",
                 },
                 {
                   step: "03",
-                  title: "Start je impact",
-                  desc: "Bij een match nemen we contact met de organisatie. Je ontvangt een automatisch gespreksstarter via de app.",
+                  title: "Ga aan de slag",
+                  desc: "Bij een goede koppeling nemen we contact op met de organisatie. Je ontvangt een persoonlijke gespreksopener via de app.",
                 },
               ].map((item) => (
                 <div key={item.step} className="bg-white p-6 sm:p-8 lg:p-10">
@@ -195,8 +195,8 @@ export default function HomePage() {
                   Vind de vrijwilliger die echt bij jou past
                 </h2>
                 <p className="text-gray-500 leading-relaxed mb-8 sm:mb-10">
-                  Maak gratis een profiel aan, voeg vacatures toe en ontvang gematchte kandidaten
-                  direct in je dashboard. Geen tijdverlies, geen ruis.
+                  Maak gratis een profiel aan, voeg vrijwilligersplekken toe en ontvang geschikte
+                  vrijwilligers direct in je overzicht. Geen tijdverlies, geen ruis.
                 </p>
                 <Link
                   href="/register?role=organisation"
@@ -213,7 +213,7 @@ export default function HomePage() {
                 {[
                   { title: "Geverifieerd platform", desc: "Alle organisaties worden handmatig goedgekeurd." },
                   { title: "Slimme matching", desc: "Ons algoritme koppelt op vaardigheden, locatie en motivatie." },
-                  { title: "AI-gegenereerde icebreakers", desc: "Bij elke match: een persoonlijke gespreksopener." },
+                  { title: "Persoonlijke gespreksopeners", desc: "Bij elke koppeling: een op maat gemaakte gespreksopener." },
                   { title: "Realtime berichten", desc: "Communiceer direct met gematchte vrijwilligers in de app." },
                 ].map((item) => (
                   <li key={item.title} className="flex gap-4 p-4 sm:p-5 bg-white border border-gray-100 rounded-xl">
@@ -258,7 +258,7 @@ export default function HomePage() {
         <section data-tour-id="website-cta" className="py-16 sm:py-20 bg-orange-500">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-white mb-4">
-              Klaar om impact te maken?
+              Klaar om te beginnen?
             </h2>
             <p className="text-orange-100 mb-8 sm:mb-10 max-w-md mx-auto text-sm sm:text-base">
               Maak vandaag een gratis account aan en vind jouw perfecte vrijwilligersmatch.

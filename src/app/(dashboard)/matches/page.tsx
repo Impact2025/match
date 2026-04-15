@@ -235,10 +235,10 @@ export default function MatchesPage() {
             <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center mx-auto">
               <MessageCircle className="w-8 h-8 text-orange-400" />
             </div>
-            <h3 className="text-lg font-semibold text-gray-900">Nog geen matches</h3>
-            <p className="text-gray-500 text-sm">Ga swipen om je eerste match te vinden!</p>
+            <h3 className="text-lg font-semibold text-gray-900">Nog geen koppelingen</h3>
+            <p className="text-gray-500 text-sm">Blader door vrijwilligersplekken om je eerste koppeling te vinden!</p>
             <Button asChild className="bg-orange-500 hover:bg-orange-600 text-white rounded-2xl">
-              <Link href="/swipe">Begin met swipen</Link>
+              <Link href="/swipe">Bekijk vrijwilligersplekken</Link>
             </Button>
           </div>
         ) : (
