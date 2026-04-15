@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { Send, Users, Building2, UsersRound, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react"
+import { RichTextEditor } from "./rich-text-editor"
 
 type Target = "volunteers" | "organisations" | "all"
 
@@ -46,8 +47,11 @@ export function BulkEmailForm({ gemeenten }: Props) {
     fetchCount()
   }, [fetchCount])
 
+  // Strip HTML tags to get plain text length for validation
+  const messageTextLength = message.replace(/<[^>]*>/g, "").trim().length
+
   async function handleSend() {
-    if (!subject.trim() || !message.trim()) {
+    if (!subject.trim() || messageTextLength === 0) {
       setError("Vul een onderwerp en bericht in.")
       return
     }
@@ -147,14 +151,12 @@ export function BulkEmailForm({ gemeenten }: Props) {
         </div>
         <div>
           <label className="text-sm font-semibold text-gray-700 block mb-1.5">Bericht</label>
-          <textarea
+          <RichTextEditor
             value={message}
-            onChange={(e) => { setMessage(e.target.value); setConfirmed(false) }}
-            placeholder="Typ je bericht hier. Lege regel = nieuwe alinea."
-            rows={8}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-300 resize-y"
+            onChange={(html) => { setMessage(html); setConfirmed(false) }}
+            placeholder="Typ je bericht hier…"
           />
-          <p className="text-xs text-gray-400 mt-1">{message.length}/5000 tekens</p>
+          <p className="text-xs text-gray-400 mt-1">{messageTextLength} tekens</p>
         </div>
       </div>
 
@@ -164,7 +166,7 @@ export function BulkEmailForm({ gemeenten }: Props) {
           {!confirmed ? (
             <button
               onClick={() => setConfirmed(true)}
-              disabled={!subject.trim() || !message.trim() || recipientCount === 0 || loadingCount}
+              disabled={!subject.trim() || messageTextLength === 0 || recipientCount === 0 || loadingCount}
               className="flex items-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-200 disabled:text-gray-400 text-white text-sm font-semibold rounded-lg transition-colors"
             >
               <Send className="w-4 h-4" />

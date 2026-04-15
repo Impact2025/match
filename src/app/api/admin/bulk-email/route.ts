@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { Resend } from "resend"
 import { z } from "zod"
 import { buildBulkEmailHtml } from "@/lib/email"
+import { getCurrentGemeente } from "@/lib/gemeente"
 
 let _resend: Resend | null = null
 function getResend() {
@@ -16,7 +17,7 @@ const FROM = process.env.RESEND_FROM ?? "Vrijwilligersmatch <noreply@vrijwillige
 const sendSchema = z.object({
   target: z.enum(["volunteers", "organisations", "all"]),
   subject: z.string().min(3).max(200),
-  message: z.string().min(10).max(5000),
+  message: z.string().min(10).max(100000),
   gemeenteSlug: z.string().optional(),
 })
 
@@ -83,13 +84,19 @@ export async function POST(req: NextRequest) {
   }
 
   const { target, subject, message, gemeenteSlug } = parsed.data
-  const recipients = await getRecipients(target, gemeenteSlug)
+  const [recipients, gemeente] = await Promise.all([
+    getRecipients(target, gemeenteSlug),
+    getCurrentGemeente(),
+  ])
 
   if (recipients.length === 0) {
     return NextResponse.json({ error: "Geen ontvangers gevonden" }, { status: 400 })
   }
 
-  const html = buildBulkEmailHtml(subject, message)
+  const emailBrand = gemeente
+    ? { primaryColor: gemeente.primaryColor, accentColor: gemeente.accentColor ?? gemeente.primaryColor, name: gemeente.name, emailSignature: gemeente.emailSignature }
+    : undefined
+  const html = buildBulkEmailHtml(subject, message, emailBrand)
   const BATCH_SIZE = 100
   let sent = 0
   let failed = 0
