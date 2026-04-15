@@ -4,6 +4,7 @@ import { useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ArrowRight, ShieldCheck, X } from "lucide-react"
 import Link from "next/link"
+import { useGemeenteColor } from "@/lib/gemeente-context"
 
 interface MatchModalProps {
   open: boolean
@@ -23,6 +24,7 @@ export function MatchModal({
   userImage,
   onClose,
 }: MatchModalProps) {
+  const { primaryColor, accentColor } = useGemeenteColor()
   const confetti = useMemo(
     () =>
       Array.from({ length: 24 }, (_, i) => ({
@@ -31,9 +33,9 @@ export function MatchModal({
         duration: 2 + (i % 4) * 0.5,
         delay: (i % 6) * 0.2,
         rotate: i * 15,
-        color: ["#f97316", "#fb923c", "#fbbf24", "#ffffff", "#fed7aa"][i % 5],
+        color: [primaryColor, accentColor, "#ffffff", `${primaryColor}cc`, `${accentColor}99`][i % 5],
       })),
-    []
+    [primaryColor, accentColor]
   )
 
   return (
@@ -44,7 +46,8 @@ export function MatchModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 bg-orange-500 flex flex-col items-center justify-center px-8 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center px-8 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
+          style={{ background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})` }}
         >
           {/* Confetti overlay */}
           <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -95,13 +98,14 @@ export function MatchModal({
               initial={{ x: -100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ type: "spring", stiffness: 200, damping: 22, delay: 0.15 }}
-              className="w-28 h-28 rounded-full border-4 border-white shadow-2xl overflow-hidden bg-orange-300 relative z-10"
+              className="w-28 h-28 rounded-full border-4 border-white shadow-2xl overflow-hidden relative z-10"
+              style={{ backgroundColor: `${primaryColor}66` }}
             >
               {userImage ? (
                 <img src={userImage} alt="Jij" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-orange-200">
-                  <span className="text-orange-600 text-4xl font-black">J</span>
+                <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: `${primaryColor}33` }}>
+                  <span className="text-4xl font-black" style={{ color: primaryColor }}>J</span>
                 </div>
               )}
             </motion.div>
@@ -113,7 +117,7 @@ export function MatchModal({
               transition={{ delay: 0.5, duration: 0.4, times: [0, 0.6, 1] }}
               className="absolute z-20 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center"
             >
-              <span className="text-orange-500 text-lg leading-none">♥</span>
+              <span className="text-lg leading-none" style={{ color: primaryColor }}>♥</span>
             </motion.div>
 
             {/* Org logo */}

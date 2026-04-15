@@ -5,6 +5,7 @@ import { MapPin, Clock, Wifi, ChevronRight, Check } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { AiScoreBadge } from "./ai-score-badge"
 import { CATEGORIES } from "@/config"
+import { useGemeenteColor } from "@/lib/gemeente-context"
 import type { VacancyWithOrgAndDistance } from "@/types"
 
 interface VacancyCardProps {
@@ -47,22 +48,6 @@ const CAT_EMOJI: Record<string, string> = {
   "Anders / Overig": "✨",
 }
 
-const GRADIENT_PAIRS = [
-  ["#f97316", "#f59e0b"],
-  ["#f59e0b", "#fbbf24"],
-  ["#fb923c", "#f97316"],
-  ["#ea580c", "#f97316"],
-  ["#f97316", "#fb923c"],
-  ["#f59e0b", "#f97316"],
-  ["#fbbf24", "#f59e0b"],
-  ["#f97316", "#ea580c"],
-]
-
-function orgGradient(name: string): [string, string] {
-  const idx = name.charCodeAt(0) % GRADIENT_PAIRS.length
-  return GRADIENT_PAIRS[idx] as [string, string]
-}
-
 function orgInitials(name: string) {
   return name
     .split(/\s+/)
@@ -73,6 +58,7 @@ function orgInitials(name: string) {
 }
 
 export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: VacancyCardProps) {
+  const { primaryColor, accentColor } = useGemeenteColor()
   const { distanceKm, matchScore } = vacancy
   const x = useMotionValue(0)
   const rotate = useTransform(x, [-300, 300], [-15, 15])
@@ -90,11 +76,17 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
   const firstCategory = vacancy.categories?.[0]?.category?.name
   const catInfo = firstCategory ? CAT_MAP[firstCategory] : null
   const catEmoji = firstCategory ? (CAT_EMOJI[firstCategory] ?? "🌟") : "🌟"
-  const catColor = catInfo?.color ?? "#f97316"
-  const [gradFrom, gradTo] = orgGradient(vacancy.organisation.name)
+  const catColor = catInfo?.color ?? primaryColor
+
+  // Org gradient: alternate between primary→accent and accent→primary per org name
+  const idx = vacancy.organisation.name.charCodeAt(0) % 2
+  const [gradFrom, gradTo] = idx === 0 ? [primaryColor, accentColor] : [accentColor, primaryColor]
 
   const highlights = isTop ? (matchScore?.highlights ?? []).slice(0, 2) : []
   const hasHighlights = highlights.length > 0
+
+  const chipBg = `${primaryColor}18`
+  const chipBorder = `${primaryColor}33`
 
   return (
     <motion.div
@@ -228,15 +220,17 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
           <div className="flex items-center flex-wrap gap-x-2 gap-y-1 flex-shrink-0">
             {(vacancy.city || vacancy.location) && (
               <span className="flex items-center gap-1 text-[12px] text-gray-500">
-                <MapPin className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
+                <MapPin className="w-3.5 h-3.5 flex-shrink-0" style={{ color: primaryColor }} />
                 {vacancy.city ?? vacancy.location}
               </span>
             )}
             {distanceKm != null && !vacancy.remote && (
-              <span className="text-[12px] text-orange-600 font-semibold">· {distanceKm} km</span>
+              <span className="text-[12px] font-semibold" style={{ color: primaryColor }}>
+                · {distanceKm} km
+              </span>
             )}
             {vacancy.remote && (
-              <span className="flex items-center gap-1 text-[12px] text-orange-600 font-semibold">
+              <span className="flex items-center gap-1 text-[12px] font-semibold" style={{ color: primaryColor }}>
                 <Wifi className="w-3.5 h-3.5" /> Op afstand
               </span>
             )}
@@ -263,7 +257,8 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
               {highlights.map((h) => (
                 <span
                   key={h}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 text-[11px] font-semibold border border-orange-100"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border"
+                  style={{ backgroundColor: chipBg, color: primaryColor, borderColor: chipBorder }}
                 >
                   <Check className="w-2.5 h-2.5 flex-shrink-0" />
                   {h}
@@ -280,7 +275,8 @@ export function VacancyCard({ vacancy, stackIndex, onSwipe, isTop, onExpand }: V
                   {vacancy.skills.slice(0, 3).map(({ skill }) => (
                     <span
                       key={skill.id}
-                      className="px-2.5 py-0.5 bg-orange-50 text-orange-600 text-[11px] font-semibold rounded-full border border-orange-100"
+                      className="px-2.5 py-0.5 text-[11px] font-semibold rounded-full border"
+                      style={{ backgroundColor: chipBg, color: primaryColor, borderColor: chipBorder }}
                     >
                       {skill.name}
                     </span>

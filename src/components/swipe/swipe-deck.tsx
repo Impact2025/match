@@ -12,6 +12,7 @@ import { MatchReasonSheet } from "./match-reason-sheet"
 import { DailyLimitScreen } from "./daily-limit-screen"
 import { VacancyDetailSheet } from "./vacancy-detail-sheet"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useGemeenteColor } from "@/lib/gemeente-context"
 import type { VacancyWithOrgAndDistance, MatchReason } from "@/types"
 
 const DAILY_LIMIT = 15
@@ -36,6 +37,7 @@ function persistSwipeCount(count: number) {
 export function SwipeDeck() {
   const queryClient = useQueryClient()
   const { data: session } = useSession()
+  const { primaryColor } = useGemeenteColor()
   const [currentIndex, setCurrentIndex] = useState(0)
   const prevDataRef = useRef<VacancyWithOrgAndDistance[] | undefined>(undefined)
   const [exiting, setExiting] = useState<{ id: string; dir: "left" | "right" } | null>(null)
@@ -249,8 +251,8 @@ export function SwipeDeck() {
   if (remaining.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
-        <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center">
-          <Shuffle className="w-10 h-10 text-orange-400" />
+        <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ backgroundColor: `${primaryColor}1a` }}>
+          <Shuffle className="w-10 h-10" style={{ color: primaryColor }} />
         </div>
         <h3 className="text-xl font-bold text-gray-900">Alle vacatures bekeken!</h3>
         <p className="text-gray-500 text-sm max-w-xs">
@@ -258,7 +260,10 @@ export function SwipeDeck() {
         </p>
         <button
           onClick={() => window.location.reload()}
-          className="mt-2 px-5 py-2 rounded-full bg-orange-500 text-white text-sm font-medium hover:bg-orange-600 transition-colors"
+          className="mt-2 px-5 py-2 rounded-full text-white text-sm font-medium transition-all"
+          style={{ backgroundColor: primaryColor }}
+          onMouseEnter={(e) => (e.currentTarget.style.filter = "brightness(0.88)")}
+          onMouseLeave={(e) => (e.currentTarget.style.filter = "")}
         >
           Opnieuw laden
         </button>

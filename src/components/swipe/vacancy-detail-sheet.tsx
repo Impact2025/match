@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { CATEGORIES } from "@/config"
+import { useGemeenteColor } from "@/lib/gemeente-context"
 import type { MatchScore, VacancyWithOrgAndDistance } from "@/types"
 
 const CAT_MAP = Object.fromEntries(
@@ -40,28 +41,12 @@ const CAT_EMOJI: Record<string, string> = {
   "Anders / Overig": "✨",
 }
 
-const GRADIENT_PAIRS = [
-  ["#f97316", "#f59e0b"],
-  ["#f59e0b", "#fbbf24"],
-  ["#fb923c", "#f97316"],
-  ["#ea580c", "#f97316"],
-  ["#f97316", "#fb923c"],
-  ["#f59e0b", "#f97316"],
-  ["#fbbf24", "#f59e0b"],
-  ["#f97316", "#ea580c"],
-]
-
-function orgGradient(name: string): [string, string] {
-  const idx = name.charCodeAt(0) % GRADIENT_PAIRS.length
-  return GRADIENT_PAIRS[idx] as [string, string]
-}
-
 function orgInitials(name: string) {
   return name.split(/\s+/).slice(0, 2).map((w) => w[0]).join("").toUpperCase()
 }
 
 // Parse description: bullet lines (starting with •, -, *) → proper list items
-function DescriptionBody({ text }: { text: string }) {
+function DescriptionBody({ text, primaryColor }: { text: string; primaryColor: string }) {
   const paragraphs = text.split(/\n{2,}/)
   return (
     <div className="space-y-3">
@@ -73,7 +58,7 @@ function DescriptionBody({ text }: { text: string }) {
             <ul key={i} className="space-y-1.5">
               {lines.map((l, j) => (
                 <li key={j} className="flex items-start gap-2 text-sm text-gray-600 leading-relaxed">
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400 flex-shrink-0 mt-1.5" />
+                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-1.5" style={{ backgroundColor: primaryColor }} />
                   {l.replace(/^[•\-\*]\s*/, "")}
                 </li>
               ))}
@@ -92,12 +77,6 @@ function DescriptionBody({ text }: { text: string }) {
 
 // ─── Match score breakdown panel ───────────────────────────────────────────
 
-function scoreColor(score: number): string {
-  if (score >= 75) return "#f97316"
-  if (score >= 50) return "#f59e0b"
-  return "#fbbf24"
-}
-
 const SCORE_DIMS: { key: keyof MatchScore; label: string; Icon: React.ComponentType<{ className?: string }> }[] = [
   { key: "motivation", label: "Motivatie",   Icon: Heart },
   { key: "distance",   label: "Nabijheid",   Icon: Navigation },
@@ -105,8 +84,15 @@ const SCORE_DIMS: { key: keyof MatchScore; label: string; Icon: React.ComponentT
   { key: "freshness",  label: "Actualiteit", Icon: Sparkles },
 ]
 
-function MatchScorePanel({ matchScore }: { matchScore: MatchScore }) {
+function MatchScorePanel({ matchScore, primaryColor, accentColor }: { matchScore: MatchScore; primaryColor: string; accentColor: string }) {
   const total = Math.round(matchScore.rawTotal ?? matchScore.total)
+
+  function scoreColor(score: number): string {
+    if (score >= 75) return primaryColor
+    if (score >= 50) return accentColor
+    return "#fbbf24"
+  }
+
   const totalColor = scoreColor(total)
 
   return (
@@ -156,7 +142,8 @@ function MatchScorePanel({ matchScore }: { matchScore: MatchScore }) {
           {matchScore.highlights.map((h) => (
             <span
               key={h}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-orange-50 text-orange-600 text-[11px] font-semibold border border-orange-100"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border"
+              style={{ backgroundColor: `${primaryColor}18`, color: primaryColor, borderColor: `${primaryColor}33` }}
             >
               <Check className="w-2.5 h-2.5 flex-shrink-0" />
               {h}
@@ -175,9 +162,11 @@ interface VacancyDetailSheetProps {
 }
 
 export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailSheetProps) {
+  const { primaryColor, accentColor } = useGemeenteColor()
   if (!vacancy) return null
 
-  const [gradFrom, gradTo] = orgGradient(vacancy.organisation.name)
+  const idx = vacancy.organisation.name.charCodeAt(0) % 2
+  const [gradFrom, gradTo] = idx === 0 ? [primaryColor, accentColor] : [accentColor, primaryColor]
   const categories = vacancy.categories ?? []
   const firstCategory = categories[0]?.category?.name
   const catEmoji = firstCategory ? (CAT_EMOJI[firstCategory] ?? "🌟") : null
@@ -243,15 +232,18 @@ export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailShee
           <div className="flex flex-wrap gap-2">
             {(vacancy.city || vacancy.location) && (
               <span className="flex items-center gap-1.5 text-sm text-gray-600 bg-gray-100 rounded-full px-3 py-1">
-                <MapPin className="w-3.5 h-3.5 text-orange-400" />
+                <MapPin className="w-3.5 h-3.5" style={{ color: primaryColor }} />
                 {vacancy.city ?? vacancy.location}
                 {vacancy.distanceKm != null && !vacancy.remote && (
-                  <span className="text-orange-500 font-semibold">· {vacancy.distanceKm} km</span>
+                  <span className="font-semibold" style={{ color: primaryColor }}>· {vacancy.distanceKm} km</span>
                 )}
               </span>
             )}
             {vacancy.remote && (
-              <span className="flex items-center gap-1.5 text-sm text-orange-600 bg-orange-50 rounded-full px-3 py-1">
+              <span
+                className="flex items-center gap-1.5 text-sm rounded-full px-3 py-1"
+                style={{ color: primaryColor, backgroundColor: `${primaryColor}18` }}
+              >
                 <Wifi className="w-3.5 h-3.5" /> Op afstand
               </span>
             )}
@@ -270,14 +262,14 @@ export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailShee
           </div>
 
           {/* Match score breakdown */}
-          {vacancy.matchScore && <MatchScorePanel matchScore={vacancy.matchScore} />}
+          {vacancy.matchScore && <MatchScorePanel matchScore={vacancy.matchScore} primaryColor={primaryColor} accentColor={accentColor} />}
 
           {/* Categories */}
           {categories.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {categories.map(({ category }) => {
                 const catInfo = CAT_MAP[category.name]
-                const color = catInfo?.color ?? "#f97316"
+                const color = catInfo?.color ?? primaryColor
                 const emoji = CAT_EMOJI[category.name] ?? "🌟"
                 return (
                   <span
@@ -300,7 +292,7 @@ export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailShee
           {/* Description */}
           <div>
             <h3 className="text-sm font-semibold text-gray-900 mb-2">Over deze vacature</h3>
-            <DescriptionBody text={vacancy.description} />
+            <DescriptionBody text={vacancy.description} primaryColor={primaryColor} />
           </div>
 
           {/* Skills */}
@@ -311,7 +303,8 @@ export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailShee
                 {vacancy.skills.map(({ skill }) => (
                   <span
                     key={skill.id}
-                    className="px-2.5 py-1 bg-orange-50 text-orange-600 text-xs font-semibold rounded-full border border-orange-100"
+                    className="px-2.5 py-1 text-xs font-semibold rounded-full border"
+                    style={{ backgroundColor: `${primaryColor}18`, color: primaryColor, borderColor: `${primaryColor}33` }}
                   >
                     {skill.name}
                   </span>
@@ -342,7 +335,8 @@ export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailShee
                 href={vacancy.organisation.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-orange-500 hover:underline mt-1 block"
+                className="text-xs hover:underline mt-1 block"
+                style={{ color: primaryColor }}
               >
                 {vacancy.organisation.website.replace(/^https?:\/\//, "")}
               </a>

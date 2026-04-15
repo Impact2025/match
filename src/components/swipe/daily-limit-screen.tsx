@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Sun } from "lucide-react"
+import { useGemeenteColor } from "@/lib/gemeente-context"
 
 interface DailyLimitScreenProps {
   streakDays: number
@@ -23,6 +24,7 @@ function formatCountdown(ms: number): string {
 }
 
 export function DailyLimitScreen({ streakDays }: DailyLimitScreenProps) {
+  const { primaryColor } = useGemeenteColor()
   const [countdown, setCountdown] = useState(msUntilMidnight())
 
   useEffect(() => {
@@ -34,8 +36,11 @@ export function DailyLimitScreen({ streakDays }: DailyLimitScreenProps) {
 
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center space-y-5 px-6">
-      <div className="w-20 h-20 rounded-full bg-orange-100 flex items-center justify-center">
-        <Sun className="w-10 h-10 text-orange-400" />
+      <div
+        className="w-20 h-20 rounded-full flex items-center justify-center"
+        style={{ backgroundColor: `${primaryColor}1a` }}
+      >
+        <Sun className="w-10 h-10" style={{ color: primaryColor }} />
       </div>
 
       <div>
@@ -46,7 +51,10 @@ export function DailyLimitScreen({ streakDays }: DailyLimitScreenProps) {
       </div>
 
       {streakDays > 0 && (
-        <div className="flex items-center gap-2 bg-orange-500 text-white px-5 py-2.5 rounded-full font-semibold text-sm shadow-md">
+        <div
+          className="flex items-center gap-2 text-white px-5 py-2.5 rounded-full font-semibold text-sm shadow-md"
+          style={{ backgroundColor: primaryColor }}
+        >
           <span className="text-lg">🔥</span>
           {streakDays} dag{streakDays !== 1 ? "en" : ""} streak!
         </div>
@@ -61,7 +69,10 @@ export function DailyLimitScreen({ streakDays }: DailyLimitScreenProps) {
 
       <Link
         href="/matches"
-        className="flex items-center justify-center gap-2 w-full max-w-xs bg-orange-500 hover:bg-orange-600 text-white font-semibold py-4 rounded-2xl transition-colors"
+        className="flex items-center justify-center gap-2 w-full max-w-xs text-white font-semibold py-4 rounded-2xl transition-all"
+        style={{ backgroundColor: primaryColor }}
+        onMouseEnter={(e) => (e.currentTarget.style.filter = "brightness(0.88)")}
+        onMouseLeave={(e) => (e.currentTarget.style.filter = "")}
       >
         Bekijk mijn matches
       </Link>

@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion"
 import { Heart, Wrench, Clock, MapPin } from "lucide-react"
 import type { MatchReason } from "@/types"
+import { useGemeenteColor } from "@/lib/gemeente-context"
 
 const REASON_OPTIONS: { reason: MatchReason; icon: React.ElementType }[] = [
   { reason: "Goede zaak",         icon: Heart },
@@ -18,6 +19,8 @@ interface MatchReasonSheetProps {
 }
 
 export function MatchReasonSheet({ open, onSelect, onCancel }: MatchReasonSheetProps) {
+  const { primaryColor } = useGemeenteColor()
+
   return (
     <AnimatePresence>
       {open && (
@@ -52,10 +55,21 @@ export function MatchReasonSheet({ open, onSelect, onCancel }: MatchReasonSheetP
                 <button
                   key={reason}
                   onClick={() => onSelect(reason)}
-                  className="w-full flex items-center gap-4 px-4 py-4 bg-gray-50 hover:bg-orange-50 border border-gray-100 hover:border-orange-200 rounded-2xl text-left transition-all"
+                  className="w-full flex items-center gap-4 px-4 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-left transition-all"
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = `${primaryColor}10`
+                    e.currentTarget.style.borderColor = `${primaryColor}33`
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = ""
+                    e.currentTarget.style.borderColor = ""
+                  }}
                 >
-                  <div className="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center flex-shrink-0">
-                    <Icon className="w-4 h-4 text-orange-500" strokeWidth={1.75} />
+                  <div
+                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+                    style={{ backgroundColor: `${primaryColor}1a` }}
+                  >
+                    <Icon className="w-4 h-4" strokeWidth={1.75} style={{ color: primaryColor }} />
                   </div>
                   <span className="text-sm font-semibold text-gray-800">{reason}</span>
                 </button>

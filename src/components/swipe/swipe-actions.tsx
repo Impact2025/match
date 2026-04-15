@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import { X, Heart, Star, Undo2 } from "lucide-react"
+import { useGemeenteColor } from "@/lib/gemeente-context"
 
 interface SwipeActionsProps {
   onDislike: () => void
@@ -13,6 +14,8 @@ interface SwipeActionsProps {
 }
 
 export function SwipeActions({ onDislike, onLike, onSuperLike, onUndo, canUndo, disabled }: SwipeActionsProps) {
+  const { primaryColor, accentColor } = useGemeenteColor()
+
   return (
     <div className="flex items-center justify-center gap-5">
       {/* Undo */}
@@ -67,7 +70,11 @@ export function SwipeActions({ onDislike, onLike, onSuperLike, onUndo, canUndo, 
           whileHover={{ scale: 1.08 }}
           onClick={onLike}
           disabled={disabled}
-          className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-orange-500 to-amber-400 shadow-lg shadow-orange-200 text-white hover:from-orange-600 hover:to-amber-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex items-center justify-center w-16 h-16 rounded-full shadow-lg text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            background: `linear-gradient(135deg, ${primaryColor}, ${accentColor})`,
+            boxShadow: `0 8px 20px ${primaryColor}4d`,
+          }}
           aria-label="Interessant!"
         >
           <Heart className="w-7 h-7 fill-white" strokeWidth={0} />

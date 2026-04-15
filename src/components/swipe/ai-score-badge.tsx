@@ -1,29 +1,24 @@
 "use client"
 
-/**
- * MatchScoreBadge — circular progress ring showing the pre-computed match score.
- *
- * Replaces the old AiScoreBadge that made a separate API call per card.
- * Score is now computed server-side alongside the vacancy data, so this
- * component renders instantly with no loading state.
- */
+import { useGemeenteColor } from "@/lib/gemeente-context"
 
 const RADIUS = 13
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS
 
-function ringColor(score: number): string {
-  if (score >= 75) return "#f97316" // orange-500
-  if (score >= 50) return "#f59e0b" // amber-400
-  return "#fbbf24"                   // amber-300
-}
-
 interface AiScoreBadgeProps {
-  /** Pre-computed match score [0–100]. Defaults to 50 (neutral) when absent. */
   score?: number
 }
 
 export function AiScoreBadge({ score = 50 }: AiScoreBadgeProps) {
+  const { primaryColor, accentColor } = useGemeenteColor()
   const pct = Math.round(Math.max(0, Math.min(100, score)))
+
+  function ringColor(s: number): string {
+    if (s >= 75) return primaryColor
+    if (s >= 50) return accentColor
+    return "#fbbf24"
+  }
+
   const color = ringColor(pct)
   const offset = CIRCUMFERENCE - (pct / 100) * CIRCUMFERENCE
 

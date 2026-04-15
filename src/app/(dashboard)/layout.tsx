@@ -7,6 +7,7 @@ import { Heart } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { AiAssistant } from "@/components/ai/ai-assistant"
 import { getCurrentGemeente } from "@/lib/gemeente"
+import { GemeenteColorProvider } from "@/lib/gemeente-context"
 import { TourLauncher } from "@/components/onboarding/tour/TourLauncher"
 import { NotificationBell } from "@/components/layout/notification-bell"
 
@@ -29,8 +30,12 @@ export default async function DashboardLayout({
 
   const gemeente = await getCurrentGemeente()
 
+  const primary = gemeente?.primaryColor ?? "#f97316"
+  const accent = gemeente?.accentColor ?? "#f59e0b"
+
   return (
     <QueryProvider>
+    <GemeenteColorProvider primaryColor={primary} accentColor={accent}>
       {/* ── Top header ──────────────────────────────────────────────────── */}
       <header
         className="fixed top-0 left-0 right-0 z-50 bg-white border-b h-14"
@@ -114,6 +119,7 @@ export default async function DashboardLayout({
       <BottomNav gemeente={gemeente} />
       <AiAssistant mode="dashboard" />
       <TourLauncher tourId="volunteer" accentColor={gemeente?.primaryColor} />
+    </GemeenteColorProvider>
     </QueryProvider>
   )
 }
