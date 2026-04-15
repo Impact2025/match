@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { sendPasswordResetEmail } from "@/lib/email"
+import { getCurrentGemeente } from "@/lib/gemeente"
 import { randomBytes } from "crypto"
 
 export async function POST(req: Request) {
   try {
-    const { email } = await req.json()
+    const [{ email }, gemeente] = await Promise.all([req.json(), getCurrentGemeente()])
 
     if (!email || typeof email !== "string") {
       return NextResponse.json({ error: "E-mailadres vereist" }, { status: 400 })
@@ -26,7 +27,10 @@ export async function POST(req: Request) {
       data: { resetToken: token, resetTokenExpiry: expiry },
     })
 
-    await sendPasswordResetEmail(user.email!, user.name ?? "", token)
+    const emailBrand = gemeente
+      ? { primaryColor: gemeente.primaryColor, accentColor: gemeente.accentColor ?? gemeente.primaryColor, name: gemeente.name, emailSignature: gemeente.emailSignature }
+      : undefined
+    await sendPasswordResetEmail(user.email!, user.name ?? "", token, emailBrand)
 
     return NextResponse.json({ success: true })
   } catch (error) {

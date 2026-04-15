@@ -3,10 +3,11 @@ import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/prisma"
 import { registerSchema } from "@/validators"
 import { sendWelcomeEmail } from "@/lib/email"
+import { getCurrentGemeente } from "@/lib/gemeente"
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json()
+    const [body, gemeente] = await Promise.all([req.json(), getCurrentGemeente()])
     const result = registerSchema.safeParse(body)
 
     if (!result.success) {
@@ -38,7 +39,10 @@ export async function POST(req: Request) {
     })
 
     // Send welcome email (non-blocking)
-    sendWelcomeEmail(user.email!, user.name ?? "").catch((err) =>
+    const emailBrand = gemeente
+      ? { primaryColor: gemeente.primaryColor, accentColor: gemeente.accentColor ?? gemeente.primaryColor, name: gemeente.name, emailSignature: gemeente.emailSignature }
+      : undefined
+    sendWelcomeEmail(user.email!, user.name ?? "", emailBrand).catch((err) =>
       console.error("[WELCOME_EMAIL_ERROR]", err)
     )
 

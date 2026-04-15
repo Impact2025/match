@@ -18,8 +18,13 @@ interface NotificationCounts {
   pendingItems: number
 }
 
-export function OrgBottomNav() {
+interface OrgBottomNavProps {
+  primaryColor?: string
+}
+
+export function OrgBottomNav({ primaryColor }: OrgBottomNavProps) {
   const pathname = usePathname()
+  const color = primaryColor ?? "#f97316"
 
   const { data: counts } = useQuery<NotificationCounts>({
     queryKey: ["notificationCounts"],
@@ -44,11 +49,15 @@ export function OrgBottomNav() {
               className="flex flex-col items-center gap-1 py-3 px-2 relative"
             >
               {isActive && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-orange-500 rounded-full" />
+                <span
+                  className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full"
+                  style={{ backgroundColor: color }}
+                />
               )}
               <div className="relative">
                 <Icon
-                  className={`w-5 h-5 ${isActive ? "text-orange-500" : "text-gray-400"}`}
+                  className={`w-5 h-5 ${isActive ? "" : "text-gray-400"}`}
+                  style={isActive ? { color } : undefined}
                   strokeWidth={isActive ? 2.5 : 1.8}
                 />
                 {showBadge && (
@@ -58,9 +67,8 @@ export function OrgBottomNav() {
                 )}
               </div>
               <span
-                className={`text-[10px] font-medium ${
-                  isActive ? "text-orange-500" : "text-gray-400"
-                }`}
+                className={`text-[10px] font-medium ${isActive ? "" : "text-gray-400"}`}
+                style={isActive ? { color } : undefined}
               >
                 {item.label}
               </span>

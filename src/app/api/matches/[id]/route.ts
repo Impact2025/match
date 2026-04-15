@@ -9,6 +9,7 @@ import {
   sendPlacementConfirmedEmail,
 } from "@/lib/email"
 import { createNotification } from "@/lib/notifications"
+import { getCurrentGemeente } from "@/lib/gemeente"
 
 async function updateOrgSla(orgId: string) {
   const resolvedMatches = await prisma.match.findMany({
@@ -56,6 +57,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (!["ACCEPTED", "CONFIRMED", "REJECTED"].includes(status)) {
       return NextResponse.json({ error: "Ongeldige status" }, { status: 400 })
     }
+
+    // Resolve gemeente branding for emails (non-blocking)
+    const gemeente = await getCurrentGemeente()
+    const emailBrand = gemeente
+      ? { primaryColor: gemeente.primaryColor, accentColor: gemeente.accentColor ?? gemeente.primaryColor, name: gemeente.name, emailSignature: gemeente.emailSignature }
+      : undefined
 
     // Verify ownership
     const org = await prisma.organisation.findUnique({
@@ -143,7 +150,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           match.volunteer.name ?? "Vrijwilliger",
           match.vacancy.title,
           org.name,
-          conversation.id
+          conversation.id,
+          emailBrand
         ).catch((err) => console.error("[MATCH_ACCEPTED_EMAIL_ERROR]", err))
       }
 
@@ -167,7 +175,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           match.volunteer.email,
           match.volunteer.name ?? "Vrijwilliger",
           match.vacancy.title,
-          org.name
+          org.name,
+          emailBrand
         ).catch((err) => console.error("[PLACEMENT_CONFIRMED_EMAIL_ERROR]", err))
       }
 
@@ -189,7 +198,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
           match.volunteer.email,
           match.volunteer.name ?? "Vrijwilliger",
           match.vacancy.title,
-          org.name
+          org.name,
+          emailBrand
         ).catch((err) => console.error("[MATCH_REJECTED_EMAIL_ERROR]", err))
       }
       createNotification({

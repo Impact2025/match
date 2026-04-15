@@ -35,6 +35,10 @@ export async function generateMetadata(): Promise<Metadata> {
         title: `${gemeente.name} × Vrijwilligersmatch`,
         description: gemeente.tagline,
       },
+      icons: {
+        icon: gemeente.faviconUrl ?? "/favicon.ico",
+        apple: gemeente.faviconUrl ?? "/favicon.ico",
+      },
       robots: { index: false, follow: false }, // gemeente subdomains not indexed
     }
   }
