@@ -56,6 +56,16 @@ export const GEMEENTEN: Record<string, GemeenteBranding> = {
     logoUrl: null,
     website: "https://www.haarlem.nl",
   },
+  haarlemmermeer: {
+    slug: "haarlemmermeer",
+    name: "HaarlemmermeerVrijwilligers",
+    displayName: "Haarlemmermeer",
+    tagline: "Vrijwilligerswerk in Haarlemmermeer & omgeving",
+    primaryColor: "#0f4c8a",
+    accentColor: "#1d6fc4",
+    logoUrl: null,
+    website: "https://www.haarlemmermeer.nl",
+  },
 }
 
 /** Look up gemeente branding by slug (returns null for unknown/global). */
