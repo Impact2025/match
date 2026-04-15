@@ -7,6 +7,7 @@ import { OrgSidebar } from "@/components/organisation/org-sidebar"
 import { QueryProvider } from "@/components/providers/query-provider"
 import { TourLauncher } from "@/components/onboarding/tour/TourLauncher"
 import { getCurrentGemeente } from "@/lib/gemeente"
+import { AiAssistant } from "@/components/ai/ai-assistant"
 
 export const dynamic = "force-dynamic"
 
@@ -78,6 +79,7 @@ export default async function OrganisationLayout({
         </div>
       </div>
       <TourLauncher tourId="organisation" />
+      <AiAssistant mode="org-dashboard" color={gemeente?.primaryColor} />
     </QueryProvider>
   )
 }

@@ -1,6 +1,6 @@
 import { CATEGORIES, SKILLS } from "@/config"
 
-export type NovaMode = "presale" | "dashboard"
+export type NovaMode = "presale" | "dashboard" | "org-dashboard"
 
 export interface DashboardUserContext {
   name: string
@@ -92,4 +92,61 @@ Je taken:
 4. VFI/Schwartz uitleg: psychologische modellen begrijpelijk maken
 
 Toon: warm, persoonlijk, gebruik de naam ${user.name}. Beknopt. Altijd Nederlands.`
+}
+
+export interface OrgDashboardContext {
+  orgName: string
+  description?: string | null
+  status: string
+  activeVacancies: number
+  vacanciesWithNoSwipes: string[]
+  pendingMatches: number
+  acceptedMatches: number
+  matchRate: number
+  avgResponseHours?: number | null
+  slaScore?: number | null
+  totalSwipes: number
+}
+
+export function buildOrgDashboardSystemPrompt(org: OrgDashboardContext): string {
+  const statusLabel: Record<string, string> = {
+    APPROVED: "geverifieerd",
+    PENDING_APPROVAL: "wacht op verificatie",
+    SUSPENDED: "geschorst",
+  }
+  const respDisplay =
+    org.avgResponseHours != null
+      ? `${Math.round(org.avgResponseHours)}u gemiddeld`
+      : "onbekend"
+  const slaLabel = org.slaScore != null ? `${org.slaScore}/100` : "onbekend"
+  const noSwipesMsg =
+    org.vacanciesWithNoSwipes.length > 0
+      ? `Vacatures zonder aanmeldingen: ${org.vacanciesWithNoSwipes.join(", ")}`
+      : "Alle vacatures hebben aanmeldingen — goed bezig!"
+
+  return `Je bent Vera, de slimme organisatiecoach van Vrijwilligersmatch.nl.
+Je helpt ${org.orgName} om meer en betere vrijwilligers te vinden en te behouden.
+
+Organisatiestatus:
+- Naam: ${org.orgName}
+- Status: ${statusLabel[org.status] ?? org.status}
+- Actieve vacatures: ${org.activeVacancies}
+- Totaal aanmeldingen (swipes): ${org.totalSwipes}
+- ${noSwipesMsg}
+- Openstaande matches: ${org.pendingMatches} (wachten op reactie)
+- Geaccepteerde matches: ${org.acceptedMatches}
+- Match rate: ${org.matchRate}%
+- Responstijd: ${respDisplay}
+- SLA-score: ${slaLabel}
+
+Jouw taken als Vera:
+1. **Vacatureadvies**: help betere vacatureteksten schrijven die meer vrijwilligers trekken. Vraag wat de vacature inhoudt en geef concrete verbeteringen.
+2. **Match-opvolging**: als er openstaande matches zijn, adviseer dan om snel te reageren (< 48u verhoogt conversie).
+3. **Responstijd**: als responstijd > 48u of SLA < 70, geef dan concrete tips om sneller te reageren.
+4. **Vrijwilligersretentie**: tips voor onboarding, betrokkenheid en waardering van vrijwilligers.
+5. **Platform-uitleg**: hoe werkt matching, wat doet de matchscore, hoe optimaliseer je een profiel.
+6. **Actie-suggesties**: proactief adviseren op basis van de huidige statistieken.
+
+Toon: professioneel maar warm, to-the-point. Gebruik concrete aantallen uit de context. Altijd Nederlands.
+Formaat: gebruik korte alinea's of bulletpoints. Max 150 woorden per antwoord tenzij gevraagd om uitleg.`
 }

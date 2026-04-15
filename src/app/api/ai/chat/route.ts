@@ -4,7 +4,9 @@ import OpenAI from "openai"
 import {
   buildPresaleSystemPrompt,
   buildDashboardSystemPrompt,
+  buildOrgDashboardSystemPrompt,
   type DashboardUserContext,
+  type OrgDashboardContext,
 } from "@/lib/ai-prompts"
 
 const MODEL = "google/gemini-2.0-flash-001"
@@ -102,6 +104,55 @@ export async function POST(req: Request) {
         openToInvitations: user.openToInvitations ?? true,
       }
       systemPrompt = buildDashboardSystemPrompt(ctx)
+    } else {
+      systemPrompt = buildPresaleSystemPrompt()
+    }
+  } else if (mode === "org-dashboard" && session?.user?.id) {
+    const org = await prisma.organisation.findUnique({
+      where: { adminId: session.user.id },
+      include: {
+        vacancies: {
+          where: { status: "ACTIVE" },
+          include: { _count: { select: { swipes: true } } },
+        },
+      },
+    })
+
+    if (org) {
+      const allMatches = await prisma.match.findMany({
+        where: { vacancy: { organisationId: org.id } },
+        select: { status: true },
+      })
+      const pendingMatches = allMatches.filter((m) => m.status === "PENDING").length
+      const acceptedMatches = allMatches.filter((m) => m.status === "ACCEPTED").length
+      const matchRate =
+        allMatches.length > 0
+          ? Math.round((acceptedMatches / allMatches.length) * 100)
+          : 0
+      const totalSwipes = org.vacancies.reduce((s, v) => s + v._count.swipes, 0)
+      const vacanciesWithNoSwipes = org.vacancies
+        .filter((v) => v._count.swipes === 0)
+        .map((v) => v.title)
+
+      const orgSla = await prisma.organisation.findUnique({
+        where: { id: org.id },
+        select: { avgResponseHours: true, slaScore: true },
+      })
+
+      const ctx: OrgDashboardContext = {
+        orgName: org.name,
+        description: org.description,
+        status: org.status,
+        activeVacancies: org.vacancies.length,
+        vacanciesWithNoSwipes,
+        pendingMatches,
+        acceptedMatches,
+        matchRate,
+        avgResponseHours: orgSla?.avgResponseHours ?? null,
+        slaScore: orgSla?.slaScore ?? null,
+        totalSwipes,
+      }
+      systemPrompt = buildOrgDashboardSystemPrompt(ctx)
     } else {
       systemPrompt = buildPresaleSystemPrompt()
     }

@@ -2,11 +2,12 @@
 
 import { useRef, useState, useEffect, useCallback } from "react"
 
-export type NovaMode = "presale" | "dashboard"
+export type NovaMode = "presale" | "dashboard" | "org-dashboard"
 
 const ASSISTANT_NAME: Record<NovaMode, string> = {
   presale: "Iris",
   dashboard: "Nova",
+  "org-dashboard": "Vera",
 }
 
 interface Message {
@@ -34,6 +35,24 @@ const SUGGESTIONS: Record<NovaMode, string[]> = {
     "Help me met een openingszin",
     "Wat betekent het VFI-profiel?",
   ],
+  "org-dashboard": [
+    "Help me een betere vacaturetekst schrijven",
+    "Hoe reageer ik op een match?",
+    "Tips voor vrijwilligersretentie",
+    "Hoe verbeter ik mijn match rate?",
+  ],
+}
+
+const ASSISTANT_SUBTITLE: Record<NovaMode, string> = {
+  presale: "AI-assistent",
+  dashboard: "Jouw vrijwilligerscoach",
+  "org-dashboard": "Jouw organisatiecoach",
+}
+
+const ASSISTANT_INTRO: Record<NovaMode, string> = {
+  presale: "Stel me een vraag over Vrijwilligersmatch!",
+  dashboard: "Jouw persoonlijke vrijwilligerscoach. Hoe kan ik je helpen?",
+  "org-dashboard": "Ik help je meer vrijwilligers vinden en beter beheren. Waar kan ik mee helpen?",
 }
 
 // Inline SVG icons — no lucide-react import for bundle size
@@ -261,10 +280,14 @@ export function AiAssistant({ mode, color }: AiAssistantProps) {
   const btnPosition =
     mode === "dashboard"
       ? "fixed bottom-24 right-4 z-50"
+      : mode === "org-dashboard"
+      ? "fixed bottom-24 right-4 z-50 lg:bottom-6 lg:right-6"
       : "fixed bottom-6 right-6 z-50"
   const panelPosition =
     mode === "dashboard"
       ? "fixed bottom-[calc(6rem+5.5rem)] right-4 z-50"
+      : mode === "org-dashboard"
+      ? "fixed bottom-[calc(6rem+5.5rem)] right-4 z-50 lg:bottom-24 lg:right-6"
       : "fixed bottom-24 right-6 z-50"
 
   return (
@@ -285,7 +308,7 @@ export function AiAssistant({ mode, color }: AiAssistantProps) {
               <div>
                 <p className="text-sm font-bold text-white leading-none">{name}</p>
                 <p className="text-[10px] text-white/70 leading-tight mt-0.5">
-                  {mode === "dashboard" ? "Jouw vrijwilligerscoach" : "AI-assistent"}
+                  {ASSISTANT_SUBTITLE[mode]}
                 </p>
               </div>
             </div>
@@ -308,9 +331,7 @@ export function AiAssistant({ mode, color }: AiAssistantProps) {
                 </div>
                 <p className="text-sm font-semibold text-gray-800 mb-1">Hoi! Ik ben {name} 👋</p>
                 <p className="text-xs text-gray-500 max-w-[220px] mx-auto">
-                  {mode === "dashboard"
-                    ? "Jouw persoonlijke vrijwilligerscoach. Hoe kan ik je helpen?"
-                    : "Stel me een vraag over Vrijwilligersmatch!"}
+                  {ASSISTANT_INTRO[mode]}
                 </p>
               </div>
             )}
