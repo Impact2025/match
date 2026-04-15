@@ -1,16 +1,30 @@
+export const dynamic = "force-dynamic"
+
 import Link from "next/link"
 import { AiAssistant } from "@/components/ai/ai-assistant"
 import { IrisSection } from "@/components/ai/iris-section"
 import { TourLauncher } from "@/components/onboarding/tour/TourLauncher"
+import { getCurrentGemeente } from "@/lib/gemeente"
 
-export default function HomePage() {
+export default async function HomePage() {
+  const gemeente = await getCurrentGemeente()
+
+  // Brand color: gemeente primaryColor or default Vrijwilligersmatch orange
+  const brand = gemeente?.primaryColor ?? "#f97316"
+  const brandAccent = gemeente?.accentColor ?? gemeente?.primaryColor ?? "#fb923c"
+  const platformName = gemeente?.name ?? "Vrijwilligersmatch"
+  const tagline = gemeente?.tagline ?? null
+
   return (
     <div className="bg-white text-gray-900 antialiased overflow-x-hidden">
       {/* ─── HEADER ─── */}
       <header className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2.5 min-w-0">
-            <div className="w-7 h-7 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: brand }}
+            >
               <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
@@ -18,7 +32,9 @@ export default function HomePage() {
                 />
               </svg>
             </div>
-            <span className="text-sm sm:text-base font-semibold tracking-tight text-gray-900 truncate">Vrijwilligersmatch</span>
+            <span className="text-sm sm:text-base font-semibold tracking-tight text-gray-900 truncate">
+              {platformName}
+            </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-8 text-sm text-gray-500">
@@ -37,7 +53,8 @@ export default function HomePage() {
             </Link>
             <Link
               href="/register"
-              className="px-3 sm:px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-lg hover:bg-orange-600 transition-colors whitespace-nowrap"
+              className="px-3 sm:px-4 py-2 text-white text-sm font-medium rounded-lg transition-colors whitespace-nowrap"
+              style={{ backgroundColor: brand }}
             >
               Aanmelden
             </Link>
@@ -64,7 +81,6 @@ export default function HomePage() {
 
               {/* Left — Phone mockup — only on large screens */}
               <div className="hidden lg:flex justify-center lg:justify-start">
-                {/* Phone frame */}
                 <div className="relative w-[260px] md:w-[290px]">
                   <div className="rounded-[2.5rem] border-[6px] border-white/15 overflow-hidden shadow-2xl">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -78,14 +94,19 @@ export default function HomePage() {
                   {/* Floating match notification */}
                   <div className="absolute -top-4 -right-6 bg-white rounded-xl px-3 py-2.5 shadow-lg border border-gray-100">
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
-                        <svg className="w-4 h-4 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <div
+                        className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: brand + "20" }}
+                      >
+                        <svg className="w-4 h-4" style={{ color: brand }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
                         </svg>
                       </div>
                       <div>
                         <p className="text-[11px] font-bold text-gray-900 leading-none mb-0.5">Gelukt, een koppeling!</p>
-                        <p className="text-[10px] text-gray-400">Rode Kruis Amsterdam</p>
+                        <p className="text-[10px] text-gray-400">
+                          {gemeente ? gemeente.displayName : "Rode Kruis Amsterdam"}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -95,14 +116,16 @@ export default function HomePage() {
               {/* Right — Text */}
               <div className="text-white text-center lg:text-left">
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 mb-6 sm:mb-8 bg-white/10 border border-white/20 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-orange-400 flex-shrink-0" />
-                  <span className="text-xs font-medium text-white/90">Matching platform voor Nederland</span>
+                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ backgroundColor: brandAccent }} />
+                  <span className="text-xs font-medium text-white/90">
+                    {tagline ?? "Matching platform voor Nederland"}
+                  </span>
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tighter leading-[1.05] mb-5 sm:mb-6">
                   Vrijwilligers&shy;werk dat
                   <br />
-                  <span className="text-orange-400">bij je past.</span>
+                  <span style={{ color: brandAccent }}>bij je past.</span>
                 </h1>
 
                 <p className="text-base sm:text-lg text-white/70 leading-relaxed mb-8 sm:mb-10 max-w-md mx-auto lg:mx-0">
@@ -113,7 +136,8 @@ export default function HomePage() {
                 <div className="flex flex-col sm:flex-row gap-3 mb-10 sm:mb-14">
                   <Link
                     href="/register"
-                    className="w-full sm:w-auto inline-flex justify-center items-center px-6 py-4 sm:py-3.5 bg-orange-500 text-white font-semibold rounded-xl hover:bg-orange-600 transition-colors"
+                    className="w-full sm:w-auto inline-flex justify-center items-center px-6 py-4 sm:py-3.5 text-white font-semibold rounded-xl transition-colors"
+                    style={{ backgroundColor: brand }}
                   >
                     Ik ben vrijwilliger
                   </Link>
@@ -148,7 +172,7 @@ export default function HomePage() {
         <section data-tour-id="website-hoe-het-werkt" className="py-16 sm:py-24 border-t border-gray-100" id="hoe-het-werkt">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="mb-10 sm:mb-16">
-              <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-4">Hoe het werkt</p>
+              <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: brand }}>Hoe het werkt</p>
               <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-gray-900 max-w-lg">
                 Drie stappen naar zinvol vrijwilligerswerk
               </h2>
@@ -173,7 +197,7 @@ export default function HomePage() {
                 },
               ].map((item) => (
                 <div key={item.step} className="bg-white p-6 sm:p-8 lg:p-10">
-                  <span className="text-xs font-bold text-orange-500 tracking-widest uppercase">{item.step}</span>
+                  <span className="text-xs font-bold tracking-widest uppercase" style={{ color: brand }}>{item.step}</span>
                   <h3 className="mt-4 mb-3 text-lg font-bold text-gray-900">{item.title}</h3>
                   <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
                 </div>
@@ -190,7 +214,7 @@ export default function HomePage() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="grid lg:grid-cols-2 gap-12 sm:gap-16 items-center">
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-orange-500 mb-4">Voor organisaties</p>
+                <p className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: brand }}>Voor organisaties</p>
                 <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-gray-900 mb-6">
                   Vind de vrijwilliger die echt bij jou past
                 </h2>
@@ -200,7 +224,8 @@ export default function HomePage() {
                 </p>
                 <Link
                   href="/register?role=organisation"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors"
+                  className="inline-flex items-center gap-2 text-sm font-semibold transition-colors"
+                  style={{ color: brand }}
                 >
                   Aanmelden als organisatie
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,7 +243,7 @@ export default function HomePage() {
                 ].map((item) => (
                   <li key={item.title} className="flex gap-4 p-4 sm:p-5 bg-white border border-gray-100 rounded-xl">
                     <div className="w-5 h-5 mt-0.5 flex-shrink-0">
-                      <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5" style={{ color: brand }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" />
                       </svg>
                     </div>
@@ -255,18 +280,23 @@ export default function HomePage() {
         </section>
 
         {/* ─── CTA ─── */}
-        <section data-tour-id="website-cta" className="py-16 sm:py-20 bg-orange-500">
+        <section
+          data-tour-id="website-cta"
+          className="py-16 sm:py-20"
+          style={{ backgroundColor: brand }}
+        >
           <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tighter text-white mb-4">
               Klaar om te beginnen?
             </h2>
-            <p className="text-orange-100 mb-8 sm:mb-10 max-w-md mx-auto text-sm sm:text-base">
+            <p className="text-white/80 mb-8 sm:mb-10 max-w-md mx-auto text-sm sm:text-base">
               Maak vandaag een gratis account aan en vind jouw perfecte vrijwilligersmatch.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
                 href="/register"
-                className="px-8 py-4 sm:py-3.5 bg-white text-orange-600 font-semibold rounded-xl hover:bg-orange-50 transition-colors"
+                className="px-8 py-4 sm:py-3.5 bg-white font-semibold rounded-xl hover:bg-white/90 transition-colors"
+                style={{ color: brand }}
               >
                 Word vrijwilliger
               </Link>
@@ -287,7 +317,10 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 sm:gap-10 mb-10 sm:mb-12">
             <div className="col-span-2 md:col-span-2">
               <div className="flex items-center gap-2 mb-5">
-                <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: brand }}
+                >
                   <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                       d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
@@ -295,7 +328,7 @@ export default function HomePage() {
                     />
                   </svg>
                 </div>
-                <span className="text-sm font-semibold text-white">Vrijwilligersmatch</span>
+                <span className="text-sm font-semibold text-white">{platformName}</span>
               </div>
               <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
                 Vrijwilligerswerk toegankelijker maken door slimme matching en intuïtief design.
@@ -324,7 +357,7 @@ export default function HomePage() {
 
           <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-xs text-gray-600">
-              © 2026 Vrijwilligersmatch · een initiatief van WeAreImpact · Hoofddorp
+              © 2026 {platformName} · een initiatief van WeAreImpact · Hoofddorp
             </p>
             <div className="flex gap-5">
               <a href="#" className="text-gray-600 hover:text-gray-400 transition-colors">
