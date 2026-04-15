@@ -376,8 +376,12 @@ export default async function HomePage() {
           </div>
         </div>
       </footer>
-      <AiAssistant mode="presale" />
-      <TourLauncher tourId="website" />
+      <AiAssistant mode="presale" color={brand} />
+      <TourLauncher
+        tourId="website"
+        accentColor={brand}
+        welcomeTitle={gemeente ? `Welkom bij ${gemeente.name}!` : "Welkom bij Vrijwilligersmatch!"}
+      />
     </div>
   )
 }

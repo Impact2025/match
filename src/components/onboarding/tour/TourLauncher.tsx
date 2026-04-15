@@ -185,13 +185,16 @@ export interface TourLauncherProps {
   tourId: TourId
   /** Override accent colour (e.g. gemeente branding) */
   accentColor?: string
+  /** Override welcome modal title (e.g. "Welkom bij WijHeemstede!") */
+  welcomeTitle?: string
 }
 
 type Phase = "idle" | "welcome" | "touring" | "done"
 
-export function TourLauncher({ tourId, accentColor }: TourLauncherProps) {
+export function TourLauncher({ tourId, accentColor, welcomeTitle }: TourLauncherProps) {
   const tour = TOURS[tourId]
   const color = accentColor ?? tour.accentColor
+  const resolvedTour = welcomeTitle ? { ...tour, welcomeTitle } : tour
 
   const [phase, setPhase] = useState<Phase>("idle")
   const [stepIdx, setStepIdx] = useState(0)
@@ -288,7 +291,7 @@ export function TourLauncher({ tourId, accentColor }: TourLauncherProps) {
       {phase === "welcome" && (
         <WelcomeModal
           key="welcome"
-          tour={tour}
+          tour={resolvedTour}
           color={color}
           onStart={() => {
             setStepIdx(0)
