@@ -303,8 +303,8 @@ export function AiAssistant({ mode, color }: AiAssistantProps) {
             {messages.length === 0 && (
               <div className="text-center pt-4">
                 <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3"
-                  style={{ backgroundColor: brand + "15" }}>
-                  <IconSparkles className="w-6 h-6" style={{ color: brand }} />
+                  style={{ backgroundColor: brand + "15", color: brand }}>
+                  <IconSparkles className="w-6 h-6" />
                 </div>
                 <p className="text-sm font-semibold text-gray-800 mb-1">Hoi! Ik ben {name} 👋</p>
                 <p className="text-xs text-gray-500 max-w-[220px] mx-auto">
@@ -322,8 +322,8 @@ export function AiAssistant({ mode, color }: AiAssistantProps) {
               >
                 {msg.role === "assistant" && (
                   <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mr-2 mt-0.5"
-                    style={{ backgroundColor: brand + "20" }}>
-                    <IconSparkles className="w-3 h-3" style={{ color: brand }} />
+                    style={{ backgroundColor: brand + "20", color: brand }}>
+                    <IconSparkles className="w-3 h-3" />
                   </div>
                 )}
                 <div
