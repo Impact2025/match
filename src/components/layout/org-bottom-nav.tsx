@@ -8,7 +8,7 @@ import { useQuery } from "@tanstack/react-query"
 const NAV_ITEMS = [
   { href: "/organisation/dashboard",  label: "Dashboard", icon: LayoutDashboard, badge: "pendingItems" as const,                          tourId: "nav-org-dashboard" },
   { href: "/organisation/volunteers", label: "Zoeken",    icon: Users,           badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-org-zoeken" },
-  { href: "/impact",                  label: "Impact",    icon: Sprout,          badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-org-impact" },
+  { href: "/organisation/impact",      label: "Impact",    icon: Sprout,          badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-org-impact" },
   { href: "/chat",                    label: "Berichten", icon: MessageCircle,   badge: "unreadMessages" as const,                        tourId: "nav-org-chat" },
   { href: "/organisation/vacancies",  label: "Vacatures", icon: Briefcase,       badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-org-vacatures" },
 ]
