@@ -214,7 +214,7 @@ export default async function HomePage() {
         </section>
 
         {/* ─── IRIS ─── */}
-        <IrisSection />
+        <IrisSection color={brand} />
 
         {/* ─── FOR ORGANISATIONS ─── */}
         <section data-tour-id="website-organisaties" className="py-16 sm:py-24 bg-gray-50 border-y border-gray-100" id="organisaties">
