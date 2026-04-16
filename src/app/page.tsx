@@ -5,6 +5,7 @@ import { AiAssistant } from "@/components/ai/ai-assistant"
 import { IrisSection } from "@/components/ai/iris-section"
 import { TourLauncher } from "@/components/onboarding/tour/TourLauncher"
 import { getCurrentGemeente } from "@/lib/gemeente"
+import { FeaturedVacancies } from "@/components/home/featured-vacancies"
 
 export default async function HomePage() {
   const gemeente = await getCurrentGemeente()
@@ -212,6 +213,9 @@ export default async function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* ─── FEATURED VACANCIES ─── */}
+        <FeaturedVacancies brand={brand} gemeenteSlug={gemeente?.slug} />
 
         {/* ─── IRIS ─── */}
         <IrisSection color={brand} />

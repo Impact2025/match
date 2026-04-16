@@ -20,6 +20,8 @@ export async function POST(req: Request) {
       location,
       postcode,
       birthYear,
+      birthMonth,
+      aanhef,
       maxDistance,
       commitmentType,
       motivationProfile,
@@ -135,6 +137,7 @@ export async function POST(req: Request) {
           lat: geoCoords?.lat ?? null,
           lon: geoCoords?.lon ?? null,
           birthYear: birthYear != null ? Number(birthYear) : null,
+          // birthMonth + aanhef saved via raw SQL below (new columns)
           maxDistance: maxDistance != null ? Number(maxDistance) : undefined,
           commitmentType: commitmentType ?? null,
           availability: JSON.stringify(availability),
@@ -150,6 +153,16 @@ export async function POST(req: Request) {
           },
         },
       })
+    }
+
+    // Save birthMonth + aanhef via raw SQL (new columns, not yet in generated Prisma client)
+    if (birthMonth != null || aanhef != null) {
+      await prisma.$executeRawUnsafe(
+        `UPDATE users SET "birthMonth" = $1, "aanhef" = $2 WHERE id = $3`,
+        birthMonth != null ? Number(birthMonth) : null,
+        aanhef ?? null,
+        session.user.id
+      )
     }
 
     return NextResponse.json({ success: true })

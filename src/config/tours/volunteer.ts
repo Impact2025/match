@@ -45,11 +45,11 @@ export const volunteerTour: TourConfig = {
       spotlightPadding: 10,
     },
     {
-      id: "nav-kaart",
-      target: "nav-kaart",
-      title: "Kaart",
+      id: "nav-activiteiten",
+      target: "nav-activiteiten",
+      title: "Activiteiten",
       content:
-        "Ontdek vacatures in jouw buurt op de interactieve kaart. Filter op afstand en categorie.",
+        "Schrijf je in voor groepsactiviteiten en evenementen van organisaties bij jou in de buurt.",
       placement: "top",
       spotlightPadding: 10,
     },

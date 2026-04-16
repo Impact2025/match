@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { href: "/organisation/impact",      label: "Impact",    icon: Sprout,          badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-org-impact" },
   { href: "/chat",                    label: "Berichten", icon: MessageCircle,   badge: "unreadMessages" as const,                        tourId: "nav-org-chat" },
   { href: "/organisation/vacancies",   label: "Vacatures",    icon: Briefcase,     badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-org-vacatures" },
-  { href: "/organisation/activities",  label: "Activiteiten", icon: CalendarDays,  badge: null as "pendingItems" | "unreadMessages" | null },
+  { href: "/organisation/activities",  label: "Activiteiten", icon: CalendarDays,  badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-org-activiteiten" },
 ]
 
 interface NotificationCounts {

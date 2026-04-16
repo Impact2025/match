@@ -62,5 +62,14 @@ export const organisationTour: TourConfig = {
       placement: "top",
       spotlightPadding: 10,
     },
+    {
+      id: "nav-org-activiteiten",
+      target: "nav-org-activiteiten",
+      title: "Groepsactiviteiten",
+      content:
+        "Plan workshops, evenementen en groepsbijeenkomsten. Beheer aanmeldingen en check-ins via QR-code.",
+      placement: "top",
+      spotlightPadding: 10,
+    },
   ],
 }

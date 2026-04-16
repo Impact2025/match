@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   User,
   Calendar,
   MapPin,
@@ -204,8 +205,9 @@ export default function OnboardingPage() {
   const [showCelebration, setShowCelebration] = useState(false)
   const [currentStep,     setCurrentStep]     = useState(0)
 
-  const [name,       setName]       = useState("")
-  const [birthYear,  setBirthYear]  = useState("")
+  const [name,        setName]        = useState("")
+  const [birthYear,   setBirthYear]   = useState("")
+  const [birthMonth,  setBirthMonth]  = useState("")
   const [location, setLocation] = useState("")
   const [postcode, setPostcode] = useState("")
 
@@ -303,7 +305,8 @@ export default function OnboardingPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name:              name || undefined,
-          birthYear:         birthYear ? Number(birthYear) : undefined,
+          birthYear:         birthYear  ? Number(birthYear)  : undefined,
+          birthMonth:        birthMonth ? Number(birthMonth) : undefined,
           skills:            selectedSkills,
           interests:         selectedInterests,
           availability:      selectedAvailability,
@@ -523,19 +526,35 @@ export default function OnboardingPage() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="birthYear" className="text-sm font-medium text-gray-700">Geboortejaar</Label>
-                  <div className="relative">
-                    <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input
-                      id="birthYear"
-                      type="number"
-                      value={birthYear}
-                      onChange={(e) => setBirthYear(e.target.value)}
-                      placeholder="Bijv. 1985"
-                      min={1924}
-                      max={new Date().getFullYear() - 16}
-                      className="pl-10 h-12 rounded-xl border-gray-200 bg-white"
-                    />
+                  <Label className="text-sm font-medium text-gray-700">Geboortemaand + jaar</Label>
+                  <div className="flex gap-2">
+                    {/* Month dropdown */}
+                    <div className="relative flex-1">
+                      <select
+                        value={birthMonth}
+                        onChange={(e) => setBirthMonth(e.target.value)}
+                        className="border-gray-200 h-12 w-full rounded-xl border bg-white pl-3 pr-10 py-1 text-sm outline-none appearance-none text-gray-900"
+                      >
+                        <option value="">Maand</option>
+                        {["Januari","Februari","Maart","April","Mei","Juni","Juli","Augustus","September","Oktober","November","December"].map((m, i) => (
+                          <option key={i + 1} value={String(i + 1)}>{m}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    </div>
+                    {/* Year input */}
+                    <div className="relative">
+                      <Calendar className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Input
+                        type="number"
+                        value={birthYear}
+                        onChange={(e) => setBirthYear(e.target.value)}
+                        placeholder="jjjj"
+                        min={1924}
+                        max={new Date().getFullYear() - 16}
+                        className="pl-10 h-12 w-28 rounded-xl border-gray-200 bg-white"
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="space-y-1.5">
