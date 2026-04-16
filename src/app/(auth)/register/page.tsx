@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Heart, User, Mail, Lock, Building2, ArrowRight, Loader2 } from "lucide-react"
+import { Heart, User, Mail, Lock, Building2, ArrowRight, Loader2, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -18,6 +18,7 @@ export default function RegisterPage() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [selectedRole, setSelectedRole] = useState<"VOLUNTEER" | "ORGANISATION">("VOLUNTEER")
+  const [aanhef, setAanhef] = useState("")
   const { brand, brandAccent, name, tagline } = useBrand()
 
   const {
@@ -41,7 +42,7 @@ export default function RegisterPage() {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, aanhef: aanhef || undefined }),
       })
 
       const result = await response.json()
@@ -89,7 +90,6 @@ export default function RegisterPage() {
         <Card className="shadow-xl border-0">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl">Account aanmaken</CardTitle>
-            <CardDescription>Begin gratis — geen creditcard nodig</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -145,6 +145,26 @@ export default function RegisterPage() {
                   </button>
                 </div>
               </div>
+
+              {selectedRole === "VOLUNTEER" && (
+                <div className="space-y-2">
+                  <Label htmlFor="aanhef">Aanhef</Label>
+                  <div className="relative">
+                    <select
+                      id="aanhef"
+                      value={aanhef}
+                      onChange={(e) => setAanhef(e.target.value)}
+                      className="border-input h-9 w-full min-w-0 rounded-md border bg-transparent pl-3 pr-8 py-1 text-sm shadow-xs outline-none appearance-none text-gray-900"
+                    >
+                      <option value=""></option>
+                      <option value="De heer">De heer</option>
+                      <option value="Mevrouw">Mevrouw</option>
+                      <option value="Anders">Anders</option>
+                    </select>
+                    <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="name">

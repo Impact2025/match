@@ -16,6 +16,7 @@ export const registerSchema = z
       .regex(/[0-9]/, "Wachtwoord moet een cijfer bevatten"),
     confirmPassword: z.string(),
     role: z.enum(["VOLUNTEER", "ORGANISATION"]),
+    aanhef: z.string().optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Wachtwoorden komen niet overeen",

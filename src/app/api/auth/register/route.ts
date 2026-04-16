@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       )
     }
 
-    const { name, email, password, role } = result.data
+    const { name, email, password, role, aanhef } = result.data
 
     const existing = await prisma.user.findUnique({ where: { email } })
     if (existing) {
@@ -37,6 +37,15 @@ export async function POST(req: Request) {
         role,
       },
     })
+
+    // Save aanhef via raw SQL (new column, not yet in generated Prisma client)
+    if (aanhef && role === "VOLUNTEER") {
+      await prisma.$executeRawUnsafe(
+        `UPDATE users SET "aanhef" = $1 WHERE id = $2`,
+        aanhef,
+        user.id
+      )
+    }
 
     // Send welcome email (non-blocking)
     const emailBrand = gemeente
