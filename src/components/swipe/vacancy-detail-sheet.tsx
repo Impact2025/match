@@ -1,6 +1,8 @@
 "use client"
 
-import { MapPin, Clock, Wifi, Calendar, Building2, Check, Heart, Navigation, Zap, Sparkles } from "lucide-react"
+import { MapPin, Clock, Wifi, Calendar, Building2, Check, Heart, Navigation, Zap, Sparkles, CalendarDays, ArrowRight } from "lucide-react"
+import { useState, useEffect } from "react"
+import Link from "next/link"
 import {
   Sheet,
   SheetContent,
@@ -159,6 +161,89 @@ interface VacancyDetailSheetProps {
   vacancy: VacancyWithOrgAndDistance | null
   open: boolean
   onClose: () => void
+}
+
+interface OrgActivity {
+  id: string
+  title: string
+  type: string
+  startDateTime: string
+  online: boolean
+  city?: string | null
+  maxCapacity?: number | null
+  registrations?: { status: string }[]
+}
+
+function OrgActivitiesSection({ orgId, primaryColor }: { orgId: string; primaryColor: string }) {
+  const [activities, setActivities] = useState<OrgActivity[]>([])
+
+  useEffect(() => {
+    fetch(`/api/activities?organisationId=${orgId}&take=3`)
+      .then((r) => r.json())
+      .then((data) => setActivities(data.activities ?? []))
+      .catch(() => {})
+  }, [orgId])
+
+  if (activities.length === 0) return null
+
+  return (
+    <div className="space-y-2.5">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+          <CalendarDays className="w-4 h-4 text-gray-400" />
+          Eerst kennismaken?
+        </h3>
+        <Link
+          href="/activiteiten"
+          className="text-xs font-semibold flex items-center gap-1"
+          style={{ color: primaryColor }}
+        >
+          Meer <ArrowRight className="w-3 h-3" />
+        </Link>
+      </div>
+      <p className="text-xs text-gray-400">Kom langs bij een activiteit voordat je je aanmeldt als vrijwilliger.</p>
+      <div className="space-y-2">
+        {activities.map((a) => {
+          const start = new Date(a.startDateTime)
+          const activeRegs = (a.registrations ?? []).filter(
+            (r) => r.status === "REGISTERED" || r.status === "WAITLISTED"
+          ).length
+          const isFull = a.maxCapacity ? activeRegs >= a.maxCapacity : false
+          return (
+            <Link
+              key={a.id}
+              href={`/activiteiten/${a.id}`}
+              className="flex items-center gap-3 p-3 rounded-xl border border-gray-100 hover:border-gray-200 bg-white hover:bg-gray-50 transition-all"
+            >
+              <div
+                className="flex-shrink-0 text-center rounded-lg px-2 py-1.5 min-w-[34px]"
+                style={{ backgroundColor: `${primaryColor}15` }}
+              >
+                <div className="text-sm font-black leading-none" style={{ color: primaryColor }}>
+                  {start.getDate()}
+                </div>
+                <div className="text-[8px] font-bold uppercase leading-none mt-0.5" style={{ color: primaryColor }}>
+                  {start.toLocaleDateString("nl-NL", { month: "short" })}
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-gray-900 truncate">{a.title}</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">
+                  {start.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })}
+                  {a.city ? ` · ${a.city}` : a.online ? " · Online" : ""}
+                </p>
+              </div>
+              {isFull ? (
+                <span className="text-[10px] text-amber-500 font-semibold flex-shrink-0">Vol</span>
+              ) : (
+                <ArrowRight className="w-3.5 h-3.5 text-gray-300 flex-shrink-0" />
+              )}
+            </Link>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailSheetProps) {
@@ -342,6 +427,9 @@ export function VacancyDetailSheet({ vacancy, open, onClose }: VacancyDetailShee
               </a>
             )}
           </div>
+
+          {/* Kennismaken via activiteit */}
+          <OrgActivitiesSection orgId={vacancy.organisation.id} primaryColor={primaryColor} />
 
           <div className="h-4" />
         </div>

@@ -359,6 +359,107 @@ export function buildBulkEmailHtml(subject: string, message: string, brand?: Par
   return layout(subject, body, b)
 }
 
+// ── Activiteit emails ────────────────────────────────────────────────────────
+
+export async function sendActivityRegistrationEmail(
+  to: string,
+  name: string,
+  activityTitle: string,
+  activityDate: Date,
+  orgName: string,
+  activityId: string,
+  waitlisted: boolean,
+  brand?: Partial<EmailBrand>
+) {
+  const b = resolveBrand(brand)
+  const dateStr = activityDate.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" })
+  const timeStr = activityDate.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })
+  const body = waitlisted
+    ? `
+      ${h1("Je staat op de wachtlijst!")}
+      ${p(`Hoi ${highlight(name, b)}, je bent op de wachtlijst geplaatst voor ${highlight(`"${activityTitle}"`, b)} van ${highlight(orgName, b)}.`)}
+      ${p(`De activiteit is op ${highlight(`${dateStr} om ${timeStr}`, b)}. Je ontvangt direct bericht als er een plek vrijkomt.`)}
+      ${btn(`${BASE_URL}/activiteiten/${activityId}`, "Bekijk activiteit →", b)}
+      ${gdprFooter(b)}
+    `
+    : `
+      ${h1("Je aanmelding is bevestigd!")}
+      ${p(`Hoi ${highlight(name, b)}, je bent aangemeld voor ${highlight(`"${activityTitle}"`, b)} van ${highlight(orgName, b)}.`)}
+      ${p(`De activiteit is op ${highlight(`${dateStr} om ${timeStr}`, b)}. We zien je dan!`)}
+      ${btn(`${BASE_URL}/activiteiten/${activityId}`, "Bekijk activiteit →", b)}
+      ${p(`<span style="font-size:13px;color:#9ca3af;">Kun je toch niet? Meld je dan tijdig af via de knop hierboven.</span>`)}
+      ${gdprFooter(b)}
+    `
+  return getResend().emails.send({
+    from: FROM,
+    to,
+    subject: waitlisted
+      ? `Wachtlijst: "${activityTitle}"`
+      : `Aanmelding bevestigd: "${activityTitle}"`,
+    html: layout(waitlisted ? "Wachtlijst" : "Aanmelding bevestigd", body, b),
+  })
+}
+
+export async function sendActivityWaitlistPromotedEmail(
+  to: string,
+  name: string,
+  activityTitle: string,
+  activityDate: Date,
+  orgName: string,
+  activityId: string,
+  brand?: Partial<EmailBrand>
+) {
+  const b = resolveBrand(brand)
+  const dateStr = activityDate.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" })
+  const timeStr = activityDate.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })
+  const body = `
+    ${h1("Er is een plek vrijgekomen! 🎉")}
+    ${p(`Goed nieuws, ${highlight(name, b)}! Er is een plek vrijgekomen voor ${highlight(`"${activityTitle}"`, b)} van ${highlight(orgName, b)}.`)}
+    ${p(`Je bent van de wachtlijst gepromoveerd en nu officieel aangemeld. De activiteit is op ${highlight(`${dateStr} om ${timeStr}`, b)}.`)}
+    ${btn(`${BASE_URL}/activiteiten/${activityId}`, "Bekijk activiteit →", b)}
+    ${p(`<span style="font-size:13px;color:#9ca3af;">Kun je toch niet? Meld je dan tijdig af zodat iemand anders de plek kan krijgen.</span>`)}
+    ${gdprFooter(b)}
+  `
+  return getResend().emails.send({
+    from: FROM,
+    to,
+    subject: `Goed nieuws: plek vrijgekomen voor "${activityTitle}"`,
+    html: layout("Plek vrijgekomen", body, b),
+  })
+}
+
+export async function sendActivityReminderEmail(
+  to: string,
+  name: string,
+  activityTitle: string,
+  activityDate: Date,
+  isOnline: boolean,
+  location: string | null,
+  meetUrl: string | null,
+  activityId: string,
+  brand?: Partial<EmailBrand>
+) {
+  const b = resolveBrand(brand)
+  const timeStr = activityDate.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" })
+  const locatieStr = isOnline
+    ? (meetUrl ? `<a href="${meetUrl}" style="color:${b.primaryColor};">Online (klik voor link)</a>` : "Online")
+    : (location ?? "Zie activiteitsdetails")
+  const body = `
+    ${h1("Morgen is het zover! 📅")}
+    ${p(`Hoi ${highlight(name, b)}, morgen om ${highlight(timeStr, b)} begint ${highlight(`"${activityTitle}"`, b)}. We zijn benieuwd naar je!`)}
+    ${p(`<strong>Locatie:</strong> ${locatieStr}`)}
+    ${btn(`${BASE_URL}/activiteiten/${activityId}`, "Bekijk details →", b)}
+    ${p(`<span style="font-size:13px;color:#9ca3af;">Kun je toch niet? Meld je dan nu af zodat iemand anders de plek kan krijgen.</span>`)}
+    ${gdprFooter(b)}
+  `
+  return getResend().emails.send({
+    from: FROM,
+    to,
+    subject: `Herinnering: morgen "${activityTitle}"`,
+    html: layout("Herinnering activiteit", body, b),
+  })
+}
+
 export async function sendPasswordResetEmail(to: string, name: string, token: string, brand?: Partial<EmailBrand>) {
   const b = resolveBrand(brand)
   const resetUrl = `${BASE_URL}/reset-password?token=${token}`

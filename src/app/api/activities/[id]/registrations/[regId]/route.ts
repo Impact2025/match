@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { sendActivityWaitlistPromotedEmail } from "@/lib/email"
 
 // PATCH /api/activities/[id]/registrations/[regId]
 // Vrijwilliger: annuleren (status → CANCELLED)
@@ -18,7 +19,11 @@ export async function PATCH(
 
   const registration = await prisma.activityRegistration.findUnique({
     where: { id: regId },
-    include: { activity: { select: { organisationId: true } } },
+    include: {
+      activity: {
+        select: { organisationId: true, title: true, startDateTime: true, organisation: { select: { name: true } } },
+      },
+    },
   })
   if (!registration || registration.activityId !== id) {
     return NextResponse.json({ error: "Niet gevonden" }, { status: 404 })
@@ -39,16 +44,28 @@ export async function PATCH(
       data: { status: "CANCELLED", cancelledAt: new Date() },
     })
 
-    // Eerste persoon van wachtlijst promoveren
+    // Eerste persoon van wachtlijst promoveren + email sturen
     const waitlisted = await prisma.activityRegistration.findFirst({
       where: { activityId: id, status: "WAITLISTED" },
       orderBy: { registeredAt: "asc" },
+      include: { volunteer: { select: { name: true, email: true } } },
     })
     if (waitlisted) {
       await prisma.activityRegistration.update({
         where: { id: waitlisted.id },
         data: { status: "REGISTERED" },
       })
+      // Stuur email naar gepromoveerde vrijwilliger (best-effort)
+      if (waitlisted.volunteer.email) {
+        sendActivityWaitlistPromotedEmail(
+          waitlisted.volunteer.email,
+          waitlisted.volunteer.name ?? "Vrijwilliger",
+          registration.activity.title,
+          registration.activity.startDateTime,
+          registration.activity.organisation.name,
+          id,
+        ).catch(() => {})
+      }
     }
 
     return NextResponse.json(updated)

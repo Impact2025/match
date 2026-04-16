@@ -39,14 +39,17 @@ export async function GET(req: NextRequest) {
   }
 
   // Publiek / vrijwilliger: gepubliceerde activiteiten, optioneel gemeente-gefilterd
+  const organisationId = searchParams.get("organisationId") ?? undefined
+
   const where: Record<string, unknown> = {
     status: "PUBLISHED",
     ...(upcoming ? { startDateTime: { gte: new Date() } } : {}),
     ...(type ? { type } : {}),
+    ...(organisationId ? { organisationId } : {}),
   }
 
-  // Gemeente filter: zoek id op via slug
-  if (gemeente) {
+  // Gemeente filter: zoek id op via slug (sla over als org-specifiek gefilterd)
+  if (gemeente && !organisationId) {
     const gemeenteRecord = await prisma.gemeente.findUnique({
       where: { slug: gemeente.slug },
       select: { id: true },
