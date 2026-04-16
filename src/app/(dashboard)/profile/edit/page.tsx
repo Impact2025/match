@@ -31,6 +31,13 @@ export default async function ProfileEditPage() {
       })()
     : []
 
+  // birthMonth and aanhef are new columns — read via raw SQL until client is regenerated
+  const rawExtra = await prisma.$queryRawUnsafe<{ birthMonth: number | null; aanhef: string | null }[]>(
+    `SELECT "birthMonth", "aanhef" FROM users WHERE id = $1`,
+    user.id
+  )
+  const extra = rawExtra[0] ?? { birthMonth: null, aanhef: null }
+
   const defaultValues = {
     name: user.name ?? "",
     bio: user.bio ?? "",
@@ -42,6 +49,9 @@ export default async function ProfileEditPage() {
     maxDistance: user.maxDistance ?? 25,
     image: user.image,
     openToInvitations: user.openToInvitations ?? false,
+    birthYear: user.birthYear ?? null,
+    birthMonth: extra.birthMonth ?? null,
+    aanhef: extra.aanhef ?? null,
   }
 
   return (

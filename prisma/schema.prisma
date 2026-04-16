@@ -38,6 +38,8 @@ model User {
   maxDistance   Int?      @default(25) // km
 
   birthYear           Int?      // geboortejaar (bijv. 1985)
+  birthMonth          Int?      // geboortemaand 1-12
+  aanhef              String?   // "De heer" | "Mevrouw" | "Anders"
 
   motivationProfile   String?   @db.Text   // JSON: {waarden,begrip,sociaal,loopbaan,bescherming,verbetering}
   schwartzProfile     String?   @db.Text   // JSON: {zorg,universalisme,zelfrichting,stimulatie,hedonisme,prestatie,macht,veiligheid,conformiteit,traditie}

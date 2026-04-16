@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { toast } from "sonner"
-import { Save, Loader2, MapPin, Bell, Camera, ShieldCheck } from "lucide-react"
+import { Save, Loader2, MapPin, Bell, Camera, ShieldCheck, ChevronDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -15,8 +15,15 @@ import { profileSchema, type ProfileFormData } from "@/validators"
 import { SKILLS, CATEGORIES } from "@/config"
 import { AvailabilityGrid, migrateLegacyAvailability } from "@/components/profile/availability-grid"
 
+const MONTHS = [
+  "Januari", "Februari", "Maart", "April", "Mei", "Juni",
+  "Juli", "Augustus", "September", "Oktober", "November", "December",
+]
+
+const AANHEF_OPTIONS = ["De heer", "Mevrouw", "Anders"]
+
 interface ProfileFormProps {
-  defaultValues: ProfileFormData & { image?: string | null; openToInvitations?: boolean }
+  defaultValues: ProfileFormData & { image?: string | null; openToInvitations?: boolean; birthYear?: number | null; birthMonth?: number | null; aanhef?: string | null }
 }
 
 export function ProfileForm({ defaultValues }: ProfileFormProps) {
@@ -29,6 +36,9 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
   )
   const [maxDistance, setMaxDistance] = useState(defaultValues.maxDistance ?? 25)
   const [openToInvitations, setOpenToInvitations] = useState(defaultValues.openToInvitations ?? false)
+  const [birthMonth, setBirthMonth] = useState<number | null>(defaultValues.birthMonth ?? null)
+  const [birthYear, setBirthYear] = useState<number | null>(defaultValues.birthYear ?? null)
+  const [aanhef, setAanhef] = useState<string>(defaultValues.aanhef ?? "")
   const [currentImage, setCurrentImage] = useState<string | null>(defaultValues.image ?? null)
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -158,6 +168,9 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
           availability: selectedAvailability,
           maxDistance,
           openToInvitations,
+          birthMonth,
+          birthYear,
+          aanhef: aanhef || null,
         }),
       })
 
@@ -306,6 +319,56 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
             rows={4}
             maxLength={500}
           />
+        </div>
+
+        {/* Geboortemaand + jaar / Aanhef */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label>Geboortemaand + jaar</Label>
+            <div className="flex gap-2">
+              {/* Month dropdown */}
+              <div className="relative flex-1">
+                <select
+                  value={birthMonth ?? ""}
+                  onChange={(e) => setBirthMonth(e.target.value ? Number(e.target.value) : null)}
+                  className="border-input h-9 w-full min-w-0 rounded-md border bg-transparent pl-3 pr-8 py-1 text-sm shadow-xs outline-none appearance-none text-gray-900"
+                >
+                  <option value="">Maand</option>
+                  {MONTHS.map((m, i) => (
+                    <option key={i + 1} value={i + 1}>{m}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+              {/* Year number input */}
+              <input
+                type="number"
+                min={1920}
+                max={new Date().getFullYear()}
+                placeholder="jjjj"
+                value={birthYear ?? ""}
+                onChange={(e) => setBirthYear(e.target.value ? Number(e.target.value) : null)}
+                className="border-input h-9 w-20 min-w-0 rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Aanhef</Label>
+            <div className="relative">
+              <select
+                value={aanhef}
+                onChange={(e) => setAanhef(e.target.value)}
+                className="border-input h-9 w-full min-w-0 rounded-md border bg-transparent pl-3 pr-8 py-1 text-sm shadow-xs outline-none appearance-none text-gray-900"
+              >
+                <option value=""></option>
+                {AANHEF_OPTIONS.map((o) => (
+                  <option key={o} value={o}>{o}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
+          </div>
         </div>
       </section>
 

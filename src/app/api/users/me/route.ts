@@ -49,7 +49,7 @@ export async function PATCH(req: Request) {
       )
     }
 
-    const { name, bio, location, postcode, skills, interests, availability, maxDistance, openToInvitations } =
+    const { name, bio, location, postcode, skills, interests, availability, maxDistance, openToInvitations, birthYear, birthMonth, aanhef } =
       result.data
 
     const geoCoords =
@@ -85,6 +85,7 @@ export async function PATCH(req: Request) {
         availability: JSON.stringify(availability),
         maxDistance,
         ...(openToInvitations !== undefined && { openToInvitations }),
+        birthYear: birthYear ?? null,
         skills: {
           deleteMany: {},
           create: skillRecords.map((s) => ({ skillId: s.id })),
@@ -99,6 +100,14 @@ export async function PATCH(req: Request) {
         interests: { include: { category: true } },
       },
     })
+
+    // Save birthMonth + aanhef via raw SQL (new columns, not yet in generated Prisma client)
+    await prisma.$executeRawUnsafe(
+      `UPDATE users SET "birthMonth" = $1, "aanhef" = $2 WHERE id = $3`,
+      birthMonth ?? null,
+      aanhef ?? null,
+      session.user.id
+    )
 
     // Regenerate embedding non-blocking after profile update
     const userId = session.user!.id

@@ -54,6 +54,9 @@ export const profileSchema = z.object({
   availability: z.array(z.string()).default([]),
   maxDistance: z.number().min(1).max(200).default(25),
   openToInvitations: z.boolean().optional(),
+  birthMonth: z.number().int().min(1).max(12).nullable().optional(),
+  birthYear: z.number().int().min(1920).max(new Date().getFullYear()).nullable().optional(),
+  aanhef: z.string().nullable().optional(),
 })
 
 export const invitationSchema = z.object({
