@@ -2,13 +2,13 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutGrid, Heart, MessageCircle, User, Map } from "lucide-react"
+import { LayoutGrid, Heart, MessageCircle, User, CalendarDays } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 
 const NAV_ITEMS = [
   { href: "/swipe",   label: "Home",      icon: LayoutGrid,    badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-home" },
   { href: "/matches", label: "Matches",   icon: Heart,         badge: "pendingItems" as const,                          tourId: "nav-matches" },
-  { href: "/kaart",   label: "Kaart",     icon: Map,           badge: null,                                             tourId: "nav-kaart" },
+  { href: "/activiteiten", label: "Activiteiten", icon: CalendarDays, badge: null,                                    tourId: "nav-activiteiten" },
   { href: "/chat",    label: "Berichten", icon: MessageCircle, badge: "unreadMessages" as const,                        tourId: "nav-chat" },
   { href: "/profile", label: "Profiel",   icon: User,          badge: null,                                             tourId: "nav-profiel" },
 ]

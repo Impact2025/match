@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { LayoutDashboard, MessageCircle, Briefcase, User, Users, Sprout } from "lucide-react"
+import { LayoutDashboard, MessageCircle, Briefcase, Users, Sprout, CalendarDays } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 
 const NAV_ITEMS = [
@@ -10,7 +10,8 @@ const NAV_ITEMS = [
   { href: "/organisation/volunteers", label: "Zoeken",    icon: Users,           badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-org-zoeken" },
   { href: "/organisation/impact",      label: "Impact",    icon: Sprout,          badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-org-impact" },
   { href: "/chat",                    label: "Berichten", icon: MessageCircle,   badge: "unreadMessages" as const,                        tourId: "nav-org-chat" },
-  { href: "/organisation/vacancies",  label: "Vacatures", icon: Briefcase,       badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-org-vacatures" },
+  { href: "/organisation/vacancies",   label: "Vacatures",    icon: Briefcase,     badge: null as "pendingItems" | "unreadMessages" | null, tourId: "nav-org-vacatures" },
+  { href: "/organisation/activities",  label: "Activiteiten", icon: CalendarDays,  badge: null as "pendingItems" | "unreadMessages" | null },
 ]
 
 interface NotificationCounts {

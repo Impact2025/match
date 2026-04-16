@@ -9,6 +9,7 @@ import {
   MessageCircle,
   Search,
   Briefcase,
+  CalendarDays,
   Leaf,
   UserCircle,
   LogOut,
@@ -37,8 +38,9 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/organisation/matches",    icon: Users,           label: "Matches",    badge: "pendingItems" },
   { href: "/chat",                    icon: MessageCircle,   label: "Berichten",  badge: "unreadMessages",  tourId: "nav-org-chat" },
   { href: "/organisation/volunteers", icon: Search,          label: "Zoeken",     divider: "Vrijwilligers", tourId: "nav-org-zoeken" },
-  { href: "/organisation/vacancies",  icon: Briefcase,       label: "Vacatures",                            tourId: "nav-org-vacatures" },
-  { href: "/organisation/impact",     icon: Leaf,            label: "Impact",     divider: "Rapportage",    tourId: "nav-org-impact" },
+  { href: "/organisation/vacancies",   icon: Briefcase,     label: "Vacatures",                            tourId: "nav-org-vacatures" },
+  { href: "/organisation/activities",  icon: CalendarDays,  label: "Activiteiten" },
+  { href: "/organisation/impact",      icon: Leaf,          label: "Impact",     divider: "Rapportage",    tourId: "nav-org-impact" },
   { href: "/organisation/profile",    icon: UserCircle,      label: "Profiel",    divider: "Account" },
 ]
 

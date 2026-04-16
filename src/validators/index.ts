@@ -77,6 +77,46 @@ export const organisationSchema = z.object({
   postcode: postcodeSchema,
 })
 
+export const ACTIVITY_TYPES = [
+  "BIJEENKOMST",
+  "WORKSHOP",
+  "CURSUS",
+  "EVENEMENT",
+  "INLOOPSPREEKUUR",
+] as const
+
+export const ACTIVITY_TYPE_LABELS: Record<typeof ACTIVITY_TYPES[number], string> = {
+  BIJEENKOMST: "Bijeenkomst",
+  WORKSHOP: "Workshop",
+  CURSUS: "Cursus",
+  EVENEMENT: "Evenement",
+  INLOOPSPREEKUUR: "Inloopspreekuur",
+}
+
+export const activitySchema = z.object({
+  title: z.string().min(5, "Titel moet minimaal 5 tekens zijn").max(100),
+  description: z
+    .string()
+    .min(20, "Beschrijving moet minimaal 20 tekens zijn")
+    .max(5000),
+  type: z.enum(ACTIVITY_TYPES).default("BIJEENKOMST"),
+  startDateTime: z.string().min(1, "Startdatum is verplicht"),
+  endDateTime: z.string().min(1, "Einddatum is verplicht"),
+  online: z.boolean().default(false),
+  meetUrl: z.string().url("Ongeldige URL").optional().or(z.literal("")),
+  location: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  postcode: postcodeSchema,
+  maxCapacity: z.number().int().min(1).optional(),
+  waitlistEnabled: z.boolean().default(true),
+  imageUrl: z.string().optional().nullable(),
+  skills: z.array(z.string()).default([]),
+  categories: z.array(z.string()).default([]),
+})
+
+export type ActivityFormData = z.infer<typeof activitySchema>
+
 export type LoginFormData = z.infer<typeof loginSchema>
 export type RegisterFormData = z.infer<typeof registerSchema>
 export type VacancyFormData = z.infer<typeof vacancySchema>
