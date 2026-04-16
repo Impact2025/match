@@ -2,12 +2,13 @@
 
 import { useRef, useState, useEffect, useCallback } from "react"
 
-export type NovaMode = "presale" | "dashboard" | "org-dashboard"
+export type NovaMode = "presale" | "dashboard" | "org-dashboard" | "gemeente-dashboard"
 
 const ASSISTANT_NAME: Record<NovaMode, string> = {
   presale: "Iris",
   dashboard: "Nova",
   "org-dashboard": "Vera",
+  "gemeente-dashboard": "Sam",
 }
 
 interface Message {
@@ -41,18 +42,26 @@ const SUGGESTIONS: Record<NovaMode, string[]> = {
     "Tips voor vrijwilligersretentie",
     "Hoe verbeter ik mijn match rate?",
   ],
+  "gemeente-dashboard": [
+    "Wat zijn de belangrijkste actiepunten?",
+    "Hoe interpreteer ik de retentiecijfers?",
+    "Help me een bericht opstellen voor organisaties",
+    "Hoe rapporteer ik SDG-impact aan het college?",
+  ],
 }
 
 const ASSISTANT_SUBTITLE: Record<NovaMode, string> = {
   presale: "AI-assistent",
   dashboard: "Jouw vrijwilligerscoach",
   "org-dashboard": "Jouw organisatiecoach",
+  "gemeente-dashboard": "Strategisch vrijwilligersadviseur",
 }
 
 const ASSISTANT_INTRO: Record<NovaMode, string> = {
   presale: "Stel me een vraag over Vrijwilligersmatch!",
   dashboard: "Jouw persoonlijke vrijwilligerscoach. Hoe kan ik je helpen?",
   "org-dashboard": "Ik help je meer vrijwilligers vinden en beter beheren. Waar kan ik mee helpen?",
+  "gemeente-dashboard": "Ik help je het vrijwilligersecosysteem in jouw gemeente te versterken. Waar wil je mee aan de slag?",
 }
 
 // Inline SVG icons — no lucide-react import for bundle size
@@ -282,12 +291,16 @@ export function AiAssistant({ mode, color }: AiAssistantProps) {
       ? "fixed bottom-24 right-4 z-50"
       : mode === "org-dashboard"
       ? "fixed bottom-24 right-4 z-50 lg:bottom-6 lg:right-6"
+      : mode === "gemeente-dashboard"
+      ? "fixed bottom-6 right-6 z-50"
       : "fixed bottom-6 right-6 z-50"
   const panelPosition =
     mode === "dashboard"
       ? "fixed bottom-[calc(6rem+5.5rem)] right-4 z-50"
       : mode === "org-dashboard"
       ? "fixed bottom-[calc(6rem+5.5rem)] right-4 z-50 lg:bottom-24 lg:right-6"
+      : mode === "gemeente-dashboard"
+      ? "fixed bottom-24 right-6 z-50"
       : "fixed bottom-24 right-6 z-50"
 
   return (

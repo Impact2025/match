@@ -5,9 +5,12 @@ import {
   buildPresaleSystemPrompt,
   buildDashboardSystemPrompt,
   buildOrgDashboardSystemPrompt,
+  buildGemeenteDashboardSystemPrompt,
   type DashboardUserContext,
   type OrgDashboardContext,
+  type GemeenteDashboardContext,
 } from "@/lib/ai-prompts"
+import { CATEGORY_SDG_MAP, SDG_DEFINITIONS, IMPACT_CONSTANTS } from "@/config/sdg"
 
 const MODEL = "google/gemini-2.0-flash-001"
 
@@ -153,6 +156,114 @@ export async function POST(req: Request) {
         totalSwipes,
       }
       systemPrompt = buildOrgDashboardSystemPrompt(ctx)
+    } else {
+      systemPrompt = buildPresaleSystemPrompt()
+    }
+  } else if (mode === "gemeente-dashboard" && session?.user?.id) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { role: true, gemeenteSlug: true },
+    })
+
+    const slug = dbUser?.gemeenteSlug
+    if (dbUser?.role === "GEMEENTE_ADMIN" && slug) {
+      const gemeente = await prisma.gemeente.findUnique({
+        where: { slug },
+        select: { id: true, name: true, displayName: true },
+      })
+
+      if (gemeente) {
+        const gid = gemeente.id
+
+        const [orgCount, pendingOrgCount, vacancyCount, allMatches, matchesWithCats] =
+          await Promise.all([
+            prisma.organisation.count({ where: { status: "APPROVED", gemeenteId: gid } }),
+            prisma.organisation.count({ where: { status: "PENDING_APPROVAL", gemeenteId: gid } }),
+            prisma.vacancy.count({ where: { status: "ACTIVE", organisation: { gemeenteId: gid } } }),
+            prisma.match.findMany({
+              where: { vacancy: { organisation: { gemeenteId: gid } } },
+              select: { status: true, startedAt: true, checkIn12SentAt: true },
+            }),
+            prisma.match.findMany({
+              where: {
+                status: { in: ["ACCEPTED", "COMPLETED"] },
+                vacancy: { organisation: { gemeenteId: gid } },
+              },
+              select: {
+                status: true,
+                startedAt: true,
+                vacancy: {
+                  select: {
+                    hours: true,
+                    categories: { select: { category: { select: { name: true } } } },
+                  },
+                },
+              },
+            }),
+          ])
+
+        const acceptedCount = allMatches.filter((m) => m.status === "ACCEPTED").length
+        const completedCount = allMatches.filter((m) => m.status === "COMPLETED").length
+        const fulfilledMatches = acceptedCount + completedCount
+        const checkIn12Count = allMatches.filter((m) => m.checkIn12SentAt !== null).length
+        const retentionWeek12 =
+          fulfilledMatches > 0 ? Math.round((checkIn12Count / fulfilledMatches) * 100) : 0
+
+        let totalHours = 0
+        const sdgHours = new Map<number, number>()
+        for (const m of matchesWithCats) {
+          const h = m.vacancy.hours ?? 2
+          const wks = m.status === "COMPLETED"
+            ? IMPACT_CONSTANTS.AVG_COMPLETED_WEEKS
+            : m.startedAt
+            ? Math.min(
+                (Date.now() - m.startedAt.getTime()) / (7 * 24 * 60 * 60 * 1000),
+                IMPACT_CONSTANTS.MAX_ACTIVE_WEEKS,
+              )
+            : IMPACT_CONSTANTS.DEFAULT_ACCEPTED_WEEKS
+          const hrs = h * Math.max(wks, 1)
+          totalHours += hrs
+
+          const cats = m.vacancy.categories.map((c) => c.category.name)
+          const sdgs = new Set<number>()
+          for (const cat of cats) (CATEGORY_SDG_MAP[cat] ?? []).forEach((n) => sdgs.add(n))
+          const share = sdgs.size > 0 ? hrs / sdgs.size : 0
+          for (const n of sdgs) sdgHours.set(n, (sdgHours.get(n) ?? 0) + share)
+        }
+
+        const economicValue = Math.round(totalHours * IMPACT_CONSTANTS.HOURLY_VALUE_EUR)
+        const sroiValue = Math.round(economicValue * IMPACT_CONSTANTS.SROI_MULTIPLIER)
+
+        const topSdgs = SDG_DEFINITIONS
+          .filter((s) => sdgHours.has(s.number))
+          .sort((a, b) => (sdgHours.get(b.number) ?? 0) - (sdgHours.get(a.number) ?? 0))
+          .slice(0, 3)
+          .map((s) => s.nameNl)
+
+        const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+        const newMatchesThisMonth = await prisma.match.count({
+          where: { vacancy: { organisation: { gemeenteId: gid } }, createdAt: { gte: startOfMonth } },
+        })
+
+        const ctx: GemeenteDashboardContext = {
+          gemeenteName: gemeente.name,
+          displayName: gemeente.displayName,
+          totaalOrganisaties: orgCount,
+          pendingOrganisaties: pendingOrgCount,
+          totaalVacatures: vacancyCount,
+          totaalMatches: allMatches.length,
+          fulfilledMatches,
+          newMatchesThisMonth,
+          retentionWeek12,
+          totalHours: Math.round(totalHours),
+          economicValue,
+          sroiValue,
+          topSdgs,
+        }
+        systemPrompt = buildGemeenteDashboardSystemPrompt(ctx)
+      } else {
+        systemPrompt = buildPresaleSystemPrompt()
+      }
     } else {
       systemPrompt = buildPresaleSystemPrompt()
     }

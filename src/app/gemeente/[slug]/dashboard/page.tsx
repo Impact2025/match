@@ -14,6 +14,7 @@ import {
   Users, Building2, Clock, TrendingUp, Download, Sprout, BarChart3,
 } from "lucide-react"
 import { TourLauncher } from "@/components/onboarding/tour/TourLauncher"
+import { AiAssistant } from "@/components/ai/ai-assistant"
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -170,6 +171,7 @@ export default async function GemeenteDashboardPage({
   return (
     <div className="min-h-screen bg-gray-50">
       <TourLauncher tourId="gemeente" accentColor={accent} />
+      <AiAssistant mode="gemeente-dashboard" color={accent} />
 
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="bg-white border-b border-gray-100">

@@ -1,6 +1,6 @@
 import { CATEGORIES, SKILLS } from "@/config"
 
-export type NovaMode = "presale" | "dashboard" | "org-dashboard"
+export type NovaMode = "presale" | "dashboard" | "org-dashboard" | "gemeente-dashboard"
 
 export interface DashboardUserContext {
   name: string
@@ -149,4 +149,56 @@ Jouw taken als Vera:
 
 Toon: professioneel maar warm, to-the-point. Gebruik concrete aantallen uit de context. Altijd Nederlands.
 Formaat: gebruik korte alinea's of bulletpoints. Max 150 woorden per antwoord tenzij gevraagd om uitleg.`
+}
+
+export interface GemeenteDashboardContext {
+  gemeenteName: string
+  displayName: string
+  totaalOrganisaties: number
+  pendingOrganisaties: number
+  totaalVacatures: number
+  totaalMatches: number
+  fulfilledMatches: number
+  newMatchesThisMonth: number
+  retentionWeek12: number
+  totalHours: number
+  economicValue: number
+  sroiValue: number
+  topSdgs: string[]
+}
+
+export function buildGemeenteDashboardSystemPrompt(g: GemeenteDashboardContext): string {
+  const retentionBenchmark = g.retentionWeek12 >= 60 ? "boven" : g.retentionWeek12 >= 40 ? "rond" : "onder"
+  const pendingMsg =
+    g.pendingOrganisaties > 0
+      ? `⚠️ ${g.pendingOrganisaties} organisatie(s) wachten op verificatie.`
+      : "Alle organisaties zijn geverifieerd."
+  const eurFormat = (n: number) =>
+    n >= 1_000_000
+      ? `€ ${(n / 1_000_000).toFixed(1).replace(".", ",")} mln`
+      : `€ ${Math.round(n / 1_000).toLocaleString("nl")}.000`
+
+  return `Je bent Sam, de strategische vrijwilligerscoach van het Vrijwilligerspunt ${g.displayName}.
+Je ondersteunt de gemeente-coördinator bij het monitoren en versterken van het vrijwilligersecosysteem.
+
+Platform ${g.displayName} — actuele stand:
+- Aangesloten organisaties: ${g.totaalOrganisaties} (${pendingMsg})
+- Actieve vacatures: ${g.totaalVacatures}
+- Totaal matches: ${g.totaalMatches} | Gerealiseerd: ${g.fulfilledMatches}
+- Nieuwe matches deze maand: ${g.newMatchesThisMonth}
+- Retentie (12 weken): ${g.retentionWeek12}% — ${retentionBenchmark} landelijk gemiddelde (54%)
+- Vrijwilligersuren (geschat): ${g.totalHours.toLocaleString("nl")} uur
+- Maatschappelijke waarde: ${eurFormat(g.economicValue)} | SROI: ${eurFormat(g.sroiValue)}
+${g.topSdgs.length > 0 ? `- Grootste SDG-bijdrage: ${g.topSdgs.slice(0, 3).join(", ")}` : ""}
+
+Jouw taken als Sam:
+1. **KPI-duiding**: leg uit wat de cijfers betekenen en vergelijk met benchmarks (landelijk vrijwilligersonderzoek).
+2. **Actiepunten**: signaleer wat aandacht nodig heeft (lage retentie, wachtende verificaties, stagnerende matches).
+3. **Organisatieadvies**: help bij het opstellen van communicatie naar organisaties (aanmoediging, tips, rapportages).
+4. **SDG-rapportage**: leg uit hoe vrijwilligerswerk bijdraagt aan SDG-doelstellingen en hoe dit te rapporteren aan het gemeentebestuur.
+5. **Groei-strategie**: suggesties voor het aantrekken van nieuwe organisaties en vrijwilligers.
+6. **Platform-beheer**: uitleg over verificatieproces, instellingen, branding en CSV-exports.
+
+Toon: beleidsmatig maar toegankelijk. Gebruik concrete cijfers. Vergelijk met benchmarks waar relevant. Altijd Nederlands.
+Formaat: korte alinea's of bulletpoints. Max 200 woorden per antwoord tenzij om een rapport gevraagd wordt.`
 }
