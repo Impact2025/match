@@ -5,6 +5,7 @@ import { Globe, Mail, Phone, MapPin, Calendar, Briefcase } from "lucide-react"
 import { OrgStatusBadge } from "@/components/admin/status-badges"
 import { OrgActionForm } from "./org-action-form"
 import { Breadcrumbs } from "@/components/admin/breadcrumbs"
+import { AdminNotesWidget } from "@/components/admin/admin-notes-widget"
 
 export const dynamic = "force-dynamic"
 
@@ -30,6 +31,11 @@ export default async function AdminOrgDetailPage({
   })
 
   if (!org) notFound()
+
+  const notesRows = await prisma.$queryRaw<{ admin_notes: string | null }[]>`
+    SELECT admin_notes FROM organisations WHERE id = ${id}
+  `
+  const adminNotes = notesRows[0]?.admin_notes ?? null
 
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-8">
@@ -184,6 +190,8 @@ export default async function AdminOrgDetailPage({
 
           {/* Action form */}
           <OrgActionForm orgId={org.id} currentStatus={org.status} />
+
+          <AdminNotesWidget entityId={org.id} entityType="organisation" initialNotes={adminNotes} />
         </div>
       </div>
     </div>

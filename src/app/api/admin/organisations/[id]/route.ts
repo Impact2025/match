@@ -34,7 +34,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const { id } = await params
   const body = await req.json()
-  const { action, reason } = body as { action: string; reason?: string }
+  const { action, reason, notes } = body as { action: string; reason?: string; notes?: string }
+
+  if (action === "UPDATE_NOTES") {
+    await prisma.$executeRaw`UPDATE organisations SET admin_notes = ${notes ?? null} WHERE id = ${id}`
+    return NextResponse.json({ ok: true })
+  }
 
   const validActions = ["APPROVE_ORG", "REJECT_ORG", "SUSPEND_ORG", "UNSUSPEND_ORG"]
   if (!validActions.includes(action)) {

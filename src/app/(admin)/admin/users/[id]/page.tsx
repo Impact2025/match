@@ -5,6 +5,7 @@ import { Calendar, MapPin, Activity, GitMerge, MousePointerClick } from "lucide-
 import { UserStatusBadge, VacancyStatusBadge } from "@/components/admin/status-badges"
 import { UserActionButton } from "@/components/admin/user-action-button"
 import { Breadcrumbs } from "@/components/admin/breadcrumbs"
+import { AdminNotesWidget } from "@/components/admin/admin-notes-widget"
 
 export const dynamic = "force-dynamic"
 
@@ -46,6 +47,11 @@ export default async function AdminUserDetailPage({
   })
 
   if (!user) notFound()
+
+  const notesRows = await prisma.$queryRaw<{ admin_notes: string | null }[]>`
+    SELECT admin_notes FROM users WHERE id = ${id}
+  `
+  const adminNotes = notesRows[0]?.admin_notes ?? null
 
   const totalSwipes = user._count.swipesGiven
   const likeSwipes = user.swipesGiven.filter((s) => s.direction === "LIKE" || s.direction === "SUPER_LIKE").length
@@ -257,6 +263,8 @@ export default async function AdminUserDetailPage({
               </div>
             </div>
           )}
+
+          <AdminNotesWidget entityId={user.id} entityType="user" initialNotes={adminNotes} />
         </div>
       </div>
     </div>

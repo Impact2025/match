@@ -47,6 +47,9 @@ model User {
   openToInvitations Boolean   @default(true)
   commitmentType    String?   // "wekelijks" | "projectmatig" | "incidenteel" | "alles"
 
+  // Internal admin notes (not visible to user)
+  adminNotes        String?   @db.Text
+
   // Gemeente admin link
   gemeenteSlug      String?   // set when role = GEMEENTE_ADMIN
 
@@ -59,12 +62,13 @@ model User {
   organisationId String?
 
   // Relations
-  swipesGiven         Swipe[]          @relation("SwipeFrom")
-  matchesAsVol        Match[]          @relation("MatchVolunteer")
-  conversations       ConversationParticipant[]
-  sentMessages        Message[]        @relation("MessageSender")
-  adminLogs           AdminLog[]       @relation("AdminActions")
-  receivedInvitations Invitation[]     @relation("ReceivedInvitations")
+  swipesGiven           Swipe[]          @relation("SwipeFrom")
+  matchesAsVol          Match[]          @relation("MatchVolunteer")
+  conversations         ConversationParticipant[]
+  sentMessages          Message[]        @relation("MessageSender")
+  adminLogs             AdminLog[]       @relation("AdminActions")
+  receivedInvitations   Invitation[]     @relation("ReceivedInvitations")
+  activityRegistrations ActivityRegistration[] @relation("ActivityRegistrations")
 
   // Notifications
   notifications Notification[]
@@ -159,6 +163,7 @@ model Organisation {
   admin       User     @relation("OrgAdmin", fields: [adminId], references: [id])
 
   vacancies        Vacancy[]
+  activities       GroupActivity[]
   categories       OrgCategory[]
   sentInvitations  Invitation[]
   handprint        OrgHandprint?
@@ -169,6 +174,9 @@ model Organisation {
 
   avgResponseHours   Float?
   slaScore           Int     @default(100)
+
+  // Internal admin notes (not visible to organisation)
+  adminNotes  String?   @db.Text
 
   // Multi-tenant: optional link to a municipality (gemeente)
   gemeenteId  String?
@@ -238,9 +246,10 @@ model Category {
   icon          String?
   color         String?
 
-  userInterests UserCategory[]
-  orgCategories OrgCategory[]
-  vacancyCategories VacancyCategory[]
+  userInterests      UserCategory[]
+  orgCategories      OrgCategory[]
+  vacancyCategories  VacancyCategory[]
+  activityCategories ActivityCategory[]
 
   @@map("categories")
 }
@@ -249,8 +258,9 @@ model Skill {
   id           String        @id @default(cuid())
   name         String        @unique
 
-  userSkills   UserSkill[]
-  vacancySkills VacancySkill[]
+  userSkills     UserSkill[]
+  vacancySkills  VacancySkill[]
+  activitySkills ActivitySkill[]
 
   @@map("skills")
 }
@@ -482,6 +492,7 @@ model Gemeente {
   faviconUrl     String?                // custom favicon URL
 
   organisations Organisation[]
+  activities    GroupActivity[]
   dashboard     GemeenteDashboard?
 
   createdAt    DateTime  @default(now())
@@ -541,6 +552,8 @@ enum NotificationType {
   NEW_INVITATION
   INVITATION_ACCEPTED
   NEW_MESSAGE
+  ACTIVITY_REMINDER
+  ACTIVITY_CANCELLED
 }
 
 model Notification {
@@ -557,6 +570,118 @@ model Notification {
   @@index([userId, read])
   @@index([userId, createdAt(sort: Desc)])
   @@map("notifications")
+}
+
+// ========================
+// GROEPSACTIVITEITEN
+// ========================
+
+enum ActivityType {
+  BIJEENKOMST      // Algemene bijeenkomst
+  WORKSHOP         // Praktische workshop
+  CURSUS           // Meerdaagse training/cursus
+  EVENEMENT        // Eenmalig evenement
+  INLOOPSPREEKUUR  // Open inloop
+}
+
+enum ActivityStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+}
+
+enum RegistrationStatus {
+  REGISTERED    // Aangemeld
+  WAITLISTED    // Wachtlijst (vol)
+  ATTENDED      // Aanwezig geweest
+  ABSENT        // No-show
+  CANCELLED     // Zelf afgemeld
+}
+
+model GroupActivity {
+  id          String         @id @default(cuid())
+  title       String
+  description String         @db.Text
+  imageUrl    String?
+  type        ActivityType   @default(BIJEENKOMST)
+  status      ActivityStatus @default(DRAFT)
+
+  // Wanneer
+  startDateTime DateTime
+  endDateTime   DateTime
+
+  // Waar
+  online   Boolean @default(false)
+  meetUrl  String?           // Zoom/Teams bij online
+  location String?           // "Dorpshuis De Wiel"
+  address  String?
+  city     String?
+  postcode String?
+  lat      Float?
+  lon      Float?
+
+  // Capaciteit
+  maxCapacity     Int?     // null = onbeperkt
+  waitlistEnabled Boolean  @default(true)
+
+  // Uniek token voor QR self-check-in
+  qrToken String @unique @default(cuid())
+
+  organisationId String
+  organisation   Organisation @relation(fields: [organisationId], references: [id], onDelete: Cascade)
+
+  gemeenteId String?
+  gemeente   Gemeente? @relation(fields: [gemeenteId], references: [id])
+
+  categories    ActivityCategory[]
+  skills        ActivitySkill[]
+  registrations ActivityRegistration[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("group_activities")
+}
+
+model ActivityRegistration {
+  id         String             @id @default(cuid())
+  activityId String
+  activity   GroupActivity      @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  volunteerId String
+  volunteer  User               @relation("ActivityRegistrations", fields: [volunteerId], references: [id], onDelete: Cascade)
+  status     RegistrationStatus @default(REGISTERED)
+
+  registeredAt      DateTime  @default(now())
+  cancelledAt       DateTime?
+  checkedInAt       DateTime? // tijdstip QR of handmatig check-in
+  reminder24hSentAt DateTime? // reminder email dag van tevoren
+
+  feedback String? @db.Text // post-activiteit feedback
+  rating   Int?              // 1–5 sterren
+
+  @@unique([activityId, volunteerId])
+  @@map("activity_registrations")
+}
+
+model ActivityCategory {
+  activityId String
+  categoryId String
+  activity   GroupActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  category   Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([activityId, categoryId])
+  @@map("activity_categories")
+}
+
+model ActivitySkill {
+  activityId String
+  skillId    String
+  activity   GroupActivity @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  skill      Skill         @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([activityId, skillId])
+  @@map("activity_skills")
 }
 
 // ========================

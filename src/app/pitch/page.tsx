@@ -49,6 +49,7 @@ export default async function PitchPage() {
             <a href="#probleem" className="hover:text-gray-900 transition-colors">Probleem</a>
             <a href="#oplossing" className="hover:text-gray-900 transition-colors">Oplossing</a>
             <a href="#voordeel" className="hover:text-gray-900 transition-colors">Voordeel</a>
+            <Link href="/pitch/samen" className="font-semibold transition-colors" style={{ color: brand }}>Samen impact maken</Link>
           </div>
 
           <Link
@@ -543,34 +544,54 @@ export default async function PitchPage() {
         <IrisSection />
 
         {/* ═══════════════════════════════════════════════════════
-            6. CTA
+            6. DEMO + VOLGENDE STAP
         ═══════════════════════════════════════════════════════ */}
-        <section className="py-20 sm:py-24" style={{ backgroundColor: brand }}>
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tighter text-white mb-4">
-              Klaar voor de live demo?
-            </h2>
-            <p className="text-white/80 mb-10 max-w-md mx-auto">
-              Log in met het demo-account en zie het platform in actie. Alle data is gesimuleerd voor Heemstede.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
+        <section className="py-14 border-b border-gray-100 bg-gray-50">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Live demo</p>
+              <p className="text-lg font-bold text-gray-900">Zie het platform zelf in actie</p>
+              <p className="text-sm text-gray-500 mt-0.5">vrijwilliger@heemstede-demo.nl · demo1234</p>
+            </div>
+            <div className="flex gap-3 shrink-0">
               <Link
                 href="/login"
-                className="px-8 py-3.5 bg-white font-semibold rounded-xl hover:bg-gray-50 transition-colors"
-                style={{ color: brand }}
+                className="px-5 py-3 text-white text-sm font-semibold rounded-xl transition-colors"
+                style={{ backgroundColor: brand }}
               >
                 Inloggen als demo-gebruiker
               </Link>
-              <Link
-                href="/"
-                className="px-8 py-3.5 bg-transparent border-2 border-white/40 text-white font-semibold rounded-xl hover:bg-white/10 hover:border-white/70 transition-colors"
-              >
-                Bekijk de homepage
+              <Link href="/" className="px-5 py-3 bg-white border border-gray-200 text-gray-700 text-sm font-semibold rounded-xl hover:bg-gray-50 transition-colors">
+                Homepage
               </Link>
             </div>
-            <p className="text-white/50 text-xs">
-              vrijwilliger@heemstede-demo.nl · demo1234
-            </p>
+          </div>
+        </section>
+
+        {/* ── Teaser → samen-pagina ── */}
+        <section className="py-20 sm:py-28" style={{ backgroundColor: brand }}>
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <div className="grid md:grid-cols-[1fr_auto] gap-10 items-center">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-white/60 mb-4">Stap 3 — het voorstel</p>
+                <h2 className="text-3xl sm:text-4xl font-bold tracking-tighter text-white mb-4">
+                  Klaar om samen<br />impact te maken?
+                </h2>
+                <p className="text-white/75 text-sm leading-relaxed max-w-lg">
+                  U heeft het platform gezien. Nu het voorstel: wat levert de pilot concreet op,
+                  wat kost het echt, en wat vragen we aan WIJ Heemstede en Gemeente Heemstede.
+                  Volledig transparant — inclusief in-kind, AVG en risico.
+                </p>
+              </div>
+              <Link
+                href="/pitch/samen"
+                className="flex items-center gap-3 px-7 py-4 bg-white font-semibold rounded-2xl hover:bg-gray-50 transition-colors shrink-0 group"
+                style={{ color: brand }}
+              >
+                Bekijk het voorstel
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
           </div>
         </section>
 
