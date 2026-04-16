@@ -32,10 +32,15 @@ export default async function AdminOrgDetailPage({
 
   if (!org) notFound()
 
-  const notesRows = await prisma.$queryRaw<{ admin_notes: string | null }[]>`
-    SELECT admin_notes FROM organisations WHERE id = ${id}
-  `
-  const adminNotes = notesRows[0]?.admin_notes ?? null
+  let adminNotes: string | null = null
+  try {
+    const notesRows = await prisma.$queryRaw<{ adminNotes: string | null }[]>`
+      SELECT "adminNotes" FROM organisations WHERE id = ${id}
+    `
+    adminNotes = notesRows[0]?.adminNotes ?? null
+  } catch {
+    // column may not exist yet in this environment
+  }
 
   return (
     <div className="p-8 max-w-5xl mx-auto space-y-8">

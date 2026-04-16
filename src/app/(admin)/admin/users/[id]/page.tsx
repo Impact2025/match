@@ -48,10 +48,15 @@ export default async function AdminUserDetailPage({
 
   if (!user) notFound()
 
-  const notesRows = await prisma.$queryRaw<{ admin_notes: string | null }[]>`
-    SELECT admin_notes FROM users WHERE id = ${id}
-  `
-  const adminNotes = notesRows[0]?.admin_notes ?? null
+  let adminNotes: string | null = null
+  try {
+    const notesRows = await prisma.$queryRaw<{ adminNotes: string | null }[]>`
+      SELECT "adminNotes" FROM users WHERE id = ${id}
+    `
+    adminNotes = notesRows[0]?.adminNotes ?? null
+  } catch {
+    // column may not exist yet in this environment
+  }
 
   const totalSwipes = user._count.swipesGiven
   const likeSwipes = user.swipesGiven.filter((s) => s.direction === "LIKE" || s.direction === "SUPER_LIKE").length

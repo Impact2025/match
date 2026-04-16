@@ -37,7 +37,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   const { action, reason, notes } = body as { action: string; reason?: string; notes?: string }
 
   if (action === "UPDATE_NOTES") {
-    await prisma.$executeRaw`UPDATE organisations SET admin_notes = ${notes ?? null} WHERE id = ${id}`
+    await prisma.$executeRaw`UPDATE organisations SET "adminNotes" = ${notes ?? null} WHERE id = ${id}`
     return NextResponse.json({ ok: true })
   }
 
