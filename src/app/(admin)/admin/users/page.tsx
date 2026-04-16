@@ -154,37 +154,44 @@ export default async function AdminUsersPage({
               {items.map((user, i) => (
                 <tr
                   key={user.id}
-                  className={`${i < items.length - 1 ? "border-b border-gray-100" : ""} hover:bg-gray-50 transition-colors`}
+                  className={`${i < items.length - 1 ? "border-b border-gray-100" : ""} hover:bg-gray-50 transition-colors cursor-pointer`}
                 >
                   <td className="px-6 py-4">
-                    <Link
-                      href={`/admin/users/${user.id}`}
-                      className="text-gray-700 text-sm font-medium hover:text-orange-500 transition-colors"
-                    >
-                      {user.name ?? "Anoniem"}
+                    <Link href={`/admin/users/${user.id}`} className="block">
+                      <span className="text-gray-700 text-sm font-medium hover:text-orange-500 transition-colors">
+                        {user.name ?? "Anoniem"}
+                      </span>
+                      <p className="text-gray-400 text-xs mt-0.5">{user.email}</p>
+                      {user.organisation && (
+                        <p className="text-gray-300 text-[11px] mt-0.5">{user.organisation.name}</p>
+                      )}
                     </Link>
-                    <p className="text-gray-400 text-xs mt-0.5">{user.email}</p>
-                    {user.organisation && (
-                      <p className="text-gray-300 text-[11px] mt-0.5">{user.organisation.name}</p>
-                    )}
                   </td>
                   <td className="px-6 py-4 hidden md:table-cell">
-                    <span className="text-gray-400 text-xs font-medium uppercase tracking-wide">
-                      {user.role === "VOLUNTEER" ? "Vrijwilliger" : "Organisatie"}
-                    </span>
+                    <Link href={`/admin/users/${user.id}`} className="block">
+                      <span className="text-gray-400 text-xs font-medium uppercase tracking-wide">
+                        {user.role === "VOLUNTEER" ? "Vrijwilliger" : "Organisatie"}
+                      </span>
+                    </Link>
                   </td>
                   <td className="px-6 py-4">
-                    <UserStatusBadge status={user.status} />
+                    <Link href={`/admin/users/${user.id}`} className="block">
+                      <UserStatusBadge status={user.status} />
+                    </Link>
                   </td>
                   <td className="px-6 py-4 text-gray-400 text-xs hidden lg:table-cell">
-                    {user.role === "VOLUNTEER" ? (
-                      <span>{user._count.swipesGiven} swipes · {user._count.matchesAsVol} matches</span>
-                    ) : (
-                      <span>—</span>
-                    )}
+                    <Link href={`/admin/users/${user.id}`} className="block">
+                      {user.role === "VOLUNTEER" ? (
+                        <span>{user._count.swipesGiven} swipes · {user._count.matchesAsVol} matches</span>
+                      ) : (
+                        <span>—</span>
+                      )}
+                    </Link>
                   </td>
                   <td className="px-6 py-4 text-gray-400 text-sm hidden lg:table-cell">
-                    {user.createdAt.toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })}
+                    <Link href={`/admin/users/${user.id}`} className="block">
+                      {user.createdAt.toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })}
+                    </Link>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <UserActionButton userId={user.id} currentStatus={user.status} />

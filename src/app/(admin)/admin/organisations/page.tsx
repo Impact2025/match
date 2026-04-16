@@ -135,25 +135,33 @@ export default async function AdminOrganisationsPage({
                   key={org.id}
                   className={`${
                     i < items.length - 1 ? "border-b border-gray-100" : ""
-                  } hover:bg-gray-50 transition-colors`}
+                  } hover:bg-gray-50 transition-colors cursor-pointer`}
                 >
                   <td className="px-6 py-4">
-                    <p className="text-gray-700 text-sm font-medium">
-                      {org.name}
-                    </p>
-                    <p className="text-gray-400 text-xs mt-0.5">{org.admin.email}</p>
+                    <Link href={`/admin/organisations/${org.id}`} className="block">
+                      <span className="text-gray-700 text-sm font-medium">{org.name}</span>
+                      <p className="text-gray-400 text-xs mt-0.5">{org.admin.email}</p>
+                    </Link>
                   </td>
                   <td className="px-6 py-4 text-gray-400 text-sm hidden lg:table-cell">
-                    {org.city ?? "—"}
+                    <Link href={`/admin/organisations/${org.id}`} className="block">
+                      {org.city ?? "—"}
+                    </Link>
                   </td>
                   <td className="px-6 py-4">
-                    <OrgStatusBadge status={org.status} />
+                    <Link href={`/admin/organisations/${org.id}`} className="block">
+                      <OrgStatusBadge status={org.status} />
+                    </Link>
                   </td>
                   <td className="px-6 py-4 text-gray-400 text-sm hidden md:table-cell">
-                    {org._count.vacancies}
+                    <Link href={`/admin/organisations/${org.id}`} className="block">
+                      {org._count.vacancies}
+                    </Link>
                   </td>
                   <td className="px-6 py-4 text-gray-400 text-sm hidden lg:table-cell">
-                    {org.createdAt.toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })}
+                    <Link href={`/admin/organisations/${org.id}`} className="block">
+                      {org.createdAt.toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" })}
+                    </Link>
                   </td>
                   <td className="px-6 py-4 text-right">
                     <Link
