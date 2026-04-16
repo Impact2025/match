@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { AdminSidebar } from "@/components/admin/sidebar"
 import { TourLauncher } from "@/components/onboarding/tour/TourLauncher"
 import { getCurrentGemeente } from "@/lib/gemeente"
+import { AiAssistant } from "@/components/ai/ai-assistant"
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
@@ -66,6 +67,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </main>
       </div>
       {!isGemeenteAdmin && <TourLauncher tourId="admin" />}
+      {isGemeenteAdmin && (
+        <AiAssistant mode="gemeente-dashboard" color={gemeente?.primaryColor} />
+      )}
     </div>
   )
 }
