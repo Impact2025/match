@@ -95,6 +95,92 @@ export async function getRelated(slugs: string[]): Promise<ContentListItem[]> {
     .map((r) => ({ ...(r as any), tags: splitList((r as any).tags), views: (r as any).views, featured: (r as any).featured }))
 }
 
+export async function getRelatedByTags(
+  slug: string,
+  tags: string[],
+  relatedSlugs: string[],
+  limit = 3,
+): Promise<ContentListItem[]> {
+  // Manual relatedSlugs first (in given order), then tag-overlap fallback
+  const manual = relatedSlugs.length ? await getRelated(relatedSlugs) : []
+  if (manual.length >= limit) return manual.slice(0, limit)
+
+  const rows = await prisma.content.findMany({
+    where: {
+      type: "BLOG",
+      status: ContentStatus.PUBLISHED,
+      slug: { not: slug },
+    },
+    orderBy: [{ featured: "desc" }, { views: "desc" }],
+    select: {
+      slug: true,
+      title: true,
+      excerpt: true,
+      metaTitle: true,
+      metaDescription: true,
+      publishedAt: true,
+      readingTime: true,
+      type: true,
+      tags: true,
+      city: true,
+      views: true,
+      featured: true,
+    },
+  })
+  const all = rows.map((r) => ({ ...r, tags: splitList(r.tags) }))
+  const tagSet = new Set(tags)
+  const scored = all
+    .map((r) => ({
+      ...r,
+      _score: r.tags.filter((t) => tagSet.has(t)).length,
+    }))
+    .filter((r) => r._score > 0)
+    .sort((a, b) => b._score - a._score || b.views - a.views)
+  const fallback = scored.slice(0, limit - manual.length)
+  return [...manual, ...fallback]
+}
+
+export async function getRelatedKb(
+  slug: string,
+  tags: string[],
+  relatedSlugs: string[],
+  limit = 3,
+): Promise<ContentListItem[]> {
+  const manual = relatedSlugs.length ? await getRelated(relatedSlugs) : []
+  if (manual.length >= limit) return manual.slice(0, limit)
+
+  const rows = await prisma.content.findMany({
+    where: {
+      type: "KB",
+      status: ContentStatus.PUBLISHED,
+      slug: { not: slug },
+    },
+    orderBy: [{ featured: "desc" }, { views: "desc" }],
+    select: {
+      slug: true,
+      title: true,
+      excerpt: true,
+      metaTitle: true,
+      metaDescription: true,
+      publishedAt: true,
+      readingTime: true,
+      type: true,
+      tags: true,
+      city: true,
+      views: true,
+      featured: true,
+    },
+  })
+  const all = rows.map((r) => ({ ...r, tags: splitList(r.tags) }))
+  const tagSet = new Set(tags)
+  const scored = all
+    .map((r) => ({ ...r, _score: r.tags.filter((t) => tagSet.has(t)).length }))
+    .filter((r) => r._score > 0)
+    .sort((a, b) => b._score - a._score || b.views - a.views)
+  const fallback = scored.slice(0, limit - manual.length)
+  return [...manual, ...fallback]
+}
+
 export type TocItem = { id: string; text: string; level: number }
 
 export function extractToc(html: string): TocItem[] {

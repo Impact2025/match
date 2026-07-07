@@ -15,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   if (gemeente) {
     return {
+      metadataBase: new URL(`https://${gemeente.slug}.vrijwilligersmatch.nl`),
       title: {
         default: `${gemeente.name} × Vrijwilligersmatch — ${gemeente.tagline}`,
         template: `%s | ${gemeente.name}`,
@@ -44,6 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 
   return {
+    metadataBase: new URL("https://vrijwilligersmatch.nl"),
     title: {
       default: "Vrijwilligersmatch.nl — Swipe je naar impact",
       template: "%s | Vrijwilligersmatch.nl",

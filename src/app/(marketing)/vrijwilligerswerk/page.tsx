@@ -27,9 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = gemeente
     ? `Vrijwilligersmatch in ${place}: swipe-matching op motivatie en waarden. Voor inwoners die willen helpen en organisaties die vrijwilligers zoeken.`
     : "Vrijwilligersmatch verbindt vrijwilligers en organisaties via swipe-matching op motivatie en waarden. Voor wie wil helpen én voor wie vrijwilligers zoekt."
-  const canonical = gemeente
-    ? `https://${gemeente.slug}.vrijwilligersmatch.nl/vrijwilligerswerk`
-    : `${BASE_URL}/vrijwilligerswerk`
+  const canonical = `${BASE_URL}/vrijwilligerswerk`
   return {
     title,
     description,

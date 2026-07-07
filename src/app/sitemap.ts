@@ -11,21 +11,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   })
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: BASE, changeFrequency: "weekly", priority: 1 },
-    { url: `${BASE}/blog`, changeFrequency: "weekly", priority: 0.9 },
-    { url: `${BASE}/kennisbank`, changeFrequency: "weekly", priority: 0.9 },
-    { url: `${BASE}/steden`, changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE}/vrijwilligerswerk`, changeFrequency: "weekly", priority: 0.9 },
-    { url: `${BASE}/faq`, changeFrequency: "monthly", priority: 0.6 },
+    { url: BASE, lastModified: new Date(), changeFrequency: "weekly", priority: 1, alternates: { languages: { nl: BASE } } },
+    { url: `${BASE}/blog`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9, alternates: { languages: { nl: `${BASE}/blog` } } },
+    { url: `${BASE}/kennisbank`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9, alternates: { languages: { nl: `${BASE}/kennisbank` } } },
+    { url: `${BASE}/steden`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7, alternates: { languages: { nl: `${BASE}/steden` } } },
+    { url: `${BASE}/vrijwilligerswerk`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9, alternates: { languages: { nl: `${BASE}/vrijwilligerswerk` } } },
+    { url: `${BASE}/faq`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6, alternates: { languages: { nl: `${BASE}/faq` } } },
   ]
 
   const contentRoutes: MetadataRoute.Sitemap = rows.map((r) => {
     const seg = r.type === "BLOG" ? "blog" : r.type === "KB" ? "kennisbank" : "steden"
+    const url = `${BASE}/${seg}/${r.type === "CITY" ? r.slug.replace("vrijwilligerswerk-", "") : r.slug}`
     return {
-      url: `${BASE}/${seg}/${r.type === "CITY" ? r.slug.replace("vrijwilligerswerk-", "") : r.slug}`,
+      url,
       lastModified: r.updatedAt,
       changeFrequency: "monthly",
       priority: r.type === "CITY" ? 0.5 : 0.8,
+      alternates: { languages: { nl: url } },
     }
   })
 

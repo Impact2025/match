@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
-import { getContent, getRelated, injectHeadingIds, extractToc } from "@/lib/content"
+import { getContent, getRelatedKb, injectHeadingIds, extractToc } from "@/lib/content"
 
 export const revalidate = 3600
 
@@ -37,7 +37,7 @@ export default async function KennisbankDetail({
 
   const html = injectHeadingIds(item.html)
   const toc = extractToc(item.html)
-  const related = await getRelated(item.relatedSlugs)
+  const related = await getRelatedKb(item.slug, item.tags, item.relatedSlugs)
 
   const jsonLd = {
     "@context": "https://schema.org",
