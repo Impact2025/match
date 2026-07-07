@@ -14,21 +14,28 @@ import {
   CheckCircle2,
   Quote,
 } from "lucide-react"
+import { getCurrentGemeente } from "@/lib/gemeente"
 
 const BASE_URL = "https://vrijwilligersmatch.nl"
 
-export const metadata: Metadata = {
-  title: "Vrijwilligerswerk vind je hier — voor vrijwilligers én organisaties",
-  description:
-    "Vrijwilligersmatch verbindt vrijwilligers en organisaties via swipe-matching op motivatie en waarden. Voor wie wil helpen én voor wie vrijwilligers zoekt: ontdek, match en behoud.",
-  alternates: { canonical: `${BASE_URL}/vrijwilligerswerk` },
-  openGraph: {
-    title: "Vrijwilligerswerk vind je hier — voor vrijwilligers én organisaties",
-    description:
-      "Swipe-matching op motivatie en waarden. Voor vrijwilligers die willen helpen en organisaties die vrijwilligers zoeken.",
-    url: `${BASE_URL}/vrijwilligerswerk`,
-    type: "website",
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const gemeente = await getCurrentGemeente()
+  const place = gemeente?.displayName ?? "jouw gemeente"
+  const title = gemeente
+    ? `Vrijwilligerswerk in ${place} — vind vrijwilligers en organisaties`
+    : "Vrijwilligerswerk vind je hier — voor vrijwilligers én organisaties"
+  const description = gemeente
+    ? `Vrijwilligersmatch in ${place}: swipe-matching op motivatie en waarden. Voor inwoners die willen helpen en organisaties die vrijwilligers zoeken.`
+    : "Vrijwilligersmatch verbindt vrijwilligers en organisaties via swipe-matching op motivatie en waarden. Voor wie wil helpen én voor wie vrijwilligers zoekt."
+  const canonical = gemeente
+    ? `https://${gemeente.slug}.vrijwilligersmatch.nl/vrijwilligerswerk`
+    : `${BASE_URL}/vrijwilligerswerk`
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: { title, description, url: canonical, type: "website" },
+  }
 }
 
 const faqs = [
@@ -48,6 +55,10 @@ const faqs = [
     q: "Kan onze gemeente een eigen omgeving krijgen?",
     a: "Ja. Gemeenten krijgen een white-label portaal met eigen URL, logo en kleuren, plus de Handprint SROI-module die de maatschappelijke waarde van vrijwilligerswerk automatisch doorrekent.",
   },
+  {
+    q: "Hoe worden vrijwilligers behouden?",
+    a: "Retentietracking signaleert wanneer iemand dreigt uit te vallen, zodat je vroeg kunt bijsturen. Uit onderzoek blijkt dat een persoonlijke buddy de retentie tot 52% verhoogt.",
+  },
 ]
 
 const forVolunteers = [
@@ -62,14 +73,59 @@ const forOrganisations = [
   { icon: TrendingUp, title: "Behoud ze met data", text: "Retentietracking en SROI-rapportage tonen je impact en signaleren wanneer iemand dreigt uit te vallen." },
 ]
 
-export default function VrijwilligerswerkPage() {
+const deepen = [
+  {
+    kicker: "Voor organisaties",
+    title: "Vacatures schrijven met AI-assistent Vera",
+    text: "Zo verrijk je je organisatiebeschrijving en maak je elke vacature aantrekkelijk.",
+    href: "/kennisbank/vacatures-optimaliseren-vera",
+    tag: "Kennisbank",
+  },
+  {
+    kicker: "Voor gemeenten",
+    title: "De gemeentelijke Handprint en SROI uitgelegd",
+    text: "Hoe de OrgHandprint-module de maatschappelijke waarde automatisch doorrekent.",
+    href: "/kennisbank/gemeentelijke-handprint-sroi",
+    tag: "Kennisbank",
+  },
+  {
+    kicker: "Thought leadership",
+    title: "Waarom traditionele vrijwilligersvacatures falen",
+    text: "Wat we leren van swipe-cultuur en hoe dat de uitval van jonge vrijwilligers keert.",
+    href: "/blog/traditionele-vrijwilligersvacatures-falen",
+    tag: "Blog",
+  },
+  {
+    kicker: "Impact",
+    title: "SROI vrijwilligerswerk berekenen (4,2x factor)",
+    text: "Hoe je de maatschappelijke waarde van vrijwilligerswerk hard maakt voor de wethouder.",
+    href: "/blog/sroi-vrijwilligerswerk-berekenen",
+    tag: "Blog",
+  },
+]
+
+export default async function VrijwilligerswerkPage() {
+  const gemeente = await getCurrentGemeente()
+  const place = gemeente?.displayName ?? null
+  const brand = gemeente?.primaryColor ?? "#f97316"
+  const heroTitle = place
+    ? `Vrijwilligerswerk in ${place}`
+    : "Vrijwilligerswerk vind je hier"
+  const heroSub = place
+    ? `Vrijwilligersmatch brengt inwoners en organisaties in ${place} bij elkaar via swipe-matching op motivatie en waarden.`
+    : "Of je nu wilt helpen of vrijwilligers zoekt — Vrijwilligersmatch brengt de juiste mensen bij elkaar via swipe-matching op motivatie en waarden."
+
+  const orgCta = place
+    ? `/register?role=organisation&gemeente=${gemeente!.slug}`
+    : "/register?role=organisation"
+  const volCta = place ? `/register?gemeente=${gemeente!.slug}` : "/register"
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: "Vrijwilligerswerk — voor vrijwilligers en organisaties",
+    name: heroTitle,
     url: `${BASE_URL}/vrijwilligerswerk`,
-    description:
-      "Vrijwilligersmatch verbindt vrijwilligers en organisaties via swipe-matching op motivatie en waarden.",
+    description: heroSub,
     mainEntity: {
       "@type": "FAQPage",
       mainEntity: faqs.map((f) => ({
@@ -88,29 +144,26 @@ export default function VrijwilligerswerkPage() {
       />
 
       {/* Hero — dual intent */}
-      <section className="relative bg-gradient-to-b from-orange-50 to-white pt-16 pb-16 lg:pb-24">
+      <section className="relative bg-gradient-to-b from-orange-50 to-white pt-16 pb-16 lg:pb-24" style={{ ["--brand" as string]: brand }}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 rounded-full bg-orange-100 text-orange-700 px-3 py-1 text-xs font-semibold">
-              <MapPin className="w-3.5 h-3.5" /> Lokaal vrijwilligerswerk, slim gematcht
+              <MapPin className="w-3.5 h-3.5" /> {place ? `Lokaal in ${place}` : "Lokaal vrijwilligerswerk, slim gematcht"}
             </span>
             <h1 className="mt-5 text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-[1.05]">
-              Vrijwilligerswerk vind je hier
+              {heroTitle}
             </h1>
-            <p className="mt-5 text-lg sm:text-xl text-gray-600 max-w-2xl">
-              Of je nu wilt <span className="font-semibold text-gray-900">helpen</span> of{' '}
-              <span className="font-semibold text-gray-900">vrijwilligers zoekt</span> —
-              Vrijwilligersmatch brengt de juiste mensen bij elkaar via swipe-matching op motivatie en waarden.
-            </p>
+            <p className="mt-5 text-lg sm:text-xl text-gray-600 max-w-2xl">{heroSub}</p>
             <div className="mt-8 flex flex-col sm:flex-row gap-3">
               <Link
-                href="/register"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-orange-500 px-6 py-3.5 text-base font-semibold text-white hover:bg-orange-600 transition-colors"
+                href={volCta}
+                className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-semibold text-white hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: brand }}
               >
                 <Heart className="w-5 h-5" /> Ik wil vrijwilliger worden
               </Link>
               <Link
-                href="/register?role=organisation"
+                href={orgCta}
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 bg-white px-6 py-3.5 text-base font-semibold text-gray-800 hover:border-gray-400 transition-colors"
               >
                 <Building2 className="w-5 h-5" /> Ik zoek vrijwilligers
@@ -124,10 +177,9 @@ export default function VrijwilligerswerkPage() {
       <section className="py-14 lg:py-20 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-6">
-            {/* For volunteers */}
             <div className="rounded-3xl border border-orange-100 bg-orange-50/40 p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-11 h-11 rounded-2xl bg-orange-500 flex items-center justify-center">
+                <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ backgroundColor: brand }}>
                   <Heart className="w-6 h-6 text-white" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-900">Voor vrijwilligers</h2>
@@ -135,7 +187,7 @@ export default function VrijwilligerswerkPage() {
               <ul className="space-y-5">
                 {forVolunteers.map((f) => (
                   <li key={f.title} className="flex gap-4">
-                    <f.icon className="w-6 h-6 text-orange-500 flex-shrink-0 mt-0.5" />
+                    <f.icon className="w-6 h-6 flex-shrink-0 mt-0.5" style={{ color: brand }} />
                     <div>
                       <p className="font-semibold text-gray-900">{f.title}</p>
                       <p className="text-sm text-gray-600 mt-0.5">{f.text}</p>
@@ -144,14 +196,14 @@ export default function VrijwilligerswerkPage() {
                 ))}
               </ul>
               <Link
-                href="/register"
-                className="mt-7 inline-flex items-center gap-1.5 text-orange-600 font-semibold hover:gap-2.5 transition-all"
+                href={volCta}
+                className="mt-7 inline-flex items-center gap-1.5 font-semibold hover:gap-2.5 transition-all"
+                style={{ color: brand }}
               >
                 Begin met swipen <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
 
-            {/* For organisations */}
             <div className="rounded-3xl border border-gray-200 bg-gray-50 p-8">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-11 h-11 rounded-2xl bg-gray-900 flex items-center justify-center">
@@ -171,7 +223,7 @@ export default function VrijwilligerswerkPage() {
                 ))}
               </ul>
               <Link
-                href="/register?role=organisation"
+                href={orgCta}
                 className="mt-7 inline-flex items-center gap-1.5 text-gray-900 font-semibold hover:gap-2.5 transition-all"
               >
                 Plaats je vacatures <ArrowRight className="w-4 h-4" />
@@ -192,7 +244,7 @@ export default function VrijwilligerswerkPage() {
           </p>
           <div className="mt-10 grid sm:grid-cols-3 gap-6">
             {[
-              { stat: "44%", label: "van de vrijwilligers wereldwijd stopte sinds 2018 — blevende aandacht voor retentie is onmisbaar" },
+              { stat: "44%", label: "van de vrijwilligers wereldwijd stopte sinds 2018 — blijvende aandacht voor retentie is onmisbaar" },
               { stat: "4,2x", label: "SROI-factor: elke euro aan ondersteuning levert ruim vier euro maatschappelijke waarde op" },
               { stat: "+52%", label: "hogere retentie bij een persoonlijke buddy — het bewijs dat matching op motivatie loont" },
             ].map((s) => (
@@ -235,6 +287,38 @@ export default function VrijwilligerswerkPage() {
         </div>
       </section>
 
+      {/* Verdieping — interne links naar blog & kennisbank (SEO sculpting) */}
+      <section className="py-14 lg:py-20 bg-orange-50/50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+            Verdiep je kennis
+          </h2>
+          <p className="mt-3 text-gray-600 max-w-2xl">
+            Praktische handleidingen en onderbouwing voor wie vrijwilligers werft, behoudt of aanstuurt.
+          </p>
+          <div className="mt-10 grid sm:grid-cols-2 gap-6">
+            {deepen.map((d) => (
+              <Link
+                key={d.href}
+                href={d.href}
+                className="group block rounded-2xl bg-white border border-orange-100 p-6 hover:shadow-lg hover:border-orange-300 transition-all"
+              >
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-orange-600">
+                  {d.kicker} · {d.tag}
+                </span>
+                <h3 className="mt-2 text-lg font-semibold text-gray-900 group-hover:text-orange-600 transition-colors">
+                  {d.title}
+                </h3>
+                <p className="mt-1.5 text-sm text-gray-600">{d.text}</p>
+                <span className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-orange-600">
+                  Lees meer <ArrowRight className="w-4 h-4" />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Quote */}
       <section className="py-14 bg-orange-50">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
@@ -268,7 +352,7 @@ export default function VrijwilligerswerkPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="py-16 bg-gray-900 text-white">
+      <section className="py-16 text-white" style={{ backgroundColor: "#111827" }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
           <h2 className="text-3xl font-bold tracking-tight">
             Klaar om te matchen?
@@ -278,13 +362,14 @@ export default function VrijwilligerswerkPage() {
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Link
-              href="/register"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-orange-500 px-6 py-3.5 text-base font-semibold text-white hover:bg-orange-600 transition-colors"
+              href={volCta}
+              className="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-3.5 text-base font-semibold text-white hover:opacity-90 transition-opacity"
+              style={{ backgroundColor: brand }}
             >
               <Heart className="w-5 h-5" /> Word vrijwilliger
             </Link>
             <Link
-              href="/register?role=organisation"
+              href={orgCta}
               className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-700 px-6 py-3.5 text-base font-semibold text-white hover:border-gray-500 transition-colors"
             >
               <Building2 className="w-5 h-5" /> Zoek vrijwilligers
