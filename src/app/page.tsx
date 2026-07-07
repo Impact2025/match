@@ -16,8 +16,30 @@ export default async function HomePage() {
   const platformName = gemeente?.name ?? "Vrijwilligersmatch"
   const tagline = gemeente?.tagline ?? null
 
+  const softwareJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "Vrijwilligersmatch",
+    applicationCategory: "BusinessApplication",
+    operatingSystem: "Web, iOS, Android",
+    url: "https://vrijwilligersmatch.nl",
+    description:
+      "Vrijwilligersmatch verbindt vrijwilligers en organisaties via swipe-matching op motivatie en waarden. Gemeenten krijgen een white-label portaal met SROI-rapportage.",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
+    publisher: {
+      "@type": "Organization",
+      name: "WeAreImpact",
+      url: "https://www.weareimpact.nl",
+    },
+  }
+
   return (
-    <div className="bg-white text-gray-900 antialiased overflow-x-hidden">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareJsonLd) }}
+      />
+      <div className="bg-white text-gray-900 antialiased overflow-x-hidden">
       {/* ─── HEADER ─── */}
       <header className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -393,6 +415,7 @@ export default async function HomePage() {
         accentColor={brand}
         welcomeTitle={gemeente ? `Welkom bij ${gemeente.name}!` : "Welkom bij Vrijwilligersmatch!"}
       />
-    </div>
+      </div>
+    </>
   )
 }

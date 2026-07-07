@@ -26,7 +26,30 @@ export default auth((req) => {
 
   // ─────────────────────────────────────────────────────────────────────────
 
-  const publicPaths = ["/", "/login", "/register", "/pitch", "/over-ons", "/faq", "/impact", "/kaart", "/privacy", "/voorwaarden", "/organisaties"]
+  const publicPaths = [
+    "/",
+    "/login",
+    "/register",
+    "/pitch",
+    "/over-ons",
+    "/faq",
+    "/impact",
+    "/kaart",
+    "/privacy",
+    "/voorwaarden",
+    "/organisaties",
+    // Marketing / SEO content (publiek, geïndexeerd)
+    "/blog",
+    "/kennisbank",
+    "/steden",
+    // Machine-routes
+    "/sitemap.xml",
+    "/robots.txt",
+    "/blog/rss",
+    "/manifest.json",
+    "/icon",
+    "/checkin",
+  ]
   const isPublic = publicPaths.some(
     (p) => pathname === p || pathname.startsWith(p + "/") || pathname.startsWith(p + "?"),
   )

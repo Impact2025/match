@@ -742,3 +742,42 @@ model GemeenteDashboard {
 
   @@map("gemeente_dashboards")
 }
+
+// ========================
+// CONTENT (Blog + Kennisbank + Programmatische steden)
+// ========================
+
+enum ContentType {
+  BLOG
+  KB
+  CITY
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model Content {
+  id             String         @id @default(cuid())
+  type           ContentType    @default(BLOG)
+  status         ContentStatus  @default(DRAFT)
+  slug           String         @unique
+  title          String
+  html           String         @db.Text
+  excerpt        String?        @db.Text
+  metaTitle      String?
+  metaDescription String?       @db.Text
+  keywords       String?        // comma-separated
+  tags           String?        // comma-separated
+  relatedSlugs   String?        // comma-separated slugs
+  city           String?        // for CITY pages: "amsterdam"
+  author         String         @default("Vincent van Munster")
+  readingTime    Int?
+  publishedAt    DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@index([type, status, publishedAt])
+  @@map("content")
+}

@@ -14,7 +14,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "seed:heemstede": "tsx scripts/seed-heemstede.ts",
-    "seed:haarlem": "tsx scripts/seed-haarlem.ts"
+    "seed:haarlem": "tsx scripts/seed-haarlem.ts",
+    "seed:content": "tsx prisma/seed-content.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
