@@ -68,6 +68,8 @@ async function main() {
         city: it.city ?? null,
         author: "Vincent van Munster",
         readingTime: it.readingTime,
+        featured: it.featured ?? false,
+        views: it.views ?? 0,
         publishedAt: new Date(it.publishedAt),
       },
       update: {
@@ -83,6 +85,8 @@ async function main() {
         relatedSlugs: it.relatedSlugs.join(", "),
         city: it.city ?? null,
         readingTime: it.readingTime,
+        featured: it.featured ?? false,
+        views: it.views ?? 0,
         publishedAt: new Date(it.publishedAt),
       },
     })

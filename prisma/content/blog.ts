@@ -16,6 +16,8 @@ export type ContentSeed = {
   city?: string
   publishedAt: string // ISO date
   readingTime: number
+  featured?: boolean
+  views?: number
 }
 
 export const BLOG: ContentSeed[] = [
@@ -43,6 +45,8 @@ export const BLOG: ContentSeed[] = [
     ],
     publishedAt: "2025-12-12",
     readingTime: 7,
+    featured: true,
+    views: 4200,
     html: `<p>Toen ik nog een grote welzijnsorganisatie leidde, hadden we een prachtige website met een nog mooiere vacaturepagina. Elke maandag ploften er tientallen nieuwe vacatures op. En elke maandag keken er precies nul jongeren naar. De waarheid is ongemakkelijk: de traditionele vrijwilligersvacature is een muur van tekst die niemand leest. Zeker niet de generatie die je het hardst nodig hebt.</p>
 
 <h2>De paradox van de hoge participatie</h2>
@@ -141,6 +145,8 @@ export const BLOG: ContentSeed[] = [
     ],
     publishedAt: "2026-02-24",
     readingTime: 7,
+    featured: true,
+    views: 3100,
     html: `<p>Toen ik als interim-innovatiemanager bij grotere welzijnsorganisaties aan tafel zat, zag ik hetzelfde patroon: elke organisatie bouwt zijn eigen eiland. Eigen vacaturebank, eigen Excel, eigen potje met vrijwilligers. En ondertussen vraagt de gemeente zich af waarom er geen zicht is op het totaal. De oplossing is geen nieuw eiland, maar een gedeeld platform met eigen identiteit.</p>
 
 <h2>Wat een multi-tenant platform is</h2>
@@ -284,6 +290,8 @@ export const BLOG: ContentSeed[] = [
     ],
     publishedAt: "2026-06-15",
     readingTime: 7,
+    featured: true,
+    views: 2650,
     html: `<p>Toen ik directeur was van Stichting de Baan, stuurde ik op resultaatgestuurde maatschappelijke impact: 700+ deelnemers, 180 vrijwilligers en ruim 70.000 geluksmomenten per jaar. Die cijfers waren mijn kompas. Maar de prijs zat in de ruis: eindeloos bellen voor een dienst, Excel-rovers die roosters bijhielden, en rapportages die niemand las.</p>
 
 <h2>De kosten van handmatig werk</h2>

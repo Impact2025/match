@@ -42,6 +42,7 @@ export default auth((req) => {
     "/blog",
     "/kennisbank",
     "/steden",
+    "/vrijwilligerswerk",
     // Machine-routes
     "/sitemap.xml",
     "/robots.txt",

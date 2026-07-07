@@ -172,7 +172,7 @@ export const KB: ContentSeed[] = [
     ],
     tags: ["organisatie", "activiteiten", "how-to"],
     relatedSlugs: ["vacatures-optimaliseren-vera", "match-lifecycle-swipe-bevestiging", "vrijwilligers-behouden-retentietracking"],
-    publishedAt: "2026-09-14",
+    publishedAt: "2026-05-20",
     readingTime: 7,
     html: `<p>Met groepsactiviteiten breng je vrijwilligers samen in workshops, cursussen, bijeenkomsten, evenementen of inloopspreekuren. Dit artikel behandelt het opzetten, het wachtlijstbeheer en de QR-check-in, zodat je geen papieren lijsten meer hoeft af te vinken.</p>
 
@@ -212,7 +212,7 @@ export const KB: ContentSeed[] = [
     ],
     tags: ["organisatie", "matching", "how-to"],
     relatedSlugs: ["vacatures-optimaliseren-vera", "groepsactiviteiten-qr-checkin", "vrijwilligers-behouden-retentietracking"],
-    publishedAt: "2026-12-01",
+    publishedAt: "2026-06-10",
     readingTime: 6,
     html: `<p>Een match in Vrijwilligersmatch loopt door vier statussen. Het onderscheid tussen ACCEPTED en CONFIRMED is cruciaal voor je impactcijfers. Dit artikel legt het uit, zodat je rapportages kloppen.</p>
 

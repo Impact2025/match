@@ -13,6 +13,8 @@ export type ContentListItem = {
   type: ContentType
   tags: string[]
   city: string | null
+  views: number
+  featured: boolean
 }
 
 export type ContentDetail = ContentListItem & {
@@ -45,6 +47,8 @@ export async function listContent(
       type: true,
       tags: true,
       city: true,
+      views: true,
+      featured: true,
     },
   })
   return rows.map((r) => ({
@@ -79,6 +83,8 @@ export async function getRelated(slugs: string[]): Promise<ContentListItem[]> {
       type: true,
       tags: true,
       city: true,
+      views: true,
+      featured: true,
     },
   })
   // preserve order from slugs
@@ -86,7 +92,7 @@ export async function getRelated(slugs: string[]): Promise<ContentListItem[]> {
   return slugs
     .map((s) => map.get(s))
     .filter(Boolean)
-    .map((r) => ({ ...(r as any), tags: splitList((r as any).tags) }))
+    .map((r) => ({ ...(r as any), tags: splitList((r as any).tags), views: (r as any).views, featured: (r as any).featured }))
 }
 
 export type TocItem = { id: string; text: string; level: number }

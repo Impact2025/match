@@ -774,6 +774,8 @@ model Content {
   city           String?        // for CITY pages: "amsterdam"
   author         String         @default("Vincent van Munster")
   readingTime    Int?
+  featured       Boolean        @default(false)
+  views          Int            @default(0)
   publishedAt    DateTime?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
